@@ -1,36 +1,17 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { loginReducer ,merchantReducer,merchantSettlementReducer,transactionReducer} from "./reducer";
 
-import {
-  payoutlogReducer,
-  ledgerwalletReducer,
-  bulkpayoutReducer,
-  walletcompanyReducer,
-  payoutreportReducer,
-  getoneuserReducer,
-  entitycallbackReducer,
-  forgotpassReducer,
-  collectionsReducer,
-  vaReducer,aadharReducer,loginReducer,gloginReducer,otpReducer,colreportReducer,summaryReducer
-} from "./reducer";
-const store = configureStore({
-  reducer: {
-    ledgerwallet: ledgerwalletReducer,
-    payoutlog: payoutlogReducer,
-    bulkpayout: bulkpayoutReducer,
-    walletcompany:walletcompanyReducer,
-    payoutreport:payoutreportReducer,
-    getoneuser:getoneuserReducer,
-    entitycallback:entitycallbackReducer,
-    forgotpass:forgotpassReducer,
-    collections:collectionsReducer,
-    vaaccount:vaReducer,
-    aadhar:aadharReducer,
-    login:loginReducer,
-    glogin:gloginReducer,
-    otp:otpReducer,
-    colreport:colreportReducer,
-    summarydata:summaryReducer
 
-  },
+
+
+export const store =configureStore({
+    reducer:{
+
+login:loginReducer,
+
+merchants:merchantReducer,
+settlements:merchantSettlementReducer,
+transactions:transactionReducer
+
+    },
 });
-export default store;

@@ -28,7 +28,7 @@ const Dashbord = () => {
   const [openverification,setOpenverification] =useState(false)
   const items = [
     {
-      to: "/dashboard/summery",
+      to: "/dashboard/merchant",
       icon: "fa-chart-simple",
       label: "Summary",
       show: shows,

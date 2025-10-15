@@ -1,352 +1,190 @@
-// reducer.js
-
-import {
-  GETALL_LEDGER_WALLET,
-  GETALL_PAYOUTLOG_DATA,
-  GETALL_BULKPAY_DATA,
-  GETALL_WALLET_COMPANY_DATA,
-  PAYOUT_REPORT,
-  GETONE_USER,
-  GETENTITY_CALLBACK,
-  ADDENTITY_CALLBACK,
-  DELETEENTITY_CALLBACK,
-  UPDATEENTITY_CALLBACK,
-  FORGOT_PASSWORD,
-  GETCOLLECTIONS,
-  GETVERTUAL_ACCOUNT,VERIFY_AADHAR,LOGIN,GLOGIN,SENDOTP,COLLECTION_REPORT,SUMMARY
-} from "./action";
+import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET_SETTLEMENTS,
+    CREATE_SETTLEMENT,
+    UPDATE_SETTLEMENT,
+    DELETE_SETTLEMENT,CREATE_TRANSACTION,
+    GET_TRANSACTIONS,
+    UPDATE_TRANSACTION,
+    DELETE_TRANSACTION, } from "../Redux/action";
 
 
 
 
 
-//// summery ///
-
-const initialsummary={
-  summarydata:[],
-}
-
-export const summaryReducer =(state=initialsummary,action)=>{
-
-  if (action.type===SUMMARY) {
-    return { ...state,
-      summarydata : action.payload
-    }
-    
-  } else {
-    return state
-  }
-}
-
-
-
-
-
-
-
-
-
-
-const initialloginState ={
-  login:[],
-}
-
-
-export const loginReducer = (state=initialloginState,action)=>{
-  if (action.type===LOGIN) {
-    return{
-      ...state,
-      login:[action.payload , ...state.login]
-    }
-    
-  }else{
-    return state
-  }
-  
-}
-const initialsendotp ={
-  otp:[],
-}
-
-
-export const otpReducer = (state=initialsendotp,action)=>{
-  if (action.type===SENDOTP) {
-    return{
-      ...state,
-      otp:[action.payload , ...state.otp]
-    }
-    
-  }else{
-    return state
-  }
-  
-}
-
-const initialgoogleloginState ={
-  glogin:[],
-}
-
-
-export const gloginReducer = (state=initialgoogleloginState,action)=>{
-  if (action.type===GLOGIN) {
-    return{
-      ...state,
-      glogin:[action.payload , ...state.glogin]
-    }
-    
-  }else{
-    return state
-  }
-  
-}
-
-
-
-
-
-
-
-
-const getoneuserState ={
- getoneuser:[],
-
-}
-
-export const getoneuserReducer =(state=getoneuserState,action)=>{
-
-
-  if (action.type===GETONE_USER) {
-    return{
-      ...state,
-      getoneuser:action.payload,
-    }
-    
-  } else{
-    return state;
-  }
-
+const initialloginState = {
+  login: [],
 };
 
-
-
-
-const initialLedgerWalletState = {
-  ledgerwallet: [],
-};
-
-export const ledgerwalletReducer = (
-  state = initialLedgerWalletState,
-  action
-) => {
-  if (action.type === GETALL_LEDGER_WALLET) {
+export const loginReducer = (state = initialloginState, action) => {
+  if (action.type === LOGIN) {
     return {
       ...state,
-      ledgerwallet: action.payload,
+      login: [action.payload, ...state.login],
     };
   } else {
     return state;
   }
 };
 
-const colreportState = {
-  colreport: [],
+const initialState = {
+  merchants: {
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+    count: 0,
+    data: [], // actual merchant list
+  },
 };
 
-export const colreportReducer = (
-  state = colreportState,
-  action
-) => {
-  if (action.type === COLLECTION_REPORT) {
-    return {
-      ...state,
-      colreport: action.payload,
-    };
-  } else {
-    return state;
+export const merchantReducer = (state = initialState, action) => {
+  switch (action.type) {
+    // ✅ Load all merchants from API
+    case GETDETAILS:
+      return {
+        ...state,
+        merchants: {
+          ...state.merchants,
+          ...action.payload, // This will include page, limit, total, totalPages, count, data
+        },
+      };
+
+    // ✅ Create (add new merchant to data array)
+    case CREATEMERCHANT:
+      return {
+        ...state,
+        merchants: {
+          ...state.merchants,
+          data: [...state.merchants.data, action.payload],
+          count: state.merchants.count + 1,
+          total: state.merchants.total + 1,
+        },
+      };
+
+    // ✅ Update merchant (match by corp_id since that's what you're using in API)
+    case UPDATE_MERCHANT:
+      return {
+        ...state,
+        merchants: {
+          ...state.merchants,
+          data: state.merchants.data.map((merchant) =>
+            merchant.corp_id === action.payload.corp_id ||
+            merchant.company_id === action.payload.company_id ||
+            merchant.org_id === action.payload.org_id
+              ? { ...merchant, ...action.payload }
+              : merchant
+          ),
+        },
+      };
+
+    // ✅ Delete merchant (match by corp_id)
+    case DELETE_MERCHANT:
+      const deletedMerchant = state.merchants.data.find(
+        merchant => merchant.corp_id === action.payload
+      );
+      
+      return {
+        ...state,
+        merchants: {
+          ...state.merchants,
+          data: state.merchants.data.filter(
+            (merchant) => merchant.corp_id !== action.payload
+          ),
+          count: deletedMerchant ? Math.max(0, state.merchants.count - 1) : state.merchants.count,
+          total: deletedMerchant ? Math.max(0, state.merchants.total - 1) : state.merchants.total,
+        },
+      };
+
+    default:
+      return state;
   }
 };
 
-const initialPayoutLogState = {
-  payoutlog: [],
-};
 
-export const payoutlogReducer = (state = initialPayoutLogState, action) => {
-  if (action.type === GETALL_PAYOUTLOG_DATA) {
-    return {
-      ...state,
-      payoutlog: action.payload,
-    };
-  } else {
-    return state;
-  }
-};
-
-const initialbulkpaystate = {
-  bulkpayout: [],
-};
-
-export const bulkpayoutReducer = (state = initialbulkpaystate, action) => {
-  if (action.type === GETALL_BULKPAY_DATA) {
-    return {
-      ...state,
-      bulkpayout: action.payload,
-    };
-  } else {
-    return state;
-  }
-};
-const initialwalletcompanystate = {
-  walletcompany: [],
-};
-
-export const walletcompanyReducer = (state = initialwalletcompanystate, action) => {
-  if (action.type === GETALL_WALLET_COMPANY_DATA) {
-    return {
-      ...state,
-      walletcompany: action.payload,
-    };
-  } else {
-    return state;
-  }
-};
-const initialpayoutreport = {
-  payoutreport: [],
-};
-
-export const payoutreportReducer = (state = initialpayoutreport, action) => {
-  if (action.type === PAYOUT_REPORT) {
-    return {
-      ...state,
-      payoutreport: action.payload,
-    };
-  } else {
-    return state;
-  }
-};
-
-
-const initialentitycallbackevent = {
-  entitycallback: [],
-};
-
-export const entitycallbackReducer = (state = initialentitycallbackevent, action) => {
-  if (action.type === GETENTITY_CALLBACK) {
-    return {
-      ...state,
-      entitycallback: action.payload,
-    };
-  } else if(action.type===ADDENTITY_CALLBACK){
-    
-    return{
-      ...state,
-      entitycallback:[action.payload, ...state.entitycallback]
-    }
-
-  }
-  else if (action.type === DELETEENTITY_CALLBACK) {
+const initialSettlementState = {
+    settlements: [],  // list of settlement objects
+    // optionally, if you want pagination / metadata:
    
-    return{
-      ...state,
-      entitycallback:state.entitycallback.map((entity) => entity.id === action.payload.id?{...entity,...action.payload}:entity)
-    }
-  }
+  };
   
-   else if(action.type===UPDATEENTITY_CALLBACK){
-    
-    return{
-      ...state,
-      entitycallback:state.entitycallback.map((entity) => entity.id === action.payload.id?{...entity,...action.payload}:entity)
+  export const merchantSettlementReducer = (state = initialSettlementState, action) => {
+    switch (action.type) {
+      case GET_SETTLEMENTS:
+        // Here action.payload might be { data: [...], pagination: {...} }
+        return {
+          ...state,
+          settlements:[action.payload]
+        };
+  
+      case CREATE_SETTLEMENT:
+        return {
+          ...state,
+          // append the new settlement
+          settlements: [action.payload, ...state.settlements]
+        };
+  
+      case UPDATE_SETTLEMENT:
+        return {
+          ...state,
+          settlements: state.settlements.map((settlement) =>
+            settlement.id === action.payload.id
+              ? { ...settlement, ...action.payload.data }
+              : settlement
+          ),
+        };
+  
+      case DELETE_SETTLEMENT:
+        return {
+          ...state,
+          settlements: state.settlements.filter(
+            (settlement) => settlement.id !== action.payload
+          ),
+        };
+  
+      default:
+        return state;
     }
+  };
 
-  }
+
   
-  
-  
-  else {
-    return state;
-  }
+const initialTransactionState = {
+  transactions: [], // list of transaction objects
+  pagination: {},   // optional: for API pagination info
 };
 
-const initialforgotpass = {
-  forgotpass: [],
-};
+export const transactionReducer = (state = initialTransactionState, action) => {
+  switch (action.type) {
+    case GET_TRANSACTIONS:
+      // If API returns { data: [...], pagination: {...} }
+      return {
+        ...state,
+        transactions: action.payload.data || [],
+        pagination: action.payload.pagination || {},
+      };
 
-export const forgotpassReducer = (state = initialforgotpass, action) => {
-   if(action.type===FORGOT_PASSWORD){
-    
-    return{
-      ...state,
-      forgotpass:state.forgotpass.map((pass) => pass.id === action.payload.id?{...pass,...action.payload}:pass)
-    }
+    case CREATE_TRANSACTION:
+      return {
+        ...state,
+        transactions: [action.payload, ...state.transactions],
+      };
 
-  }
-  
-  
-  
-  else {
-    return state;
-  }
-};
+    case UPDATE_TRANSACTION:
+      return {
+        ...state,
+        transactions: state.transactions.map((tx) =>
+          tx.id === action.payload.id ? { ...tx, ...action.payload.data } : tx
+        ),
+      };
 
-const initialcollections = {
-  collections: [],
-};
+    case DELETE_TRANSACTION:
+      return {
+        ...state,
+        transactions: state.transactions.filter(
+          (tx) => tx.id !== action.payload
+        ),
+      };
 
-export const collectionsReducer = (state = initialcollections, action) => {
-   if(action.type===GETCOLLECTIONS){
-    
-    return{
-      ...state,
-      collections:action.payload
-    }
-
-  }
-  
-  
-  
-  else {
-    return state;
+    default:
+      return state;
   }
 };
-
-const initialvastate = {
-  vaaccount:[],
-}
-
-export const vaReducer = (state = initialvastate, action) => {
-   if(action.type===GETVERTUAL_ACCOUNT){
-    
-    return{
-      ...state,
-      vaaccount:action.payload
-    }
-
-  }
-  
-  
-  
-  else {
-    return state;
-  }
-};
-
-
-const initialaadharverifystate = {
-  aadhar:[],
-}
-
- export const aadharReducer =(state=initialaadharverifystate,action)=>{
-
-  if (action.type===VERIFY_AADHAR) {
-    return {...state,
-
-      aadhar:[action.payload, ...state.aadhar]
-    }
-    
-  }  
-  else {
-    return state;
-  }
-
-
-}
