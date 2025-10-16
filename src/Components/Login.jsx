@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Lock, User } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { login } from "../Redux/action";
+import { login } from "../redux/action";
 
 export const Login = () => {
   const dispatch = useDispatch()

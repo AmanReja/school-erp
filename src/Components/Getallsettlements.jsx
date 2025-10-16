@@ -6,7 +6,7 @@ import { useDispatch,useSelector } from "react-redux";
 import { createMerchant ,getDetails,updateMerchant, deleteMerchant} from "../redux/action";
 import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
-const Merchant = () => {
+const Getallsettlements = () => {
   const { theme } = useContext(Theme);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -222,10 +222,33 @@ const Merchant = () => {
                 : "bg-white border-gray-100 text-gray-800"
             }`}
           >
-            <div className="flex justify-between items-center p-4 h-[60px] w-full">
-              <h2 className="text-[16px] font-semibold">Merchant list</h2>
-             
-            </div>
+        <div className="flex justify-between items-center p-4 h-[60px] w-full">
+  <h2 className="text-[16px] font-semibold">All Settlement Account</h2>
+
+  {/* Search Input */}
+  <div className="relative w-[220px]">
+    <input
+      type="text"
+      placeholder="Search..."
+      className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-4 w-4 text-gray-400 absolute right-3 top-2.5 pointer-events-none"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1116.65 16.65z"
+      />
+    </svg>
+  </div>
+</div>
+
 
             <table className="w-full text-sm text-left">
   <thead
@@ -261,12 +284,12 @@ const Merchant = () => {
         <td className="px-4 py-2 flex gap-2">
         <button
   onClick={() => navigate(`/dashboard/settlement/${merchant.corp_id}`)}
-  className="bg-lime-500 hover:bg-lime-600 text-white px-3 py-1 rounded text-xs"
+  className="bg-red-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
 >
   Settlement
 </button>
           <button onClick={() => handleEdit(merchant)} className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">Edit</button>
-          <button onClick={() => handleDelete(merchant)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
+          <button onClick={() => handleDelete(merchant)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs">Delete</button>
         </td>
       </tr>
     ))
@@ -571,4 +594,4 @@ const Merchant = () => {
   );
 };
 
-export default Merchant;
+export default Getallsettlements;

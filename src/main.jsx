@@ -15,9 +15,11 @@ import { Provider } from "react-redux";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from "./Contexts/Theme";
 import { Login } from "./Components/Login";
-import {store} from "./Redux/store";
+import {store} from "./redux/store";
 import Settlement from "./Components/Settlement";
-
+import Createmerchants from "./Components/Createmerchants";
+import Profile from "./Components/Profile";
+import Getallsettlements from "./Components/Getallsettlements";
 
 
 
@@ -30,11 +32,14 @@ const router = createBrowserRouter(
 
       {/* <Route element={<Protectedroute />}> */}
       <Route path="/dashboard" element={<Dashbord />}>
+        <Route path="createmerchants" element={<Createmerchants/>}/>
+        <Route path="profile" element={<Profile />} />
+        <Route path="getallsettlements" element={<Getallsettlements />} />
 
               
           {/* <Route path="addmoney" element={<Addmoney />} />
      
-          <Route path="ledger" element={<Ledger />} />
+         
  
           <Route path="bulkpayout" element={<Bulkpayout />} /> */}
       

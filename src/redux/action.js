@@ -190,12 +190,23 @@ export const deleteMerchant = (id) => async (dispatch) => {
 
 
 // actions/settlement.js (or wherever you put them)
-export const getSettlements = () => async (dispatch) => {
+export const getSettlements = (company_id,searchTerm,searchStatus) => async (dispatch) => {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement`, {
+  console.log(195,searchStatus);
+
+
+
+  const params = new URLSearchParams();
+  if (searchTerm) params.append("search", searchTerm  );
+  if (searchStatus) params.append("search",  searchStatus );
+
+ 
+ 
+
+  const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement/${company_id}?${params.toString()}`, {
     method: "GET",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json", 
       Authorization: `Bearer ${token}`,
     },
   });
@@ -222,6 +233,7 @@ export const createSettlement = (formData,corp_id) => async (dispatch) => {
   const data = await res.json();
   if(res.status===201){
     alert("settlement created")
+    
   }
 
   if (res.status===400) {
@@ -231,9 +243,9 @@ export const createSettlement = (formData,corp_id) => async (dispatch) => {
   dispatch({ type: CREATE_SETTLEMENT, payload: data });
 };
 
-export const updateSettlement = (id, updatedData) => async (dispatch) => {
+export const updateSettlement = (account_number,company_id, updatedData) => async (dispatch) => {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement/${id}`, {
+  const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement/${company_id}/${account_number}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -246,13 +258,13 @@ export const updateSettlement = (id, updatedData) => async (dispatch) => {
     console.error("Error updating settlement:", data);
     return;
   }
-  dispatch({ type: UPDATE_SETTLEMENT, payload: { id, data } });
+  dispatch({ type: UPDATE_SETTLEMENT, payload: { account_number,company_id, data } });
 };
 
-export const deleteSettlement = (id) => async (dispatch) => {
-  console.log(207,id);
+export const deleteSettlement = (account_number,company_id) => async (dispatch) => {
+  console.log(207,company_id,account_number);
   const token = localStorage.getItem("token");
-  const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement/${id}`, {
+  const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement/${company_id}/${account_number}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -264,7 +276,7 @@ export const deleteSettlement = (id) => async (dispatch) => {
     console.error("Error deleting settlement:", err);
     return;
   }
-  dispatch({ type: DELETE_SETTLEMENT, payload: id });
+  dispatch({ type: DELETE_SETTLEMENT, payload: company_id });
 };
 
 
