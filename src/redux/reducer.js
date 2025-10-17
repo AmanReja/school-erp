@@ -4,7 +4,7 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
     DELETE_SETTLEMENT,CREATE_TRANSACTION,
     GET_TRANSACTIONS,
     UPDATE_TRANSACTION,
-    DELETE_TRANSACTION, } from "../redux/action";
+    DELETE_TRANSACTION,GET_ALL_SETTLEMENTS } from "../redux/action";
 
 
 
@@ -109,6 +109,13 @@ const initialSettlementState = {
   export const merchantSettlementReducer = (state = initialSettlementState, action) => {
     switch (action.type) {
       case GET_SETTLEMENTS:
+        // Here action.payload might be { data: [...], pagination: {...} }
+        return {
+          ...state,
+          settlements:[action.payload]
+        };
+  
+      case GET_ALL_SETTLEMENTS:
         // Here action.payload might be { data: [...], pagination: {...} }
         return {
           ...state,

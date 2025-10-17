@@ -20,8 +20,8 @@ const Merchant = () => {
 
   // ✅ Individual state hooks for each field
   const [name, setName] = useState("");
-  const [org_id, setOrgId] = useState("");
-  const [program_id, setProgramId] = useState("");
+  // const [org_id, setOrgId] = useState("");
+  // const [program_id, setProgramId] = useState("");
   const [wallet_id, setWalletId] = useState("");
  
   const [user_id, setUserId] = useState("");
@@ -41,8 +41,8 @@ const Merchant = () => {
   const [selectedMerchant, setSelectedMerchant] = useState(null);
   const [updateFormData, setUpdateFormData] = useState({
     name: "",
-    org_id: "",
-    program_id: "",
+    // org_id: "",
+    // program_id: "",
     wallet_id: "",
     userid: "",
     user_pass: "",
@@ -131,8 +131,8 @@ const Merchant = () => {
   
     const formData = {
       name,
-      org_id,
-      program_id,
+      // org_id,
+      // program_id,
       wallet_id,
       userid: user_id,     
       user_pass,
@@ -153,8 +153,8 @@ const Merchant = () => {
     setSelectedMerchant(merchant);
     setUpdateFormData({
       name: merchant.name || "",
-      org_id: merchant.org_id || "",
-      program_id: merchant.program_id || "",
+      // org_id: merchant.org_id || "",
+      // program_id: merchant.program_id || "",
       wallet_id: merchant.wallet_id || "",
       userid: merchant.userid || "",
       user_pass: merchant.user_pass || "",
@@ -237,8 +237,8 @@ const Merchant = () => {
   >
     <tr>
       <th className="px-4 py-4">Name</th>
-      <th className="px-4 py-4">Org ID</th>
-      <th className="px-4 py-4">Program ID</th>
+      
+      <th className="px-4 py-4">Corp Id ID</th>
       <th className="px-4 py-4">Wallet ID</th>
       <th className="px-4 py-4">Email</th>
       <th className="px-4 py-4">Mobile</th>
@@ -252,8 +252,8 @@ const Merchant = () => {
     merchantsData?.map((merchant, i) => (
       <tr key={i} className={`border-b hover:bg-gray-50 ${theme === "dark" ? "border-gray-700 hover:bg-gray-700" : "border-gray-100 hover:bg-gray-50"}`}>
         <td className="px-4 py-2">{merchant.name}</td>
-        <td className="px-4 py-2">{merchant.org_id}</td>
-        <td className="px-4 py-2">{merchant.program_id}</td>
+        <td className="px-4 py-2">{merchant.corp_id}</td>
+        
         <td className="px-4 py-2">{merchant.wallet_id}</td>
         <td className="px-4 py-2">{merchant.email}</td>
         <td className="px-4 py-2">{merchant.mobile_number}</td>
@@ -407,7 +407,7 @@ const Merchant = () => {
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium mb-2">Organization ID</label>
                   <input
                     type="text"
@@ -420,8 +420,8 @@ const Merchant = () => {
                         : "bg-white border-gray-300 text-gray-800"
                     }`}
                   />
-                </div>
-
+                </div> */}
+{/* 
                 <div>
                   <label className="block text-sm font-medium mb-2">Program ID</label>
                   <input
@@ -435,7 +435,7 @@ const Merchant = () => {
                         : "bg-white border-gray-300 text-gray-800"
                     }`}
                   />
-                </div>
+                </div> */}
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Wallet ID</label>

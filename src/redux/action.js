@@ -6,6 +6,7 @@ export const UPDATE_MERCHANT = "UPDATE_MERCHANT";
 
 // action types
 export const GET_SETTLEMENTS = "GET_SETTLEMENTS";
+export const GET_ALL_SETTLEMENTS = "GET_ALL_SETTLEMENTS";
 export const CREATE_SETTLEMENT = "CREATE_SETTLEMENT";
 export const UPDATE_SETTLEMENT = "UPDATE_SETTLEMENT";
 export const DELETE_SETTLEMENT = "DELETE_SETTLEMENT";
@@ -217,6 +218,35 @@ export const getSettlements = (company_id,searchTerm,searchStatus) => async (dis
     return;
   }
   dispatch({ type: GET_SETTLEMENTS, payload: data });
+};
+export const getallSettlements = (searchTerm="",searchStatus="") => async (dispatch) => {
+  const token = localStorage.getItem("token");
+  console.log(195,searchStatus);
+
+
+
+ const params = new URLSearchParams({
+    search: searchTerm || "",
+    status: searchStatus || ""
+  });
+
+ 
+ 
+
+  const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement-all?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json", 
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    // handle error
+    console.error("Error fetching settlements:", data);
+    return;
+  }
+  dispatch({ type: GET_ALL_SETTLEMENTS, payload: data });
 };
 
 export const createSettlement = (formData,corp_id) => async (dispatch) => {

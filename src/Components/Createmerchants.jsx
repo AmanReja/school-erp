@@ -20,8 +20,8 @@ const Createmerchants = () => {
 
   // ✅ Individual state hooks for each field
   const [name, setName] = useState("");
-  const [org_id, setOrgId] = useState("");
-  const [program_id, setProgramId] = useState("");
+  // const [org_id, setOrgId] = useState("");
+  // const [program_id, setProgramId] = useState("");
   const [wallet_id, setWalletId] = useState("");
  
   const [user_id, setUserId] = useState("");
@@ -41,8 +41,8 @@ const Createmerchants = () => {
   const [selectedMerchant, setSelectedMerchant] = useState(null);
   const [updateFormData, setUpdateFormData] = useState({
     name: "",
-    org_id: "",
-    program_id: "",
+    // org_id: "",
+    // program_id: "",
     wallet_id: "",
     userid: "",
     user_pass: "",
@@ -131,8 +131,8 @@ const Createmerchants = () => {
   
     const formData = {
       name,
-      org_id,
-      program_id,
+      // org_id,
+      // program_id,
       wallet_id,
       userid: user_id,     
       user_pass,
@@ -153,8 +153,8 @@ const Createmerchants = () => {
     setSelectedMerchant(merchant);
     setUpdateFormData({
       name: merchant.name || "",
-      org_id: merchant.org_id || "",
-      program_id: merchant.program_id || "",
+      // org_id: merchant.org_id || "",
+      // program_id: merchant.program_id || "",
       wallet_id: merchant.wallet_id || "",
       userid: merchant.userid || "",
       user_pass: merchant.user_pass || "",
@@ -248,7 +248,7 @@ const Createmerchants = () => {
           )}
 
           {/* STEP 2 - Organization */}
-          {step === 2 && (
+          {/* {step === 2 && (
             <div className="flex flex-col gap-3">
               <label className="font-medium">Organization ID</label>
               <input type="text" value={org_id} onChange={(e) => setOrgId(e.target.value)} placeholder="Enter organization ID" className="input" required />
@@ -261,10 +261,10 @@ const Createmerchants = () => {
                 <button type="button" onClick={nextStep} className="btn-primary">Next</button>
               </div>
             </div>
-          )}
+          )} */}
 
           {/* STEP 3 - User Details */}
-          {step === 3 && (
+          {step === 2 && (
             <div className="flex flex-col gap-3">
               <label className="font-medium">User ID</label>
               <input type="text" value={user_id} onChange={(e) => setUserId(e.target.value)} placeholder="Enter user ID" className="input" required />
@@ -286,7 +286,7 @@ const Createmerchants = () => {
           )}
 
           {/* STEP 4 - Financial */}
-          {step === 4 && (
+          {step === 3 && (
             <div className="flex flex-col gap-3">
               <label className="font-medium">Wallet ID</label>
               <input type="text" value={wallet_id} onChange={(e) => setWalletId(e.target.value)} placeholder="Enter wallet ID" className="input" required />
@@ -305,7 +305,7 @@ const Createmerchants = () => {
           )}
 
           {/* STEP 5 - KYC Status */}
-          {step === 5 && (
+          {step === 4 && (
             <div className="flex flex-col gap-3">
               <label className="font-medium">KYC Status</label>
               <select value={kyc_status} onChange={(e) => setKyc_status(e.target.value)} className="input" required>

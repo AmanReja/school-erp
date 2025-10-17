@@ -59,10 +59,10 @@ const Settlement = () => {
   const settlementsData = useSelector((state) => state.settlements?.settlements || []);
   
   const settlementRowsArray = settlementsData
-    ?.map(item => item.data?.filteredRows || [])
-    .flat(); // Flatten into a single array
+  ?.map(item => item.data || [])
+  .flat(); // Flatten into a single array
 
-  console.log("All settlements:", settlementRowsArray);
+console.log(66, settlementRowsArray);
 
   // Load settlements on component mount
   useEffect(() => {

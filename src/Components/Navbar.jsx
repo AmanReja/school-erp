@@ -48,25 +48,21 @@ const Navbar = () => {
   return (
     <div
   className={`w-[100%] ${
-    theme === "dark" ? "" : "bg-gray-100 "
+    theme === "dark" ? "" : "bg-transparent "
   } h-[40px] flex justify-between px-[10px] sm:px-[40px] items-center mt-[20px]`}
 >
  
   <div
     style={{ fontFamily: "Righteous" }}
-    className={`flex tracking-wide transition-all duration-300 animate-gradient-x h-[53px] relative sm:text-5xl text-2xl font-normal ${theme==="dark"?"text-white":"text-[#0A0C2C]"}`}
+    className={`flex tracking-wide transition-all duration-300 animate-gradient-x h-[53px] relative sm:text-5xl text-2xl font-normal ${theme==="dark"?"text-white":"text-white"}`}
   >
     busybox
   </div>
 
   <div className="flex items-center gap-[20px]">
-    <Link to={"/dashboard/addmoney"}>
-      <button className="bg-blue-500 hover:ring-2 hover:ring-blue-500 hover:shadow-lg hover:shadow-blue-500/50 text-[12px] text-white rounded w-[100px] h-[30px] transition duration-300">
-        + Add Money
-      </button>
-    </Link>
+   
 
-    <i className="fa-regular fa-bell"></i>
+    
     <img
       onClick={handelOpen}
       className="w-[30px] h-[30px] rounded-full cursor-pointer border-2 border-blue-400 hover:scale-105 transition"
