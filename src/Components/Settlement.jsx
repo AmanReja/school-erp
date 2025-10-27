@@ -4,6 +4,7 @@ import { Theme } from "../Contexts/Theme";
 import { X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { LoadDetails } from "../Contexts/LoadDetails";
 import {
   getSettlements,
   createSettlement,
@@ -14,6 +15,16 @@ import {
 
 const Settlement = () => {
   const { merchantId } = useParams();
+
+  const {loadD,setLoadD}=useContext(LoadDetails)
+
+  useEffect(() => {
+    if (merchantId) {
+      setLoadD(true);
+    } else {
+      setLoadD(false);
+    }
+  }, [merchantId]);
   console.log(19, merchantId);
   
   const { theme } = useContext(Theme);
@@ -264,7 +275,7 @@ console.log(66, settlementRowsArray);
                 : "bg-white border-gray-100 text-gray-800"
             }`}
           >
-          <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md rounded-xl border border-gray-100">
+          <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md  border border-gray-100">
   {/* Title */}
   <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
     Settlements List

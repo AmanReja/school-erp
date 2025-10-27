@@ -44,6 +44,10 @@ export const login = (admin,setLoading,navigate) => async (dispatch) => {
       localStorage.setItem("token", data.token);
     }
 
+    if(res.status===404){
+      alert("invald credentials")
+    }
+
  
     
    
@@ -92,13 +96,15 @@ export const createMerchant = (formData, setStep) => async (dispatch) => {
   }
 };
 
-export const getDetails = (currentPage, itemsPerPage) => async (dispatch) => {
+export const getDetails = (currentPage, itemsPerPage,searchTerm) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
   try {
     const params = new URLSearchParams();
     if (currentPage) params.append("page", currentPage);
     if (itemsPerPage) params.append("limit", itemsPerPage);
+    if (searchTerm) params.append("search", searchTerm);
+   
  
 
     const res = await fetch(`${baseUrl}/v1/admin/marchent/entity?${params.toString()}`, {
@@ -154,6 +160,9 @@ export const updateMerchant = (id, updatedData) => async (dispatch) => {
         } 
       });
       alert("Merchant updated successfully");
+      if (res.status === 403) {
+        alert("Permission denied");
+      }
     } else {
       alert(data.message || "Failed to update merchant");
     }
@@ -180,6 +189,7 @@ export const deleteMerchant = (id) => async (dispatch) => {
         payload: id // assuming you're using corp_id as identifier
       });
       alert("Merchant deleted successfully");
+
     } else {
       const data = await res.json();
       alert(data.message || "Failed to delete merchant");
@@ -250,6 +260,8 @@ export const getallSettlements = (searchTerm="",searchStatus="") => async (dispa
 };
 
 export const createSettlement = (formData,corp_id) => async (dispatch) => {
+
+ 
   const token = localStorage.getItem("token");
   console.log(formData,172);
   const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement/${corp_id}`, {
@@ -265,7 +277,9 @@ export const createSettlement = (formData,corp_id) => async (dispatch) => {
     alert("settlement created")
     
   }
-
+  if (res.status === 403) {
+    alert("Permission denied");
+  }
   if (res.status===400) {
     alert("settlement account is already exist")
     return
@@ -284,10 +298,15 @@ export const updateSettlement = (account_number,company_id, updatedData) => asyn
     body: JSON.stringify(updatedData),
   });
   const data = await res.json();
+  if (res.status === 403) {
+    alert("Permission denied");
+  }
   if (!res.ok) {
     console.error("Error updating settlement:", data);
     return;
   }
+
+
   dispatch({ type: UPDATE_SETTLEMENT, payload: { account_number,company_id, data } });
 };
 
@@ -301,11 +320,17 @@ export const deleteSettlement = (account_number,company_id) => async (dispatch) 
       Authorization: `Bearer ${token}`,
     },
   });
+
+  
+  if (res.status === 403) {
+    alert("Permission denied");
+  }
   if (!res.ok) {
     const err = await res.json();
     console.error("Error deleting settlement:", err);
     return;
   }
+
   dispatch({ type: DELETE_SETTLEMENT, payload: company_id });
 };
 

@@ -21,6 +21,8 @@ import Createmerchants from "./Components/Createmerchants";
 import Profile from "./Components/Profile";
 import Getallsettlements from "./Components/Getallsettlements";
 
+import { LoadDetailsProvider } from "./Contexts/LoadDetails";
+
 
 
 
@@ -61,6 +63,7 @@ const router = createBrowserRouter(
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
+    <LoadDetailsProvider>
     <ThemeProvider>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
 
@@ -71,6 +74,7 @@ createRoot(document.getElementById("root")).render(
 
       </GoogleOAuthProvider>
     </ThemeProvider>
+    </LoadDetailsProvider>
 
   </StrictMode>
 );

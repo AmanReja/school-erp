@@ -35,7 +35,7 @@ const Getallsettlements = () => {
 
 
 
-  // Individual form states
+  
   const [account_name, setAccountName] = useState("");
   const [account_number, setAccountNumber] = useState("");
   const [ifsc_code, setIfscCode] = useState("");
@@ -52,24 +52,24 @@ const Getallsettlements = () => {
 
   
 
-  // State for update modal
+ 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedSettlement, setSelectedSettlement] = useState(null);
   
-  // Individual update form states
+ 
   const [updateAccountName, setUpdateAccountName] = useState("");
   const [updateAccountNumber, setUpdateAccountNumber] = useState("");
   const [updateIfscCode, setUpdateIfscCode] = useState("");
   const [updateIsValidated, setUpdateIsValidated] = useState("");
   const [updateStatus, setUpdateStatus] = useState("");
 
-  // Get settlements from Redux store
+ 
   const settlementsData = useSelector((state) => state.settlements?.settlements || []);
   console.log(60,settlementsData);
   
   const settlementRowsArray = settlementsData
     ?.map(item => item.data || [])
-    .flat(); // Flatten into a single array
+    .flat();
 
   console.log(66, settlementRowsArray);
 
@@ -80,7 +80,7 @@ const Getallsettlements = () => {
   const suspended = settlementRowsArray.filter((item)=>(item.status=="suspended"))
   console.log(77,suspended);
 
-  // Load settlements on component mount
+ 
   useEffect(() => {
     dispatch(getallSettlements(searchTerm,searchStatus));
   }, [dispatch, merchantId,searchTerm,searchStatus]);
@@ -91,7 +91,7 @@ const Getallsettlements = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Prepare form data for submission
+    
     const submissionData = {
       account_name,
       account_number,
@@ -103,14 +103,14 @@ const Getallsettlements = () => {
     console.log("Form submitted with data:", submissionData);
     dispatch(createSettlement(submissionData, merchantId))
       .then(async() => {
-        // Reset form and step on successful submission
+  
         setAccountName("");
         setAccountNumber("");
         setIfscCode("");
         setIsValidated("");
         setStatus("");
         setStep(1);
-        // Refresh settlements list
+    
        await dispatch(getallSettlements());
       })
       .catch((error) => {
@@ -118,7 +118,7 @@ const Getallsettlements = () => {
       });
   };
 
-  // Handle Edit - Open update modal with settlement data
+
   const handleEdit = (settlement) => {
     setSelectedSettlement(settlement);
     setUpdateAccountName(settlement.account_name);
@@ -129,7 +129,7 @@ const Getallsettlements = () => {
     setIsUpdateModalOpen(true);
   };
 
-  // Handle Update - Submit updated data
+  
   const handleUpdate = () => {
     if (selectedSettlement) {
       const updateData = {
@@ -144,7 +144,7 @@ const Getallsettlements = () => {
         .then(() => {
           setIsUpdateModalOpen(false);
           setSelectedSettlement(null);
-          // Refresh settlements list
+       
           dispatch(getallSettlements());
         })
         .catch((error) => {
@@ -157,7 +157,7 @@ const Getallsettlements = () => {
     if (window.confirm("Are you sure you want to delete this settlement?")) {
       dispatch(deleteSettlement(settlement.account_number, settlement.company_id))
         .then(() => {
-          // Refresh settlements list
+          
           dispatch(getallSettlements());
         })
         .catch((error) => {
@@ -178,7 +178,7 @@ const statusCard = [
     title: "Active Accounts",
     credit: activeStatus.length,
     description: "Accounts currently active and in use",
-    gradient: "from-[#374151] to-[#6B7280]", // Dark blue to medium blue
+    gradient: "from-[#374151] to-[#6B7280]", 
     textColor: "text-white",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -190,19 +190,17 @@ const statusCard = [
     title: "Inactive Accounts",
     credit: inactiveStatus.length,
     description: "Accounts currently inactive or dormant",
-    gradient: "from-[#544151] to-[#6B7280]", // Dark gray to medium gray
+    gradient: "from-[#544151] to-[#6B7280]",
     textColor: "text-white",
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" />
-      </svg>
+      <svg height={50} width={50} fill="#ffffff" viewBox="0 0 24 24" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12,2A10,10,0,1,0,22,12,10.01146,10.01146,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8.00917,8.00917,0,0,1,12,20Zm1-8.251V7a1,1,0,0,0-2,0v5a1.00586,1.00586,0,0,0,.11816.47217l1.5,2.79883a1.00029,1.00029,0,0,0,1.76368-.94434Z"></path></g></svg>
     ),
   },
   {
     title: "Suspended Accounts",
     credit: suspended.length,
     description: "Accounts suspended due to policy violations",
-    gradient: "from-[#214151] to-[#6B7280]", // Dark red to medium red
+    gradient: "from-[#214151] to-[#6B7280]", 
     textColor: "text-white",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -6,10 +6,13 @@ import { useDispatch,useSelector } from "react-redux";
 import { createMerchant ,getDetails,updateMerchant, deleteMerchant} from "../redux/action";
 import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
+import { LoadDetails } from "../Contexts/LoadDetails";
+
 const Createmerchants = () => {
   const { theme } = useContext(Theme);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const {loadD,setLoadD} = useContext(LoadDetails)
 
   const dispatch = useDispatch();
   const [step, setStep] = useState(1);

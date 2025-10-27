@@ -1,19 +1,30 @@
 import React, { useState, useContext,useEffect } from "react";
 import Hdfc from "../assets/images/HDFC.png";
-import { Link,useNavigate } from "react-router-dom";
+import { Link,useNavigate,useLocation } from "react-router-dom";
 import { Theme } from "../Contexts/Theme";
 import { useDispatch,useSelector } from "react-redux";
 import { createMerchant ,getDetails,updateMerchant, deleteMerchant} from "../redux/action";
 import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { LoadDetails } from "../Contexts/LoadDetails";
 
 const Merchant = () => {
   const { theme } = useContext(Theme);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const location = useLocation()
 
   const dispatch = useDispatch();
   const [step, setStep] = useState(1);
   const navigate =useNavigate()
+  const [marchentid,setMarchentid] =useState ("")
+
+ const [searchTerm, setSearchTerm] = useState("");
+ const {loadD,setLoadD} =useContext(LoadDetails)
+
+ 
+ 
+
+  
 
 
   
@@ -119,8 +130,8 @@ const Merchant = () => {
     setUserPass(generatePassword());
   }, []);
   useEffect(() => {
-    dispatch(getDetails(currentPage, itemsPerPage));
-  }, [dispatch, currentPage, itemsPerPage]);
+    dispatch(getDetails(currentPage, itemsPerPage,searchTerm));
+  }, [dispatch, currentPage, itemsPerPage,searchTerm]);
   
 
   const nextStep = () => setStep((prev) => prev + 1);
@@ -147,6 +158,10 @@ const Merchant = () => {
     console.log("Payload:", formData); // debug
     dispatch(createMerchant(formData,setStep));
   };
+
+
+
+
 
   // Handle Edit - Open update modal with merchant data
   const handleEdit = (merchant) => {
@@ -223,7 +238,30 @@ const Merchant = () => {
             }`}
           >
             <div className="flex justify-between items-center p-4 h-[60px] w-full">
-              <h2 className="text-[16px] font-semibold">Merchant list</h2>
+              <h2 className="text-[16px] font-semibold">Merchant list</h2>  <div className="flex items-center gap-4">
+  {/* 🔍 Search Input */}
+  <div className="relative w-[220px]">
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={(e)=>{setSearchTerm(e.target.value)}}
+      placeholder="Search settlements..."
+      className="w-full border outline-none border-gray-200 rounded-[10px] pl-10 pr-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 transition-all duration-300 ease-in-out shadow-sm"
+    />
+   
+  </div>
+
+  {/* 📋 Status Dropdown */}
+  <button 
+  
+
+  onClick={()=>{navigate("/dashboard/createmerchants")}}
+    className="p-2 bg-violet-400 text-white px-[20px] rounded-2xl"
+   
+  > Create Merchants
+    
+  </button>
+</div>
              
             </div>
 
@@ -260,8 +298,11 @@ const Merchant = () => {
         <td className="px-4 py-2">{merchant.kyc_status}</td>
         <td className="px-4 py-2 flex gap-2">
         <button
-  onClick={() => navigate(`/dashboard/settlement/${merchant.corp_id}`)}
-  className="bg-lime-500 hover:bg-lime-600 text-white px-3 py-1 rounded text-xs"
+  onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`);
+
+
+}}
+  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs"
 >
   Settlement
 </button>

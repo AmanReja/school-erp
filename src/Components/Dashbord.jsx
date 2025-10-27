@@ -7,8 +7,12 @@ import Arrow from "../assets/icons/arrow.svg";
 import { ToastContainer } from "react-toastify";
 import Subfooter from "./Subfooter";
 import { Theme } from "../Contexts/Theme";
+import { LoadDetails } from "../Contexts/LoadDetails";
+import { useLocation } from "react-router-dom";
+
 
 const Dashbord = () => {
+  const location = useLocation();
   const {theme,setTheme} =useContext(Theme)
   const [shows, setShows] = useState(false);
   const [showp, setShowp] = useState(false);
@@ -27,6 +31,18 @@ const Dashbord = () => {
   const [opensubscription,setOpensubscription] =useState(false)
   const [openverification,setOpenverification] =useState(false)
   const [expend,setExpend] =useState(false)
+  const {loadD,setLoadD} =useContext(LoadDetails)
+
+
+  useEffect(() => {
+    if (location.pathname.startsWith("/dashboard/settlement/")) {
+      setLoadD(true);
+    } else {
+      setLoadD(false);
+    }
+  }, [location.pathname]);
+
+  console.log(loadD);
   
   const items = [
     {
@@ -68,7 +84,7 @@ const Dashbord = () => {
     <div
       className={`flex sm:flex-col flex-row sm:h-full h-[70px] ${
         !expend ? "sm:w-[220px]" : "sm:w-[90px]"
-      } w-full bg-gradient-to-b from-indigo-500 to-violet-500 rounded-r-3xl sm:px-3 px-4 sm:py-6 py-2 items-center justify-between sm:justify-start sm:gap-6 gap-4 shadow-xl transition-all duration-500 ease-in-out`}
+      } w-full bg-gradient-to-b from-indigo-500 to-violet-500 rounded-r-3xl sm:px-3 px-4 sm:py-6 py-2 items-center justify-between sm:justify-start sm:gap-6 gap-4  transition-all duration-500 ease-in-out`}
     >
       {items.map(({ to, icon, label, show, setShow }) => (
         <div
@@ -137,7 +153,7 @@ const Dashbord = () => {
     >
       {/* Header */}
       <header
-        className={`w-full sm:h-[54px] h-[90px] border-b
+        className={`w-full sm:h-[54px] h-[90px] border-b flex  items-center
         ${theme === "dark"
           ? "border-gray-700/70"
           : "border-gray-300/70"
@@ -145,7 +161,7 @@ const Dashbord = () => {
       >
         <div
           style={{ fontFamily: "Montserrat" }}
-          className="w-full h-full flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-8 px-4 py-2 text-sm whitespace-nowrap"
+          className="w-[80%] h-full flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-8 px-4 py-2 text-sm whitespace-nowrap"
         >
           {[
             {
@@ -256,21 +272,17 @@ const Dashbord = () => {
                     )
                   )}
                 </div>
+               
               </div>
+             
             </div>
+            
           ))}
 
-          <NavLink
-            className={`flex justify-center items-center cursor-pointer font-medium transition duration-300 ${
-              theme === "dark"
-                ? "text-gray-100 hover:text-indigo-400"
-                : "text-gray-800 hover:text-blue-600"
-            }`}
-            to={"/dashboard/ledger"}
-          >
-            Ledger
-          </NavLink>
+        
         </div>
+        {loadD?<button className="bg-blue-500 text-white p-2 rounded-xl">Get marchent details</button>:""}
+        
       </header>
 
       <Outlet />
@@ -284,4 +296,5 @@ const Dashbord = () => {
   );
 };
 
-export default Dashbord;
+export default Dashbord;                 
+                   
