@@ -14,10 +14,10 @@ export const DELETE_SETTLEMENT = "DELETE_SETTLEMENT";
 
 
 
-export const CREATE_TRANSACTION = "CREATE_TRANSACTION";
-export const GET_TRANSACTIONS = "GET_TRANSACTIONS";
-export const UPDATE_TRANSACTION = "UPDATE_TRANSACTION";
-export const DELETE_TRANSACTION = "DELETE_TRANSACTION";
+
+export const GETTRANSACTIONS_BY_COMPANYID = "GETTRANSACTIONS_BY_COMPANYID";
+
+
 
 const baseUrl = "http://192.168.1.45:3000";
 
@@ -166,6 +166,11 @@ export const updateMerchant = (id, updatedData) => async (dispatch) => {
     } else {
       alert(data.message || "Failed to update merchant");
     }
+
+if(res.status===401){
+  window.location.href="/"
+}
+
   } catch (error) {
     alert("Error updating merchant: " + error.message);
   }
@@ -183,6 +188,11 @@ export const deleteMerchant = (id) => async (dispatch) => {
       },
     });
 
+    if(res.status===401){
+      window.location.href="/"
+      return
+      
+    }
     if (res.ok) {
       dispatch({ 
         type: DELETE_MERCHANT, 
@@ -193,7 +203,8 @@ export const deleteMerchant = (id) => async (dispatch) => {
     } else {
       const data = await res.json();
       alert(data.message || "Failed to delete merchant");
-    }
+    } 
+ 
   } catch (error) {
     alert("Error deleting merchant: " + error.message);
   }
@@ -222,6 +233,12 @@ export const getSettlements = (company_id,searchTerm,searchStatus) => async (dis
     },
   });
   const data = await res.json();
+  
+  if(res.status===401){
+    window.location.href="/"
+    return
+    
+  }
   if (!res.ok) {
     // handle error
     console.error("Error fetching settlements:", data);
@@ -229,16 +246,18 @@ export const getSettlements = (company_id,searchTerm,searchStatus) => async (dis
   }
   dispatch({ type: GET_SETTLEMENTS, payload: data });
 };
-export const getallSettlements = (searchTerm="",searchStatus="") => async (dispatch) => {
+export const getallSettlements = (searchTerm,searchStatus,page,parPage) => async (dispatch) => {
   const token = localStorage.getItem("token");
   console.log(195,searchStatus);
 
 
 
- const params = new URLSearchParams({
-    search: searchTerm || "",
-    status: searchStatus || ""
-  });
+
+const params =new URLSearchParams()
+  if (searchTerm) params.append("search", searchTerm  );
+  if (searchStatus) params.append("search",  searchStatus );
+  if (parPage) params.append("parPage",  parPage );
+  if (page) params.append("page",  page );
 
  
  
@@ -251,6 +270,12 @@ export const getallSettlements = (searchTerm="",searchStatus="") => async (dispa
     },
   });
   const data = await res.json();
+  
+  if(res.status===401){
+    window.location.href="/"
+    return
+    
+  }
   if (!res.ok) {
     // handle error
     console.error("Error fetching settlements:", data);
@@ -298,6 +323,12 @@ export const updateSettlement = (account_number,company_id, updatedData) => asyn
     body: JSON.stringify(updatedData),
   });
   const data = await res.json();
+  
+  if(res.status===401){
+    window.location.href="/"
+    return
+    
+  }
   if (res.status === 403) {
     alert("Permission denied");
   }
@@ -322,6 +353,11 @@ export const deleteSettlement = (account_number,company_id) => async (dispatch) 
   });
 
   
+  if(res.status===401){
+    window.location.href="/"
+    return
+    
+  }
   if (res.status === 403) {
     alert("Permission denied");
   }
@@ -338,110 +374,62 @@ export const deleteSettlement = (account_number,company_id) => async (dispatch) 
 
 
 // ---------------- CREATE TRANSACTION ----------------
-export const createTransaction = (formData, setStep) => async (dispatch) => {
-  const token = localStorage.getItem("token");
 
-  try {
-    const res = await fetch(`${baseUrl}/v1/admin/transactions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await res.json();
-
-    if (res.status === 201) {
-      alert("Transaction created successfully");
-      if (setStep) setStep(1); // reset form step if multi-step form
-    }
-
-    if (res.status === 403) {
-      alert("Permission denied");
-    }
-
-    dispatch({ type: CREATE_TRANSACTION, payload: data });
-  } catch (error) {
-    alert(error.message || "Error creating transaction");
-  }
-};
 
 // ---------------- GET ALL TRANSACTIONS ----------------
-export const getAllTransactions = (page = 1) => async (dispatch) => {
+
+
+
+export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page,limit,downloadexcl=false) => async (dispatch) => {
+
   const token = localStorage.getItem("token");
+  console.log(195,downloadexcl);
 
-  try {
-    const res = await fetch(`${baseUrl}/v1/admin/transactions?page=${page}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
 
-    const data = await res.json();
 
-    if (!res.ok) {
-      console.error("Error fetching transactions:", data);
-      return;
-    }
+  const params = new URLSearchParams();
+  if (searchTerm) params.append("search", searchTerm  );
+  if (searchStatus) params.append("status",  searchStatus );
+  if (page) params.append("page",  page );
+  if (limit) params.append("limit",  limit );
+  if(downloadexcl) params.append("download", "excel");
 
-    dispatch({ type: GET_TRANSACTIONS, payload: data });
-  } catch (error) {
-    console.error("Error fetching transactions:", error);
+ 
+ 
+
+  const res = await fetch(`${baseUrl}/v1/admin/payout/logs/${corpid}?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json", 
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  
+  if(res.status===401){
+    window.location.href="/"
+    return
+    
   }
+ 
+  if (!res.ok) {
+    // handle error
+    console.error("Error fetching settlements:");
+    return;
+  }
+  if (downloadexcl==true) {
+    const blob = await res.blob();
+    const fileURL = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = fileURL;
+    link.setAttribute("download", "payout_logs.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    return; 
+  }
+  const data = await res.json();
+  dispatch({ type: GETTRANSACTIONS_BY_COMPANYID, payload: data });
 };
 
 // ---------------- UPDATE TRANSACTION ----------------
-export const updateTransaction = (id, updatedData) => async (dispatch) => {
-  const token = localStorage.getItem("token");
 
-  try {
-    const res = await fetch(`${baseUrl}/v1/admin/transactions/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(updatedData),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Error updating transaction:", data);
-      return;
-    }
-
-    dispatch({ type: UPDATE_TRANSACTION, payload: { id, data } });
-  } catch (error) {
-    console.error("Error updating transaction:", error);
-  }
-};
-
-// ---------------- DELETE TRANSACTION ----------------
-export const deleteTransaction = (id) => async (dispatch) => {
-  const token = localStorage.getItem("token");
-
-  try {
-    const res = await fetch(`${baseUrl}/v1/admin/transactions/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      console.error("Error deleting transaction:", err);
-      return;
-    }
-
-    dispatch({ type: DELETE_TRANSACTION, payload: id });
-  } catch (error) {
-    console.error("Error deleting transaction:", error);
-  }
-};

@@ -298,7 +298,7 @@ const Merchant = () => {
         <td className="px-4 py-2">{merchant.kyc_status}</td>
         <td className="px-4 py-2 flex gap-2">
         <button
-  onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`);
+  onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
 
 
 }}

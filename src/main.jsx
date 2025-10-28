@@ -20,6 +20,7 @@ import Settlement from "./Components/Settlement";
 import Createmerchants from "./Components/Createmerchants";
 import Profile from "./Components/Profile";
 import Getallsettlements from "./Components/Getallsettlements";
+import TransactionMaster from "./Components/TransactionMaster";
 
 import { LoadDetailsProvider } from "./Contexts/LoadDetails";
 
@@ -37,6 +38,7 @@ const router = createBrowserRouter(
         <Route path="createmerchants" element={<Createmerchants/>}/>
         <Route path="profile" element={<Profile />} />
         <Route path="getallsettlements" element={<Getallsettlements />} />
+        <Route path="transactionmaster/:merchantId" element={<TransactionMaster />} />
 
               
           {/* <Route path="addmoney" element={<Addmoney />} />

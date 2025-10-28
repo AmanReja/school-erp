@@ -8,11 +8,15 @@ import { ToastContainer } from "react-toastify";
 import Subfooter from "./Subfooter";
 import { Theme } from "../Contexts/Theme";
 import { LoadDetails } from "../Contexts/LoadDetails";
-import { useLocation } from "react-router-dom";
+import { useLocation ,useNavigate,useParams} from "react-router-dom";
 
 
 const Dashbord = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { merchantId } = useParams();
+  console.log(19, merchantId);
+  
   const {theme,setTheme} =useContext(Theme)
   const [shows, setShows] = useState(false);
   const [showp, setShowp] = useState(false);
@@ -281,7 +285,7 @@ const Dashbord = () => {
 
         
         </div>
-        {loadD?<button className="bg-blue-500 text-white p-2 rounded-xl">Get marchent details</button>:""}
+        {loadD?<button onClick={()=>{navigate(`/dashboard/transactionmaster/${merchantId}`)}} className="bg-blue-500 text-white p-2 rounded-xl">Transaction Table</button>:""}
         
       </header>
 

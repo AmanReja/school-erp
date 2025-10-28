@@ -1,0 +1,408 @@
+import React, { useState, useContext, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Theme } from "../Contexts/Theme";
+import { X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+
+
+
+
+import {
+    getTransactions_by_companyid
+ 
+} from "../redux/action";
+
+const TransactionMaster = () => {
+    
+
+
+    
+
+
+ 
+
+ 
+
+  const { merchantId } = useParams();
+  console.log(29, merchantId);
+  
+  
+  const { theme } = useContext(Theme);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+
+
+
+
+  const [page, setPage] = useState(1);
+  const [perPage , setPerPage] = useState(10);
+
+
+
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchStatus, setSearchStatus] = useState("");
+ 
+
+
+  const [isDownloading, setIsDownloading] = useState(false);
+
+
+ 
+
+ 
+
+
+
+  const transactionData = useSelector((state) => state.transactions?.transactions || []);
+  console.log(52,transactionData);
+  
+  const transactionDataArray = transactionData
+    ?.map(item => item.data || [])
+    .flat();
+    console.log(57,transactionDataArray);
+
+
+     const totalRecords = transactionData[0]?.pagination.totalRecords;
+     console.log(totalRecords);
+ 
+
+
+
+     const totalPages =  transactionData[0]?.pagination.totalPages;
+    
+;
+   
+
+  
+    useEffect(() => {
+        if (merchantId) {
+          dispatch(getTransactions_by_companyid(merchantId, searchTerm, searchStatus,page,perPage,false));
+        }
+      }, [merchantId, searchTerm, searchStatus, dispatch,page,perPage]);
+      
+    
+      const handleDownload = async () => {
+        try {
+        
+      
+           await dispatch(
+            getTransactions_by_companyid(
+                merchantId, searchTerm, searchStatus,page,perPage,true
+            )
+          );
+      
+         
+      
+        } catch (error) {
+          console.log("Download error:", error);
+       
+      };}
+      
+ 
+useEffect(() => {
+    setPage(1);
+  }, [searchTerm, searchStatus]);
+ 
+
+
+// const statusCard = [
+//   {
+//     title: "Active Accounts",
+//     credit: activeStatus.length,
+//     description: "Accounts currently active and in use",
+//     gradient: "from-[#374151] to-[#6B7280]", 
+//     textColor: "text-white",
+//     icon: (
+//       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+//       </svg>
+//     ),
+//   },
+//   {
+//     title: "Inactive Accounts",
+//     credit: inactiveStatus.length,
+//     description: "Accounts currently inactive or dormant",
+//     gradient: "from-[#544151] to-[#6B7280]",
+//     textColor: "text-white",
+//     icon: (
+//       <svg height={50} width={50} fill="#ffffff" viewBox="0 0 24 24" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12,2A10,10,0,1,0,22,12,10.01146,10.01146,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8.00917,8.00917,0,0,1,12,20Zm1-8.251V7a1,1,0,0,0-2,0v5a1.00586,1.00586,0,0,0,.11816.47217l1.5,2.79883a1.00029,1.00029,0,0,0,1.76368-.94434Z"></path></g></svg>
+//     ),
+//   },
+//   {
+//     title: "Suspended Accounts",
+//     credit: suspended.length,
+//     description: "Accounts suspended due to policy violations",
+//     gradient: "from-[#214151] to-[#6B7280]", 
+//     textColor: "text-white",
+//     icon: (
+//       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728" />
+//       </svg>
+//     ),
+//   },
+// ];
+
+  
+
+
+
+
+
+  return (
+    <div
+      className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${
+        theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"
+      }`}
+    >
+   
+
+      <main className="w-full h-full flex flex-col overflow-y-scroll">
+
+      <section className="w-full p-2 py-4 px-6 h-[200px]">
+  <div className="mx-auto max-w-7xl">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* {statusCard.map((card, idx) => (
+        <div
+          key={idx}
+          className={`overflow-hidden rounded-2xl bg-gradient-to-r ${card.gradient} text-white transition-transform duration-300 hover:-translate-y-2`}
+        >
+          <div className="p-4">
+            <div className="mb-2 flex items-start justify-between">
+              <div>
+                <h3 className="text-xl font-bold">{card.title}</h3>
+                <p className="opacity-90">{card.credit}</p>
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
+                {card.icon}
+              </div>
+            </div>
+          
+          </div>
+        </div>
+      ))} */}
+    </div>
+  </div>
+</section>
+
+        <section className="w-full flex flex-col sm:flex-col gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
+          {/* Settlements Table */}
+         
+          <div
+            className={`flex sm:w-[100%] w-full h-full flex-col rounded-xl overflow-y-auto border ${
+              theme === "dark"
+                ? "bg-gray-800 border-gray-700 text-gray-300"
+                : "bg-white border-gray-100 text-gray-800"
+            }`}
+          >
+          <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md  border border-gray-100">
+  {/* Title */}
+  <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
+    Settlements List
+  </h2>
+
+  {/* Search Input */}
+  <div className="flex items-center gap-4">
+  {/* 🔍 Search Input */}
+  <div className="relative w-[220px]">
+    <input
+      type="text"
+      value={searchTerm}
+      onChange={(e)=>{setSearchTerm(e.target.value)}}
+      placeholder="Search settlements..."
+      className="w-full border outline-none border-gray-200 rounded-[10px] pl-10 pr-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 transition-all duration-300 ease-in-out shadow-sm"
+    />
+   
+  </div>
+
+  {/* 📋 Status Dropdown */}
+  <select onChange={(e)=>{setSearchStatus(e.target.value)}}
+  value={searchStatus}
+    className="border border-gray-200 rounded-[5px] px-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 outline-none transition-all duration-300 ease-in-out shadow-sm cursor-pointer"
+    defaultValue=""
+  >
+   <option selected value="">ALL</option>
+    <option value="SUCCESS">SUCCESS</option>
+    
+    <option value="PENDING">PENDING</option>
+    <option value="FAILED">FAILED</option>
+  </select>
+</div>
+
+
+<button
+  onClick={handleDownload}
+  disabled={isDownloading}
+  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+>
+  {isDownloading ? "Downloading..." : "Download Excel"}
+</button>
+
+</div>
+
+
+
+<div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
+  <table className="w-full table-auto text-sm">
+    <thead className={`uppercase text-gray-600 ${theme === "dark" ? "bg-gray-700 text-gray-400" : "bg-gray-200 text-gray-600"}`}>
+      <tr>
+        <th className="py-3 px-6 text-left">Bank Name</th>
+        <th className="py-3 px-6 text-left">Account Number</th>
+        <th className="py-3 px-6 text-left">IFSC Code</th>
+        <th className="py-3 px-6 text-left">RRN Number</th>
+        <th className="py-3 px-6 text-left">Status</th>
+     
+      </tr>
+    </thead>
+    <tbody className={`text-gray-600 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+      {Array.isArray(transactionDataArray) && transactionDataArray.length > 0 ? (
+        transactionDataArray.map((transaction, i) => (
+          <tr key={i} className={`border-b ${theme === "dark" ? "border-gray-700 hover:bg-gray-700" : "border-gray-200 hover:bg-gray-100"}`}>
+            <td className="py-3 px-6 text-left">{transaction.bank_name}</td>
+            <td className="py-3 px-6 text-left">{transaction.account_no}</td>
+            <td className="py-3 px-6 text-left">{transaction.ifsc_code}</td>
+            <td className="py-3 px-6 text-left">{transaction.rrn
+}</td>
+           
+            <td className="py-3 px-6 text-left">
+              <span className={`px-2 py-1 rounded-full text-xs ${
+                transaction.status
+ === 'SUCCESS' 
+                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                  : transaction.status === 'PENDING'
+                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+              }`}>
+                {transaction.status}
+              </span>
+            </td>
+           
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan={6} className="text-center py-4 text-gray-400">
+            No settlements found.
+          </td>
+        </tr>
+      )}
+
+
+
+    </tbody>
+    
+
+  </table>
+
+</div>
+
+  {totalPages > 0 ? (
+                <div
+                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"
+                      ? "bg-gray-900 text-gray-300 border-gray-700"
+                      : "bg-white text-gray-600 border-gray-200"
+                    }`}
+                >
+                  <div>
+                    Show{" "}
+                    <select
+                      className={`rounded border outline-none px-[5px] py-[5px] ${theme === "dark"
+                          ? "bg-gray-800 text-gray-200 border-gray-600"
+                          : "bg-white text-gray-700 border-gray-300"
+                        }`}
+                      value={perPage}
+                      onChange={(e) => {
+                        setPerPage(Number(e.target.value));
+                        setPage(1);
+                      }}
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={30}>30</option>
+                    </select>{" "}
+                    per page
+                  </div>
+  
+                  <div className="flex items-center space-x-2">
+                    {/* Showing range */}
+                    <p>
+                      {(page - 1) * perPage + 1}-
+                      {Math.min(page * perPage, totalRecords)} of {totalRecords}
+                    </p>
+  
+             
+                    <button
+                      onClick={() => setPage(page - 1)}
+                      disabled={page === 1}
+                      className={`px-3 py-1  rounded-md ${page === 1
+                          ? "opacity-50 cursor-not-allowed"
+                          : theme === "dark"
+                            ? "hover:bg-gray-700"
+                            : "hover:bg-gray-200"
+                        }`}
+                    >
+                      <i className="fa-solid fa-arrow-left"></i>
+                    </button>
+  
+                   
+                    {Array.from({ length: 3 }, (_, i) => page + i).map((num) => (
+    num <= totalPages && ( 
+      <button
+        key={num}
+        onClick={() => setPage(num)}
+        className={`px-3 py-1  rounded-md ${
+          num === page
+            ? theme === "dark"
+              ? "bg-gray-700 font-semibold"
+              : "bg-gray-200 font-semibold"
+            : theme === "dark"
+            ? "hover:bg-gray-800"
+            : "hover:bg-gray-100"
+        }`}
+      >
+        {num}
+      </button>
+    )
+  ))}
+  
+  
+                   
+                    <button
+                      onClick={() => setPage(page + 1)}
+                      disabled={page === totalPages}
+                      className={`px-3 py-1  rounded-md ${page === totalPages
+                          ? "opacity-50 cursor-not-allowed"
+                          : theme === "dark"
+                            ? "hover:bg-gray-700"
+                            : "hover:bg-gray-200"
+                        }`}
+                    >
+                      <i className="fa-solid fa-arrow-right"></i>
+                    </button>
+                  </div>
+  
+                </div>
+              ) : (
+                <div
+                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"
+                      ? "bg-gray-900 text-gray-300 border-gray-700"
+                      : "bg-white text-gray-600 border-gray-200"
+                    }`}
+                >
+                  <h1 className="text-2xl w-full text-center">No data found</h1>
+                </div>
+              )}
+
+          </div>
+        </section>
+      </main>
+
+   
+    </div>
+  );
+};
+
+export default TransactionMaster;

@@ -215,7 +215,14 @@ const Createmerchants = () => {
       <main className="w-full h-full flex flex-col overflow-y-scroll">
         <section className="w-full flex flex-col sm:flex-row gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
        
-          <form onSubmit={handleSubmit} className={formCardStyle}>
+          <form onSubmit={(e)=>{
+             e.preventDefault();
+             if (step !== 4) return; 
+             if (!kyc_status) {
+               alert("Please select KYC status");
+               return;
+             }
+             handleSubmit(e); }} className={formCardStyle}>
           <h2 className="text-xl font-bold text-center mb-2">Create Merchant</h2>
 
           {/* Step Indicators */}
@@ -246,7 +253,14 @@ const Createmerchants = () => {
               <label className="font-medium">Mobile Number</label>
               <input type="tel" value={mobile_number} onChange={(e) => setMobileNumber(e.target.value)} placeholder="Enter mobile number" className="input" required />
 
-              <button type="button" onClick={nextStep} className="btn-primary mt-3">Next</button>
+              <button type="button" onClick={()=>{if (!name||!email||!mobile_number) {
+                alert ("Fields must be filed")
+                return
+
+              }else if(mobile_number.length<10||mobile_number.length>10){
+                alert("mobile number should be 10 digites")
+                return
+              }else{nextStep()}}} className="btn-primary mt-3">Next</button>
             </div>
           )}
 
@@ -283,7 +297,10 @@ const Createmerchants = () => {
 
               <div className="flex justify-between gap-3 mt-3">
                 <button type="button" onClick={prevStep} className="btn-secondary">Back</button>
-                <button type="button" onClick={nextStep} className="btn-primary">Next</button>
+                <button type="button" onClick={()=>{if (!user_id||!user_pass||!address) {
+                alert ("Fields must be filed")
+                return
+              }else{nextStep()}}} className="btn-primary">Next</button>
               </div>
             </div>
           )}
@@ -302,7 +319,10 @@ const Createmerchants = () => {
 
               <div className="flex justify-between gap-3 mt-3">
                 <button type="button" onClick={prevStep} className="btn-secondary">Back</button>
-                <button type="button" onClick={nextStep} className="btn-primary">Next</button>
+                <button type="button" onClick={()=>{if (!wallet_id||!pan||!gst) {
+                alert ("Fields must be filed")
+                return
+              }else{nextStep()}}}className="btn-primary">Next</button>
               </div>
             </div>
           )}
@@ -311,7 +331,7 @@ const Createmerchants = () => {
           {step === 4 && (
             <div className="flex flex-col gap-3">
               <label className="font-medium">KYC Status</label>
-              <select value={kyc_status} onChange={(e) => setKyc_status(e.target.value)} className="input" required>
+              <select value={kyc_status} onChange={(e) => setKyc_status(e.target.value)} className="input" required >
                 <option value="Pending">Pending</option>
                 <option value="Completed">Completed</option>
               </select>

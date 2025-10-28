@@ -1,10 +1,10 @@
 import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET_SETTLEMENTS,
     CREATE_SETTLEMENT,
     UPDATE_SETTLEMENT,
-    DELETE_SETTLEMENT,CREATE_TRANSACTION,
-    GET_TRANSACTIONS,
-    UPDATE_TRANSACTION,
-    DELETE_TRANSACTION,GET_ALL_SETTLEMENTS } from "../redux/action";
+    DELETE_SETTLEMENT,GETTRANSACTIONS_BY_COMPANYID,
+   
+ 
+  GET_ALL_SETTLEMENTS } from "../redux/action";
 
 
 
@@ -156,40 +156,20 @@ const initialSettlementState = {
   
 const initialTransactionState = {
   transactions: [], // list of transaction objects
-  pagination: {},   // optional: for API pagination info
+    // optional: for API pagination info
 };
 
 export const transactionReducer = (state = initialTransactionState, action) => {
   switch (action.type) {
-    case GET_TRANSACTIONS:
-      // If API returns { data: [...], pagination: {...} }
+    case GETTRANSACTIONS_BY_COMPANYID:
+      
       return {
         ...state,
-        transactions: action.payload.data || [],
-        pagination: action.payload.pagination || {},
+        transactions: [action.payload]
+        
       };
 
-    case CREATE_TRANSACTION:
-      return {
-        ...state,
-        transactions: [action.payload, ...state.transactions],
-      };
 
-    case UPDATE_TRANSACTION:
-      return {
-        ...state,
-        transactions: state.transactions.map((tx) =>
-          tx.id === action.payload.id ? { ...tx, ...action.payload.data } : tx
-        ),
-      };
-
-    case DELETE_TRANSACTION:
-      return {
-        ...state,
-        transactions: state.transactions.filter(
-          (tx) => tx.id !== action.payload
-        ),
-      };
 
     default:
       return state;

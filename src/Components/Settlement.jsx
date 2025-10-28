@@ -12,6 +12,7 @@ import {
   deleteSettlement,
  
 } from "../redux/action";
+import {Check} from "lucide-react"
 
 const Settlement = () => {
   const { merchantId } = useParams();
@@ -25,14 +26,14 @@ const Settlement = () => {
       setLoadD(false);
     }
   }, [merchantId]);
-  console.log(19, merchantId);
+
   
   const { theme } = useContext(Theme);
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [openform, setOpenform] = useState(false);
-  console.log(26, openform);
+
 
   const handelopen = () => {
     setOpenform((prev) => !prev);
@@ -49,10 +50,30 @@ const Settlement = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchStatus, setSearchStatus] = useState("");
-  console.log(41,searchStatus);
-  console.log(42,searchTerm);
 
 
+
+
+
+  const opt =[
+    {label:"all",value:""},
+{label:"active",value:"active"},
+{label:"inactive",value:"inactive"},
+ {label:"suspended",value:"suspended"},
+
+]
+
+const [selectedopt,setSelectedopt] =useState("");
+const [optopen,setOptopen]=useState(false);
+
+console.log(61,selectedopt);
+
+const handeloptOpen =(item)=>{
+  setSelectedopt(item.value)
+  setOptopen(false)
+  setSearchStatus(item.value)
+
+}
   
 
   // State for update modal
@@ -73,7 +94,6 @@ const Settlement = () => {
   ?.map(item => item.data || [])
   .flat(); // Flatten into a single array
 
-console.log(66, settlementRowsArray);
 
   // Load settlements on component mount
   useEffect(() => {
@@ -296,7 +316,7 @@ console.log(66, settlementRowsArray);
   </div>
 
   {/* 📋 Status Dropdown */}
-  <select onChange={(e)=>{setSearchStatus(e.target.value)}}
+  {/* <select onChange={(e)=>{setSearchStatus(e.target.value)}}
   value={searchStatus}
     className="border border-gray-200 rounded-[5px] px-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 outline-none transition-all duration-300 ease-in-out shadow-sm cursor-pointer"
     defaultValue=""
@@ -307,7 +327,29 @@ console.log(66, settlementRowsArray);
     <option value="active">ACTIVE</option>
     <option value="inactive">INACTIVE</option>
     <option value="suspended">SUSPENDED</option>
-  </select>
+  </select> */}
+  
+  <div 
+   onClick={(e)=>{setOptopen(true)}}
+    className="border min-w-[120px] border-gray-200 rounded-[5px] px-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 outline-none transition-all duration-300 ease-in-out shadow-sm cursor-pointer"
+   
+  > {selectedopt?selectedopt:"select Status"} 
+    
+  </div>
+
+ {optopen&&<div className="w-auto cursor-pointer  h-auto absolute top-[33%] left-[61%] p-2 bg-white flex justify-center items-center flex-col shadow-xl z-40">
+    {opt.map((item)=>(
+      <div key={item} onClick={(e)=>{handeloptOpen(item)}}   className="w-full flex items-center justify-between h-[30px]">{item.label} {selectedopt === item.value && (
+        <Check
+          className={`w-4 h-4 ${
+            theme === "dark" ? "text-blue-400" : "text-blue-600"
+          }`}
+        />
+      )}</div> 
+    
+      
+    ))}
+  </div>} 
 </div>
 
 

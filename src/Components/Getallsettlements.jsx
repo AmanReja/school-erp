@@ -30,6 +30,8 @@ const Getallsettlements = () => {
   const handelopen = () => {
     setOpenform((prev) => !prev);
   };
+  const [page, setPage] = useState(1);
+  const [perPage , setPerPage] = useState(10);
 
 
 
@@ -66,6 +68,21 @@ const Getallsettlements = () => {
  
   const settlementsData = useSelector((state) => state.settlements?.settlements || []);
   console.log(60,settlementsData);
+
+
+
+  const totalRecords = settlementsData[0]?.pagination.totalRecords;
+  console.log(73,totalRecords);
+
+
+
+
+  const totalPages =  settlementsData[0]?.pagination.totalPages;
+  console.log(79,totalPages);
+
+
+
+
   
   const settlementRowsArray = settlementsData
     ?.map(item => item.data || [])
@@ -118,6 +135,10 @@ const Getallsettlements = () => {
       });
   };
 
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, searchStatus]);
+
 
   const handleEdit = (settlement) => {
     setSelectedSettlement(settlement);
@@ -165,14 +186,12 @@ const Getallsettlements = () => {
         });
     }
   };
-  const fetchSettlements = debounce((term, status) => {
-    dispatch(getallSettlements(term, status));
-  }, 500); 
+
 
 
   useEffect(()=>{
-    fetchSettlements(searchTerm,searchStatus)
-  },[searchStatus,searchTerm])
+    dispatch(getallSettlements(searchTerm,searchStatus,page,perPage))
+  },[searchStatus,searchTerm,page,perPage])
 const statusCard = [
   {
     title: "Active Accounts",
@@ -380,11 +399,9 @@ const statusCard = [
     className="border border-gray-200 rounded-[5px] px-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 outline-none transition-all duration-300 ease-in-out shadow-sm cursor-pointer"
     defaultValue=""
   >
-    <option selected value="" disabled>
-      Select Status
-    </option>
+    <option selected value="">ALL</option>
     <option value="active">ACTIVE</option>
-    <option value="">ALL</option>
+    
     <option value="inactive">INACTIVE</option>
     <option value="suspended">SUSPENDED</option>
   </select>
@@ -392,7 +409,7 @@ const statusCard = [
 
 
   {/* Button */}
-  <button
+  {/* <button
     onClick={handelopen}
     className="bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-medium py-2.5 px-5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex items-center gap-2"
   >
@@ -406,7 +423,7 @@ const statusCard = [
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
     </svg>
     Open Settlement
-  </button>
+  </button> */}
 </div>
 
 
@@ -420,7 +437,7 @@ const statusCard = [
         <th className="py-3 px-6 text-left">IFSC Code</th>
         <th className="py-3 px-6 text-left">Validated</th>
         <th className="py-3 px-6 text-left">Status</th>
-        <th className="py-3 px-6 text-center">Actions</th>
+      
       </tr>
     </thead>
     <tbody className={`text-gray-600 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
@@ -450,20 +467,7 @@ const statusCard = [
                 {settlement.status}
               </span>
             </td>
-            <td className="py-3 px-6 text-center">
-              <div className="flex items-center justify-center gap-2">
-                <button onClick={() => handleEdit(settlement)} className="w-6 h-6 flex items-center justify-center text-blue-500 hover:text-blue-600 transform hover:scale-110">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </button>
-                <button onClick={() => handleDelete(settlement)} className="w-6 h-6 flex items-center justify-center text-red-500 hover:text-red-600 transform hover:scale-110">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            </td>
+          
           </tr>
         ))
       ) : (
@@ -475,6 +479,102 @@ const statusCard = [
       )}
     </tbody>
   </table>
+  {totalPages > 0 ? (
+                <div
+                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"
+                      ? "bg-gray-900 text-gray-300 border-gray-700"
+                      : "bg-white text-gray-600 border-gray-200"
+                    }`}
+                >
+                  <div>
+                    Show{" "}
+                    <select
+                      className={`rounded border outline-none px-[5px] py-[5px] ${theme === "dark"
+                          ? "bg-gray-800 text-gray-200 border-gray-600"
+                          : "bg-white text-gray-700 border-gray-300"
+                        }`}
+                      value={perPage}
+                      onChange={(e) => {
+                        setPerPage(Number(e.target.value));
+                        setPage(1);
+                      }}
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={30}>30</option>
+                    </select>{" "}
+                    per page
+                  </div>
+  
+                  <div className="flex items-center space-x-2">
+                    {/* Showing range */}
+                    <p>
+                      {(page - 1) * perPage + 1}-
+                      {Math.min(page * perPage, totalRecords)} of {totalRecords}
+                    </p>
+  
+             
+                    <button
+                      onClick={() => setPage(page - 1)}
+                      disabled={page === 1}
+                      className={`px-3 py-1  rounded-md ${page === 1
+                          ? "opacity-50 cursor-not-allowed"
+                          : theme === "dark"
+                            ? "hover:bg-gray-700"
+                            : "hover:bg-gray-200"
+                        }`}
+                    >
+                      <i className="fa-solid fa-arrow-left"></i>
+                    </button>
+  
+                   
+                    {Array.from({ length: 3 }, (_, i) => page + i).map((num) => (
+    num <= totalPages && ( 
+      <button
+        key={num}
+        onClick={() => setPage(num)}
+        className={`px-3 py-1  rounded-md ${
+          num === page
+            ? theme === "dark"
+              ? "bg-gray-700 font-semibold"
+              : "bg-gray-200 font-semibold"
+            : theme === "dark"
+            ? "hover:bg-gray-800"
+            : "hover:bg-gray-100"
+        }`}
+      >
+        {num}
+      </button>
+    )
+  ))}
+  
+  
+                   
+                    <button
+                      onClick={() => setPage(page + 1)}
+                      disabled={page === totalPages}
+                      className={`px-3 py-1  rounded-md ${page === totalPages
+                          ? "opacity-50 cursor-not-allowed"
+                          : theme === "dark"
+                            ? "hover:bg-gray-700"
+                            : "hover:bg-gray-200"
+                        }`}
+                    >
+                      <i className="fa-solid fa-arrow-right"></i>
+                    </button>
+                  </div>
+  
+                </div>
+              ) : (
+                <div
+                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"
+                      ? "bg-gray-900 text-gray-300 border-gray-700"
+                      : "bg-white text-gray-600 border-gray-200"
+                    }`}
+                >
+                  <h1 className="text-2xl w-full text-center">No data found</h1>
+                </div>
+              )}
 </div>
 
           </div>
