@@ -48,7 +48,7 @@ const Navbar = () => {
   return (
     <div
   className={`w-[100%] ${
-    theme === "dark" ? "" : "bg-transparent "
+    theme === "dark" ? "" : "bg-transparent"
   } h-[40px] flex justify-between px-[10px] sm:px-[40px] items-center mt-[20px]`}
 >
  

@@ -9,6 +9,7 @@ import Subfooter from "./Subfooter";
 import { Theme } from "../Contexts/Theme";
 import { LoadDetails } from "../Contexts/LoadDetails";
 import { useLocation ,useNavigate,useParams} from "react-router-dom";
+import {Eye,ArrowRight} from "lucide-react"
 
 
 const Dashbord = () => {
@@ -152,140 +153,46 @@ const Dashbord = () => {
       className={`ml-0 sm:ml-1 w-full sm:w-[94%] h-full rounded-3xl border border-transparent shadow-lg transition-all duration-300
       ${theme === "dark"
         ? "bg-gradient-to-br from-gray-800 via-gray-850 to-gray-900 shadow-blue-900/30"
-        : "bg-gradient-to-br from-white via-blue-50 to-indigo-50 shadow-blue-200/40"
+        : "bg-gray-50"
       }`}
     >
       {/* Header */}
       <header
-        className={`w-full sm:h-[54px] h-[90px] border-b flex  items-center
+        className={`w-full sm:h-[54px] h-[90px]  border-b flex  items-center
         ${theme === "dark"
           ? "border-gray-700/70"
           : "border-gray-300/70"
         }`}
       >
-        <div
-          style={{ fontFamily: "Montserrat" }}
-          className="w-[80%] h-full flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-8 px-4 py-2 text-sm whitespace-nowrap"
-        >
-          {[
-            {
-              label: "Payouts",
-              items: [
-                { to: "/dashboard/payout", text: "Single payout" },
-                { to: "/dashboard/bulkpayout", text: "Bulk payout" },
-                { to: "/dashboard/report", text: "Report" },
-                { to: "/dashboard/invoice", text: "Invoices" },
-              ],
-              show: openpayots,
-              setShow: setOpenpayots,
-            },
-            {
-              label: "Collection",
-              items: [
-                { to: "/dashboard/virtualaccount", text: "Virtual Account" },
-                { href: "#", text: "UPI-Static QR" },
-                { href: "#", text: "UPI-Dynamic QR" },
-                { href: "#", text: "Report" },
-                { href: "#", text: "Invoices" },
-              ],
-              show: opencollection,
-              setShow: setOpencollection,
-            },
-            {
-              label: "Subscription",
-              items: [
-                { to: "/dashboard/singleenath", text: "Single eNach" },
-                { href: "#", text: "Bulk eNach" },
-                { href: "#", text: "Cancel eNach" },
-                { to: "/dashboard/transactionreport", text: "Transaction Report" },
-                { href: "#", text: "Invoices" },
-              ],
-              show: opensubscription,
-              setShow: setOpensubscription,
-            },
-            {
-              label: "Verification",
-              items: [
-                { href: "#", text: "Aadhaar eKYC" },
-                { href: "#", text: "PAN Verification" },
-                { href: "#", text: "Bank Account - Penny Drop" },
-                { href: "#", text: "Report" },
-                { href: "#", text: "Invoices" },
-              ],
-              show: openverification,
-              setShow: setOpenverification,
-            },
-          ].map(({ label, items, setShow, show }, idx) => (
-            <div key={idx} className="relative group">
-              <button
-                onClick={() => setShow((prev) => !prev)}
-                className={`flex items-center cursor-pointer font-medium transition duration-300 ${
-                  theme === "dark"
-                    ? "text-gray-100 hover:text-indigo-400"
-                    : "text-gray-800 hover:text-blue-600"
-                }`}
-              >
-                {label}
-                <img
-                  className={`ml-2 w-3 h-3 transition-transform duration-200 ${
-                    show ? "rotate-180" : "rotate-90"
-                  }`}
-                  src={Arrow}
-                  alt=""
-                />
-              </button>
 
-              <div
-                className={`absolute top-[35px] left-0 w-[250px] shadow-2xl rounded-lg p-4 z-50 transition-all duration-300 ${
-                  show
-                    ? "opacity-100 visible translate-y-0"
-                    : "opacity-0 invisible -translate-y-2"
-                } ${
-                  theme === "dark"
-                    ? "bg-gray-800/95 text-gray-200"
-                    : "bg-white text-gray-700"
-                }`}
-              >
-                <div className="flex flex-col gap-2 text-sm">
-                  {items.map((item, i) =>
-                    item.to ? (
-                      <NavLink
-                        key={i}
-                        to={item.to}
-                        onClick={() => setShow(false)}
-                        className={`px-3 py-2 rounded-md transition ${
-                          theme === "dark"
-                            ? "hover:bg-indigo-600/30"
-                            : "hover:bg-blue-100"
-                        }`}
-                      >
-                        {item.text}
-                      </NavLink>
-                    ) : (
-                      <a
-                        key={i}
-                        href={item.href}
-                        className={`px-3 py-2 rounded-md transition ${
-                          theme === "dark"
-                            ? "hover:bg-indigo-600/30"
-                            : "hover:bg-blue-100"
-                        }`}
-                      >
-                        {item.text}
-                      </a>
-                    )
-                  )}
-                </div>
-               
-              </div>
-             
-            </div>
-            
-          ))}
+
+       {loadD&&(<div
+          style={{ fontFamily: "Montserrat" }}
+          className="w-[80%] h-full flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-8 px-4 py-2 text-xl whitespace-nowrap font-bold"
+        >
+         See All Transaction Lists <ArrowRight />
 
         
-        </div>
-        {loadD?<button onClick={()=>{navigate(`/dashboard/transactionmaster/${merchantId}`)}} className="bg-blue-500 text-white p-2 rounded-xl">Transaction Table</button>:""}
+        </div>)}
+
+        
+      {loadD && (
+  <button
+    onClick={() => navigate(`/dashboard/transactionmaster/${merchantId}`)}
+    className="
+      bg-gradient-to-r from-blue-500 to-indigo-600 
+      text-white px-4 py-2 rounded-xl text-sm
+      flex items-center gap-2
+      hover:from-blue-600 hover:to-indigo-700
+      hover:shadow-lg hover:-translate-y-0.5
+      transition-all duration-200 ease-out
+    "
+  >
+    Transactions
+    <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
+  </button>
+)}
+
         
       </header>
 

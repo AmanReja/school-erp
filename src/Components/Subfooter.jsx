@@ -3,7 +3,7 @@ import React from "react";
 const Subfooter = () => {
   return (
     <>
-      <footer className="w-full bg-transparent p-2 rounded-b-2xl relative flex px-[20px] justify-between items-center">
+      <footer className="w-full bg-gray-50 p-2 rounded-b-2xl relative flex px-[20px] justify-between items-center">
         <h1 className=" text-gray-500 text-[14px]">2024© Busybox.</h1>
         <div
           style={{ fontFamily: "montserrat" }}

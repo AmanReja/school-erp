@@ -16,6 +16,7 @@ export const DELETE_SETTLEMENT = "DELETE_SETTLEMENT";
 
 
 export const GETTRANSACTIONS_BY_COMPANYID = "GETTRANSACTIONS_BY_COMPANYID";
+export const UPDATE_TXN_STATUS = "UPDATE_TXN_STATUS";
 
 
 
@@ -96,8 +97,10 @@ export const createMerchant = (formData, setStep) => async (dispatch) => {
   }
 };
 
-export const getDetails = (currentPage, itemsPerPage,searchTerm) => async (dispatch) => {
+export const getDetails = (currentPage, itemsPerPage,searchTerm,setLoad) => async (dispatch) => {
   const token = localStorage.getItem("token");
+
+  setLoad(true)
 
   try {
     const params = new URLSearchParams();
@@ -115,6 +118,7 @@ export const getDetails = (currentPage, itemsPerPage,searchTerm) => async (dispa
       },
     });
 
+
     if (res.status === 401) {
       localStorage.removeItem("token");
       window.location.href = "/";
@@ -122,6 +126,8 @@ export const getDetails = (currentPage, itemsPerPage,searchTerm) => async (dispa
     }
 
     const data = await res.json();
+    
+  setLoad(false)
 
     if (res.ok) {
       dispatch({ type: GETDETAILS, payload: data });
@@ -130,6 +136,8 @@ export const getDetails = (currentPage, itemsPerPage,searchTerm) => async (dispa
     }
   } catch (error) {
     alert("Error fetching merchants: " + error.message);
+    
+  setLoad(true)
   }
 };
 
@@ -247,6 +255,9 @@ export const getSettlements = (company_id,searchTerm,searchStatus) => async (dis
   dispatch({ type: GET_SETTLEMENTS, payload: data });
 };
 export const getallSettlements = (searchTerm,searchStatus,page,parPage) => async (dispatch) => {
+
+   console.log(251,searchStatus);
+
   const token = localStorage.getItem("token");
   console.log(195,searchStatus);
 
@@ -255,7 +266,7 @@ export const getallSettlements = (searchTerm,searchStatus,page,parPage) => async
 
 const params =new URLSearchParams()
   if (searchTerm) params.append("search", searchTerm  );
-  if (searchStatus) params.append("search",  searchStatus );
+  if (searchStatus) params.append("status",  searchStatus );
   if (parPage) params.append("parPage",  parPage );
   if (page) params.append("page",  page );
 
@@ -380,7 +391,12 @@ export const deleteSettlement = (account_number,company_id) => async (dispatch) 
 
 
 
-export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page,limit,downloadexcl=false) => async (dispatch) => {
+export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page,limit,downloadexcl=false,setLoad,startDate,
+  endDate) => async (dispatch) => {
+
+
+
+  setLoad(true)
 
   const token = localStorage.getItem("token");
   console.log(195,downloadexcl);
@@ -392,7 +408,10 @@ export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page
   if (searchStatus) params.append("status",  searchStatus );
   if (page) params.append("page",  page );
   if (limit) params.append("limit",  limit );
+  if (startDate) params.append("start_date",  startDate );
+  if (endDate) params.append("end_date",  endDate );
   if(downloadexcl) params.append("download", "excel");
+ 
 
  
  
@@ -404,6 +423,8 @@ export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page
       Authorization: `Bearer ${token}`,
     },
   });
+
+  setLoad(false)
   
   if(res.status===401){
     window.location.href="/"
@@ -413,6 +434,7 @@ export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page
  
   if (!res.ok) {
     // handle error
+    setLoad(true)
     console.error("Error fetching settlements:");
     return;
   }
@@ -429,6 +451,49 @@ export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page
   }
   const data = await res.json();
   dispatch({ type: GETTRANSACTIONS_BY_COMPANYID, payload: data });
+};
+
+export const update_Txn_status = (company_id,txn_id,updateddata,setUpdateload) => async (dispatch) => {
+
+
+  console.log(459,company_id,txn_id,updateddata,setUpdateload);
+
+
+
+
+
+
+  setUpdateload(true)
+
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${baseUrl}/v1/admin/payout/logs/${company_id}/${txn_id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json", 
+      Authorization: `Bearer ${token}`,
+      
+    },
+    body:JSON.stringify(updateddata)
+  });
+
+  setUpdateload(false)
+  
+  if(res.status===401){
+    window.location.href="/"
+    return
+    
+  }
+ 
+  if (res.status===200) {
+    window.location.reload()
+
+    dispatch(getTransactions_by_companyid())
+   alert("updated")
+  }
+ 
+  const data = await res.json();
+  dispatch({ type: UPDATE_TXN_STATUS, payload: data });
 };
 
 // ---------------- UPDATE TRANSACTION ----------------

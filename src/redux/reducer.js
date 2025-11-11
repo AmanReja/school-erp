@@ -4,7 +4,7 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
     DELETE_SETTLEMENT,GETTRANSACTIONS_BY_COMPANYID,
    
  
-  GET_ALL_SETTLEMENTS } from "../redux/action";
+  GET_ALL_SETTLEMENTS,UPDATE_TXN_STATUS } from "../redux/action";
 
 
 
@@ -169,7 +169,15 @@ export const transactionReducer = (state = initialTransactionState, action) => {
         
       };
 
-
+      case UPDATE_TXN_STATUS:
+        return {
+          ...state,
+          transactions: state.transactions.map((txn) =>
+            txn.id === action.payload.id
+              ? { ...txn, ...action.payload } // ✅ merge directly
+              : txn
+          ),
+        };
 
     default:
       return state;

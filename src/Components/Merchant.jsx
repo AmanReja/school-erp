@@ -21,6 +21,8 @@ const Merchant = () => {
  const [searchTerm, setSearchTerm] = useState("");
  const {loadD,setLoadD} =useContext(LoadDetails)
 
+ const [load,setLoad] =useState(false)
+
  
  
 
@@ -130,7 +132,7 @@ const Merchant = () => {
     setUserPass(generatePassword());
   }, []);
   useEffect(() => {
-    dispatch(getDetails(currentPage, itemsPerPage,searchTerm));
+    dispatch(getDetails(currentPage, itemsPerPage,searchTerm,setLoad));
   }, [dispatch, currentPage, itemsPerPage,searchTerm]);
   
 
@@ -238,7 +240,7 @@ const Merchant = () => {
             }`}
           >
             <div className="flex justify-between items-center p-4 h-[60px] w-full">
-              <h2 className="text-[16px] font-semibold">Merchant list</h2>  <div className="flex items-center gap-4">
+              <h2 className="text-[16px] font-semibold">Merchant List</h2>  <div className="flex items-center gap-4">
   {/* 🔍 Search Input */}
   <div className="relative w-[220px]">
     <input
@@ -276,7 +278,7 @@ const Merchant = () => {
     <tr>
       <th className="px-4 py-4">Name</th>
       
-      <th className="px-4 py-4">Corp Id ID</th>
+      <th className="px-4 py-4">Corp ID</th>
       <th className="px-4 py-4">Wallet ID</th>
       <th className="px-4 py-4">Email</th>
       <th className="px-4 py-4">Mobile</th>
@@ -285,40 +287,51 @@ const Merchant = () => {
     </tr>
   </thead>
 
-  <tbody className="text-[12px] font-semibold">
-  {merchantsData? (
-    merchantsData?.map((merchant, i) => (
-      <tr key={i} className={`border-b hover:bg-gray-50 ${theme === "dark" ? "border-gray-700 hover:bg-gray-700" : "border-gray-100 hover:bg-gray-50"}`}>
-        <td className="px-4 py-2">{merchant.name}</td>
-        <td className="px-4 py-2">{merchant.corp_id}</td>
-        
-        <td className="px-4 py-2">{merchant.wallet_id}</td>
-        <td className="px-4 py-2">{merchant.email}</td>
-        <td className="px-4 py-2">{merchant.mobile_number}</td>
-        <td className="px-4 py-2">{merchant.kyc_status}</td>
-        <td className="px-4 py-2 flex gap-2">
-        <button
-  onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
+
+{load?(
+   <tr>
+   <td colSpan="9" className="py-10">
+     <div className="flex justify-center items-center w-full">
+       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+     </div>
+   </td>
+ </tr>
+):(  <tbody className="text-[12px] font-semibold">
+{merchantsData? (
+  merchantsData?.map((merchant, i) => (
+    <tr key={i} className={`border-b hover:bg-gray-50 ${theme === "dark" ? "border-gray-700 hover:bg-gray-700" : "border-gray-100 hover:bg-gray-50"}`}>
+      <td className="px-4 py-2">{merchant.name}</td>
+      <td className="px-4 py-2">{merchant.corp_id}</td>
+      
+      <td className="px-4 py-2">{merchant.wallet_id}</td>
+      <td className="px-4 py-2">{merchant.email}</td>
+      <td className="px-4 py-2">{merchant.mobile_number}</td>
+      <td className="px-4 py-2 uppercase">{merchant.kyc_status}</td>
+      <td className="px-4 py-2 flex gap-2">
+      <button
+onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
 
 
 }}
-  className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs"
+className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs"
 >
-  Settlement
+Settlement
 </button>
-          <button onClick={() => handleEdit(merchant)} className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">Edit</button>
-          <button onClick={() => handleDelete(merchant)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan={8} className="text-center py-4 text-gray-400">
-        No merchants found.
+        <button onClick={() => handleEdit(merchant)} className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">Edit</button>
+        <button onClick={() => handleDelete(merchant)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
       </td>
     </tr>
-  )}
-</tbody>
+  ))
+) : (
+  <tr>
+    <td colSpan={8} className="text-center py-4 text-gray-400">
+      No merchants found.
+    </td>
+  </tr>
+)}
+</tbody>)}
+
+
 </table>
 
 <div className={`flex flex-col sm:flex-row justify-between items-center p-4 border-t ${
