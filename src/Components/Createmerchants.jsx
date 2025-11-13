@@ -243,26 +243,66 @@ const Createmerchants = () => {
 
           {/* STEP 1 - Basic Info */}
           {step === 1 && (
-            <div className="flex flex-col gap-3">
-              <label className="font-medium">Name</label>
-              <input type="text"  value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name" className="input" required />
+  <div className="flex flex-col gap-3">
+    <label className="font-medium">Name</label>
+    <input
+      type="text"
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+      placeholder="Enter name"
+      className="input"
+      required
+    />
 
-              <label className="font-medium">Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter email" className="input" required />
+    <label className="font-medium">Email</label>
+    <input
+      type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      placeholder="Enter email"
+      className="input"
+      required
+    />
 
-              <label className="font-medium">Mobile Number</label>
-              <input type="tel" value={mobile_number} onChange={(e) => setMobileNumber(e.target.value)} placeholder="Enter mobile number" className="input" required />
+    <label className="font-medium">Mobile Number</label>
+    <input
+      type="tel"
+      value={mobile_number}
+      onChange={(e) => setMobileNumber(e.target.value)}
+      placeholder="Enter mobile number"
+      className="input"
+      required
+    />
 
-              <button type="button" onClick={()=>{if (!name||!email||!mobile_number) {
-                alert ("Fields must be filed")
-                return
+    <button
+      type="button"
+      onClick={() => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // ✅ valid email pattern
 
-              }else if(mobile_number.length<10||mobile_number.length>10){
-                alert("mobile number should be 10 digites")
-                return
-              }else{nextStep()}}} className="btn-primary mt-3">Next</button>
-            </div>
-          )}
+        if (!name || !email || !mobile_number) {
+          alert("All fields must be filled");
+          return;
+        }
+
+        if (!emailRegex.test(email)) {
+          alert("Please enter a valid email address");
+          return;
+        }
+
+        if (mobile_number.length !== 10) {
+          alert("Mobile number should be exactly 10 digits");
+          return;
+        }
+
+        nextStep();
+      }}
+      className="btn-primary mt-3"
+    >
+      Next
+    </button>
+  </div>
+)}
+
 
           {/* STEP 2 - Organization */}
           {/* {step === 2 && (
@@ -332,8 +372,9 @@ const Createmerchants = () => {
             <div className="flex flex-col gap-3">
               <label className="font-medium">KYC Status</label>
               <select value={kyc_status} onChange={(e) => setKyc_status(e.target.value)} className="input" required >
-                <option value="Pending">Pending</option>
-                <option value="Completed">Completed</option>
+                <option  value="">Select Status</option>
+                <option  value="Pending">Pending</option>
+                <option selected value="Completed">Completed</option>
               </select>
 
               <div className="flex justify-between gap-3 mt-3">

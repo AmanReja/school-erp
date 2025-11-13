@@ -394,14 +394,7 @@ const statusCard = [
   
                 </div>
               ) : (
-                <div
-                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"
-                      ? "bg-gray-900 text-gray-300 border-gray-700"
-                      : "bg-white text-gray-600 border-gray-200"
-                    }`}
-                >
-                  <h1 className="text-2xl w-full text-center">No data found</h1>
-                </div>
+               ""
               )}
 </div>
 

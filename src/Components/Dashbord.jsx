@@ -64,6 +64,20 @@ const Dashbord = () => {
       show: showp,
       setShow: setShowp,
     },
+    {
+      to: "/dashboard/getalltxn",
+      icon: "fa-arrow-right -rotate-[50deg]",
+      label: "Get All Transactions",
+      show: showp,
+      setShow: setShowp,
+    },
+    {
+      to: "/dashboard/commercial",
+      icon: "fa-arrow-right -rotate-[50deg]",
+      label: "Commercial",
+      show: showp,
+      setShow: setShowp,
+    },
    
    
   ];
@@ -78,7 +92,7 @@ const Dashbord = () => {
   className={`w-full h-screen flex flex-col gap-[20px] items-center sm:overflow-y-hidden overflow-y-auto overflow-x-hidden 
   ${theme === "dark"
     ? "bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-gray-100"
-    : "bg-gradient-to-b from-indigo-500 to-violet-500 text-gray-900"
+    : "bg-gray-200 text-gray-900"
   }`}
 >
   <Navbar />
@@ -89,7 +103,7 @@ const Dashbord = () => {
     <div
       className={`flex sm:flex-col flex-row sm:h-full h-[70px] ${
         !expend ? "sm:w-[220px]" : "sm:w-[90px]"
-      } w-full bg-gradient-to-b from-indigo-500 to-violet-500 rounded-r-3xl sm:px-3 px-4 sm:py-6 py-2 items-center justify-between sm:justify-start sm:gap-6 gap-4  transition-all duration-500 ease-in-out`}
+      } w-full bg-gray-200 rounded-r-3xl sm:px-3  px-4 sm:py-6 py-2 items-center justify-between sm:justify-start sm:gap-6 gap-4  transition-all duration-500 ease-in-out`}
     >
       {items.map(({ to, icon, label, show, setShow }) => (
         <div
@@ -109,7 +123,7 @@ const Dashbord = () => {
               `flex justify-center items-center w-11 h-11 rounded-2xl transition-all duration-300 shadow-md ${
                 isActive
                   ? "bg-white text-blue-600 scale-110 shadow-blue-300"
-                  : "bg-white/20 hover:bg-white/40 text-white hover:scale-105"
+                  : "bg-white/20 hover:bg-white/40 text-black hover:scale-105"
               }`
             }
           >
@@ -119,7 +133,7 @@ const Dashbord = () => {
           {/* Expanded Label */}
           {!expend && (
             <span
-              className={`hidden sm:block ml-3 text-sm font-semibold text-white whitespace-nowrap transition-all duration-300 ${
+              className={`hidden sm:block ml-3 text-sm font-semibold text-gray-800 whitespace-nowrap transition-all duration-300 ${
                 !expend ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
               }`}
             >

@@ -56,10 +56,10 @@ const Settlement = () => {
 
 
   const opt =[
-    {label:"all",value:""},
-{label:"active",value:"active"},
-{label:"inactive",value:"inactive"},
- {label:"suspended",value:"suspended"},
+    {label:"All",value:""},
+{label:"Active",value:"Active"},
+{label:"Inactive",value:"Inactive"},
+ {label:"Suspended",value:"Suspended"},
 
 ]
 
@@ -333,11 +333,11 @@ const handeloptOpen =(item)=>{
    onClick={(e)=>{setOptopen(true)}}
     className="border min-w-[120px] border-gray-200 rounded-[5px] px-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 outline-none transition-all duration-300 ease-in-out shadow-sm cursor-pointer"
    
-  > {selectedopt?selectedopt:"select Status"} 
+  > {selectedopt?selectedopt:"Select Status"} 
     
   </div>
 
- {optopen&&<div className="w-auto cursor-pointer  h-auto absolute top-[33%] left-[61%] p-2 bg-white flex justify-center items-center flex-col shadow-xl z-40">
+ {optopen&&<div className=" cursor-pointer p-4 w-[150px]  h-auto absolute top-[33%] left-[61%] rounded-[9px] bg-white flex justify-center items-center flex-col shadow-xl z-40">
     {opt.map((item)=>(
       <div key={item} onClick={(e)=>{handeloptOpen(item)}}   className="w-full flex items-center justify-between h-[30px]">{item.label} {selectedopt === item.value && (
         <Check
@@ -418,7 +418,7 @@ const handeloptOpen =(item)=>{
                         </span>
                       </td>
                       <td className="px-4 py-2 flex gap-2">
-                        <button onClick={() => handleEdit(settlement)} className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">Edit</button>
+                        <button onClick={() => handleEdit(settlement)} className="bg-violet-600 hover:bg-violet-400 text-white px-3 py-1 rounded text-xs">Edit</button>
                         <button onClick={() => handleDelete(settlement)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
                       </td>
                     </tr>

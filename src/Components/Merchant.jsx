@@ -317,7 +317,7 @@ className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-x
 >
 Settlement
 </button>
-        <button onClick={() => handleEdit(merchant)} className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">Edit</button>
+        <button onClick={() => handleEdit(merchant)} className="bg-gray-900 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs">Edit</button>
         <button onClick={() => handleDelete(merchant)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
       </td>
     </tr>

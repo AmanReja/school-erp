@@ -1,8 +1,10 @@
+import { jwtDecode } from "jwt-decode";
 export const LOGIN = "LOGIN";
 export const CREATEMERCHANT = "CREATEMERCHANT";
 export const GETDETAILS = "GETDETAILS";
 export const DELETE_MERCHANT = "DELETE_MERCHANT";
 export const UPDATE_MERCHANT = "UPDATE_MERCHANT";
+
 
 // action types
 export const GET_SETTLEMENTS = "GET_SETTLEMENTS";
@@ -17,6 +19,17 @@ export const DELETE_SETTLEMENT = "DELETE_SETTLEMENT";
 
 export const GETTRANSACTIONS_BY_COMPANYID = "GETTRANSACTIONS_BY_COMPANYID";
 export const UPDATE_TXN_STATUS = "UPDATE_TXN_STATUS";
+export const UPDATE_TXN_DATA = "UPDATE_TXN_DATA";
+export const GETALL_TXN_DATA = "GETALL_TXN_DATA";
+
+
+
+
+
+export const PKG_MASTER_GET = "PKG_MASTER_GET";
+export const PKG_MASTER_CREATE = "PKG_MASTER_CREATE";
+export const PKG_MASTER_UPDATE = "PKG_MASTER_UPDATE";
+export const PKG_MASTER_DELETE = "PKG_MASTER_DELETE";
 
 
 
@@ -227,7 +240,7 @@ export const getSettlements = (company_id,searchTerm,searchStatus) => async (dis
 
 
   const params = new URLSearchParams();
-  if (searchTerm) params.append("search", searchTerm  );
+  if (searchTerm) params.append("search", searchTerm?.toLowerCase()  );
   if (searchStatus) params.append("search",  searchStatus );
 
  
@@ -267,7 +280,7 @@ export const getallSettlements = (searchTerm,searchStatus,page,parPage) => async
 const params =new URLSearchParams()
   if (searchTerm) params.append("search", searchTerm  );
   if (searchStatus) params.append("status",  searchStatus );
-  if (parPage) params.append("parPage",  parPage );
+  if (parPage) params.append("limit",  parPage );
   if (page) params.append("page",  page );
 
  
@@ -453,10 +466,76 @@ export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page
   dispatch({ type: GETTRANSACTIONS_BY_COMPANYID, payload: data });
 };
 
+
+
+export const getall_txn_data = (searchTerm,searchStatus,page,limit,downloadexcl=false,setLoad,startDate,
+  endDate) => async (dispatch) => {
+
+
+
+  setLoad(true)
+
+  const token = localStorage.getItem("token");
+  console.log(195,downloadexcl);
+
+
+
+  const params = new URLSearchParams();
+  if (searchTerm) params.append("search", searchTerm  );
+  if (searchStatus) params.append("status",  searchStatus );
+  if (page) params.append("page",  page );
+  if (limit) params.append("limit",  limit );
+  if (startDate) params.append("start_date",  startDate );
+  if (endDate) params.append("end_date",  endDate );
+  if(downloadexcl) params.append("download", "excel");
+ 
+
+ 
+ 
+
+  const res = await fetch(`${baseUrl}/v1/admin/marchent/all-Transaction?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json", 
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  setLoad(false)
+  
+  if(res.status===401){
+    window.location.href="/"
+    return
+    
+  }
+ 
+  if (!res.ok) {
+    // handle error
+    setLoad(true)
+    console.error("Error fetching settlements:");
+    return;
+  }
+  if (downloadexcl==true) {
+    const blob = await res.blob();
+    const fileURL = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = fileURL;
+    link.setAttribute("download", "payout_logs.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    return; 
+  }
+  const data = await res.json();
+  dispatch({ type: GETALL_TXN_DATA, payload: data });
+};
+
+
 export const update_Txn_status = (company_id,txn_id,updateddata,setUpdateload) => async (dispatch) => {
 
 
   console.log(459,company_id,txn_id,updateddata,setUpdateload);
+
 
 
 
@@ -486,15 +565,207 @@ export const update_Txn_status = (company_id,txn_id,updateddata,setUpdateload) =
   }
  
   if (res.status===200) {
-    window.location.reload()
+    
 
-    dispatch(getTransactions_by_companyid())
+   
    alert("updated")
   }
  
   const data = await res.json();
-  dispatch({ type: UPDATE_TXN_STATUS, payload: data });
+  dispatch({ type: UPDATE_TXN_STATUS, payload: data.updated
+  });
+};
+export const update_Txn_data = (txn_id,updateddata,setUpdateload) => async (dispatch) => {
+
+
+  console.log(459,txn_id,updateddata,setUpdateload);
+
+
+
+
+
+
+
+  setUpdateload(true)
+
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`${baseUrl}/v1/admin/payout/logs/${txn_id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json", 
+      Authorization: `Bearer ${token}`,
+      
+    },
+    body:JSON.stringify(updateddata)
+  });
+
+  setUpdateload(false)
+  
+  if(res.status===401){
+    window.location.href="/"
+    return
+    
+  }
+ 
+  if (res.status===200) {
+   
+
+   
+   alert("updated")
+  }
+ 
+  const data = await res.json();
+  // console.log(609,data);
+  dispatch({ type: UPDATE_TXN_DATA, payload: data.updated
+  });
 };
 
-// ---------------- UPDATE TRANSACTION ----------------
+// ---------------- HANDEL PKG MASTER ----------------///
+
+
+
+// ---------------- GET ALL PACKAGES ----------------
+export const getPkgMasters = (searchTerm, page, limit) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  const params = new URLSearchParams();
+  if (searchTerm) params.append("search", searchTerm);
+  if (page) params.append("page", page);
+  if (limit) params.append("limit", limit);
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Error fetching packages:", data);
+      alert(data.message || "Failed to fetch package masters");
+      return;
+    }
+
+    dispatch({ type: PKG_MASTER_GET, payload: data });
+  } catch (error) {
+    alert("Error fetching package masters: " + error.message);
+  }
+};
+
+// ---------------- CREATE PACKAGE ----------------
+export const createPkgMaster = (formData) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 201) {
+      alert("Package created successfully");
+      dispatch({ type: PKG_MASTER_CREATE, payload: data });
+    } else {
+      alert(data.message || "Failed to create package");
+    }
+  } catch (error) {
+    alert("Error creating package: " + error.message);
+  }
+};
+
+// ---------------- UPDATE PACKAGE ----------------
+export const updatePkgMaster = (pkg_id, updatedData) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/${pkg_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedData),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (!res.ok) {
+      alert(data.message || "Failed to update package");
+      return;
+    }
+
+    alert("Package updated successfully");
+    dispatch({ type: PKG_MASTER_UPDATE, payload: { pkg_id, data } });
+  } catch (error) {
+    alert("Error updating package: " + error.message);
+  }
+};
+
+// ---------------- DELETE PACKAGE ----------------
+export const deletePkgMaster = (pkg_id) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/${pkg_id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.message || "Failed to delete package");
+      return;
+    }
+
+    alert("Package deleted successfully");
+    dispatch({ type: PKG_MASTER_DELETE, payload: pkg_id });
+  } catch (error) {
+    alert("Error deleting package: " + error.message);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 

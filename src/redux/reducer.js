@@ -4,7 +4,16 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
     DELETE_SETTLEMENT,GETTRANSACTIONS_BY_COMPANYID,
    
  
-  GET_ALL_SETTLEMENTS,UPDATE_TXN_STATUS } from "../redux/action";
+  GET_ALL_SETTLEMENTS,UPDATE_TXN_STATUS,GETALL_TXN_DATA,UPDATE_TXN_DATA,
+
+
+  PKG_MASTER_GET,
+  PKG_MASTER_CREATE,
+  PKG_MASTER_UPDATE,
+  PKG_MASTER_DELETE,
+
+
+} from "../redux/action";
 
 
 
@@ -154,32 +163,124 @@ const initialSettlementState = {
 
 
   
-const initialTransactionState = {
-  transactions: [], // list of transaction objects
-    // optional: for API pagination info
-};
-
-export const transactionReducer = (state = initialTransactionState, action) => {
-  switch (action.type) {
-    case GETTRANSACTIONS_BY_COMPANYID:
-      
-      return {
-        ...state,
-        transactions: [action.payload]
-        
-      };
-
+  const initialTransactionState = {
+    transactions: {
+      page: 1,
+      limit: 10,
+      total: 0,
+      totalPages: 0,
+      count: 0,
+      data: [], // actual transaction list
+    },
+  };
+  
+  export const transactionReducer = (state = initialTransactionState, action) => {
+    switch (action.type) {
+      // ✅ Get all transactions (paginated or complete list)
+      case GETALL_TXN_DATA:
+      case GETTRANSACTIONS_BY_COMPANYID:
+        return {
+          ...state,
+          transactions: {
+            ...state.transactions,
+            ...action.payload, // Expect payload like: { page, limit, total, totalPages, count, data: [...] }
+          },
+        };
+  
+      // ✅ Update transaction status
+      case UPDATE_TXN_DATA:
       case UPDATE_TXN_STATUS:
         return {
           ...state,
-          transactions: state.transactions.map((txn) =>
-            txn.id === action.payload.id
-              ? { ...txn, ...action.payload } // ✅ merge directly
-              : txn
-          ),
+          transactions: {
+            ...state.transactions,
+            data: state.transactions.data.map((txn) =>
+              txn.txn_id === action.payload.txn_id
+                ? { ...txn, status: action.payload.status }
+                : txn
+            ),
+          },
         };
+  
+      default:
+        return state;
+    }
+  };
 
-    default:
-      return state;
-  }
-};
+
+
+  //////PKG MASTER HANDEL-------???????/////
+
+
+
+  // ✅ Initial State (Paginated Data Format)
+  const initialPkgMasterState = {
+    pkgMasters: {
+      page: 1,
+      limit: 10,
+      total: 0,
+      totalPages: 0,
+      count: 0,
+      data: [], // actual package list
+    },
+  };
+  
+  // ✅ Reducer
+  export const pkgMasterReducer = (state = initialPkgMasterState, action) => {
+    switch (action.type) {
+      // ✅ Get all packages (paginated or complete)
+      case PKG_MASTER_GET:
+        return {
+          ...state,
+          pkgMasters: {
+            ...state.pkgMasters,
+            ...action.payload, // Expect payload like: { page, limit, total, totalPages, count, data: [...] }
+          },
+        };
+  
+      // ✅ Create new package
+      case PKG_MASTER_CREATE:
+        return {
+          ...state,
+          pkgMasters: {
+            ...state.pkgMasters,
+            data: [action.payload, ...state.pkgMasters.data],
+            count: state.pkgMasters.count + 1,
+            total: state.pkgMasters.total + 1,
+          },
+        };
+  
+      // ✅ Update existing package
+      case PKG_MASTER_UPDATE:
+        return {
+          ...state,
+          pkgMasters: {
+            ...state.pkgMasters,
+            data: state.pkgMasters.data.map((pkg) =>
+              pkg.id === action.payload.pkg_id
+                ? { ...pkg, ...action.payload.data }
+                : pkg
+            ),
+          },
+        };
+  
+      // ✅ Delete a package
+      case PKG_MASTER_DELETE:
+        return {
+          ...state,
+          pkgMasters: {
+            ...state.pkgMasters,
+            data: state.pkgMasters.data.filter(
+              (pkg) => pkg.id !== action.payload
+            ),
+            count: state.pkgMasters.count - 1,
+            total: state.pkgMasters.total - 1,
+          },
+        };
+  
+      // ✅ Default
+      default:
+        return state;
+    }
+  };
+  

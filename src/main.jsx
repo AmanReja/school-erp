@@ -23,6 +23,8 @@ import Getallsettlements from "./Components/Getallsettlements";
 import TransactionMaster from "./Components/TransactionMaster";
 
 import { LoadDetailsProvider } from "./Contexts/LoadDetails";
+import GetallTxn from "./Components/GetallTxn";
+import Commercial from "./Components/Commercial";
 
 
 
@@ -38,23 +40,16 @@ const router = createBrowserRouter(
         <Route path="createmerchants" element={<Createmerchants/>}/>
         <Route path="profile" element={<Profile />} />
         <Route path="getallsettlements" element={<Getallsettlements />} />
+        <Route path="getalltxn" element={<GetallTxn />} />
         <Route path="transactionmaster/:merchantId" element={<TransactionMaster />} />
-
-              
-          {/* <Route path="addmoney" element={<Addmoney />} />
-     
-         
- 
-          <Route path="bulkpayout" element={<Bulkpayout />} /> */}
-      
+        <Route path="merchant" element={<Merchant />} />
+        <Route path="settlement/:merchantId" element={<Settlement />} />
+        <Route path="commercial" element={<Commercial />} />
         
-   <Route path="merchant" element={<Merchant />} />
-   <Route path="settlement/:merchantId" element={<Settlement />} />
-          {/* <Route path="collection" element={<Collection />} /> */}
       
 
 
-        {/* </Route> */}
+  
       </Route>
     </Route>
 

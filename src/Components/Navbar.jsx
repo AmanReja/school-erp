@@ -54,7 +54,7 @@ const Navbar = () => {
  
   <div
     style={{ fontFamily: "Righteous" }}
-    className={`flex tracking-wide transition-all duration-300 animate-gradient-x h-[53px] relative sm:text-5xl text-2xl font-normal ${theme==="dark"?"text-white":"text-white"}`}
+    className={`flex tracking-wide transition-all duration-300 animate-gradient-x h-[53px] relative sm:text-5xl text-2xl font-normal ${theme==="dark"?"text-white":"text-black"}`}
   >
     busybox
   </div>
