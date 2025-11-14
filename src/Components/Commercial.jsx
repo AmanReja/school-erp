@@ -17,8 +17,9 @@ import { DateRange } from "react-date-range";
 
 
 
+
 import {
-    update_Txn_data,getall_txn_data,getPkgMasters
+    update_Txn_data,getall_txn_data,getPkgMasters,createPkgMaster,deletePkgMaster
 
 } from "../redux/action";
 
@@ -40,8 +41,9 @@ const Commercial = () => {
 
 
 
+
   const { merchantId } = useParams();
-  console.log(29, merchantId);
+ 
 
 
   const { theme } = useContext(Theme);
@@ -67,8 +69,6 @@ const Commercial = () => {
 
   const [isDownloading, setIsDownloading] = useState(false);
   const [open, setOpen] = useState(false);
-
- 
   const [upadtedstatus, setUpadtedstatus] = useState("");
   const [updatedrrn, setUpdatedrrn] = useState("");
   const [upadtedpaytmid, seUpadtedpaytmid] = useState("");
@@ -76,10 +76,15 @@ const Commercial = () => {
   const [currenttxnid, setCurrenttxnid] = useState("");
   const [updateload, setUpdateload] = useState(false);
   const [modelopen, setModelopen] = useState(false);
-  console.log(79,modelopen);
+  const [createmodelopen, setCreatemodelopen] = useState(false);
 
 
-  console.log(72,upadtedstatus,updatedremarkes);
+
+
+ const [pkgstatus,setPkgstatus] = useState("")
+ const [pkgname,setPkgname] = useState("")
+
+
 
 
 
@@ -125,30 +130,63 @@ message:updatedremarkes,
 
 
 
+const handelpkgcreate= (e)=>{
+
+  e.preventDefault()
+
+  try {
+    const formdata = {
+      pkg_name:pkgname,
+      status:pkgstatus
+     }
+  
+  dispatch(createPkgMaster(formdata,setCreatemodelopen))
+  
+
+  } catch (error) {
+    console.log(error);
+  } finally{
+  setPkgname("")
+  setPkgstatus("")
+  }
+  
+
+
+
+
+
+
+}
+
+
 
 
 
   const transactionData = useSelector((state) => state.transactions?.transactions || []);
-  console.log(127, transactionData);
+
   const transactionDataArray = useSelector((state) => state.transactions?.transactions.data || []);
 
-  console.log(57, transactionDataArray);
+ 
 
 
-  const totalRecords = transactionData?.pagination?.totalRecords
-  ;
-  console.log(134,totalRecords);
+  // const totalRecords = transactionData?.pagination?.totalRecords
+  // ;
+  
 
 
 
 
-  const totalPages = transactionData?.pagination?.totalPages;
+  // const totalPages = transactionData?.pagination?.totalPages;
 
   
-  const Masters = useSelector((state)=>state.pkgMasters.pkgMasters?.data
-  )
-  console.log(193,Masters);
+  const Masters = useSelector((state)=>state.pkgMasters.pkgMasters
 
+  )
+//   const Masters1 = useSelector((state)=>state.pkgMasters.pkgMasters
+
+//   )
+
+// console.log(Masters1);
 
   useEffect(() => {
    
@@ -192,50 +230,17 @@ message:updatedremarkes,
 
  
 
+const handleDelete =(pkgid)=>{
 
+dispatch(deletePkgMaster(pkgid))
+
+
+
+
+}
 
 
    
-
-
-
-
-  // const statusCard = [
-  //   {
-  //     title: "Active Accounts",
-  //     credit: activeStatus.length,
-  //     description: "Accounts currently active and in use",
-  //     gradient: "from-[#374151] to-[#6B7280]", 
-  //     textColor: "text-white",
-  //     icon: (
-  //       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-  //         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-  //       </svg>
-  //     ),
-  //   },
-  //   {
-  //     title: "Inactive Accounts",
-  //     credit: inactiveStatus.length,
-  //     description: "Accounts currently inactive or dormant",
-  //     gradient: "from-[#544151] to-[#6B7280]",
-  //     textColor: "text-white",
-  //     icon: (
-  //       <svg height={50} width={50} fill="#ffffff" viewBox="0 0 24 24" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12,2A10,10,0,1,0,22,12,10.01146,10.01146,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8.00917,8.00917,0,0,1,12,20Zm1-8.251V7a1,1,0,0,0-2,0v5a1.00586,1.00586,0,0,0,.11816.47217l1.5,2.79883a1.00029,1.00029,0,0,0,1.76368-.94434Z"></path></g></svg>
-  //     ),
-  //   },
-  //   {
-  //     title: "Suspended Accounts",
-  //     credit: suspended.length,
-  //     description: "Accounts suspended due to policy violations",
-  //     gradient: "from-[#214151] to-[#6B7280]", 
-  //     textColor: "text-white",
-  //     icon: (
-  //       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-  //         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728" />
-  //       </svg>
-  //     ),
-  //   },
-  // ];
 
 
 
@@ -289,9 +294,9 @@ message:updatedremarkes,
           >
             <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md  border border-gray-100">
               {/* Title */}
-              <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
+              {/* <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
                 Transaction list
-              </h2>
+              </h2> */}
 
               {/* Search Input */}
               <div className="flex items-center gap-4">
@@ -364,7 +369,7 @@ message:updatedremarkes,
                     />
                   </div>
                 )}
-
+<button onClick={()=>{setCreatemodelopen(true)}} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Cretate Commercial</button>
                 {/* 📋 Status Dropdown */}
                 <select onChange={(e) => { setSearchStatus(e.target.value) }}
                   value={searchStatus}
@@ -378,6 +383,7 @@ message:updatedremarkes,
                   <option value="FAILED">FAILED</option>
                 </select>
               </div>
+              
 
   <button
 onClick={handleDownload}
@@ -393,120 +399,12 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
 </div><div/>
 </div>:"Download Exel"}
 </button>
+
            
 
             </div>
 
-            {open && (
-  <div
-    className="flex text-black items-center justify-center inset-0 fixed bg-black/40 z-50"
-    onClick={() => setOpen(false)} // ✅ click outside to close
-  >
-    <div
-      className="bg-white p-6 rounded-2xl shadow-2xl w-[400px]"
-      onClick={(e) => e.stopPropagation()} // ✅ prevent close when clicking inside
-    >
-      <h2 className="text-lg font-semibold mb-4 text-center">Update Details</h2>
 
-      {/* Status Dropdown */}
-      <div className="mb-3">
-        <label className="block text-sm font-medium text-black mb-1">
-          Status Update
-        </label>
-        <select
-          onChange={(e) => setUpadtedstatus(e.target.value)}
-          value={upadtedstatus}
-          className="w-full p-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Select status</option>
-          <option value="success">Success</option>
-          <option value="failed">Failed</option>
-        </select>
-
-      </div>
-      <div className="mb-3">
-        <label className="block text-sm font-medium text-black mb-1">
-          RRN Update
-        </label>
-        <input
-          onChange={(e) => setUpdatedrrn(e.target.value)}
-          value={updatedrrn}
-          className="w-full p-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-        
-        </input>
-
-      </div>
-      <div className="mb-3">
-        <label className="block text-sm font-medium text-black mb-1">
-          Paytm Order ID Update
-        </label>
-        <input
-          onChange={(e) => seUpadtedpaytmid(e.target.value)}
-          value={upadtedpaytmid}
-          className="w-full p-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-       
-        </input>
-
-      </div>
-
-
-
-
-
-  
-
-
-
-
-
-
-
-      {/* Remarks Field */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Remarks
-        </label>
-        <textarea
-          value={updatedremarkes}
-          onChange={(e) => setUpdatedremarkes(e.target.value)} // ✅ missing handler
-          placeholder="Enter remarks"
-          rows="3"
-          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      {/* Buttons */}
-      <div className="flex justify-center gap-3">
-        <button
-          onClick={() => setOpen(false)}
-          className="bg-gray-400 text-white px-4 text-[13px] py-2 rounded-md hover:bg-gray-500 transition"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={() => {
-            // handle your save action here
-            setOpen(false),update()
-          }}
-          className="bg-blue-600 text-white text-[13px] px-4 py-2 rounded-md hover:bg-blue-700 transition"
-        >
-          Manual Update
-        </button>
-        <button
-          onClick={() => {
-            // handle your save action here
-            setOpen(false)
-          }}
-          className="bg-blue-600 text-white px-4 py-2 text-[13px] rounded-md hover:bg-blue-700 transition"
-        >
-        Fetch From Bank
-        </button>
-      </div>
-    </div>
-  </div>
-)}
 
             <div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
               
@@ -599,6 +497,83 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
     </div>
   </div>
 )}
+            {createmodelopen && (
+  <div
+    className="fixed inset-0 flex justify-center items-center z-50"
+  >
+    <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
+      {/* Header */}
+      <div className="px-5 py-3 border-b flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Create Package
+        </h2>
+        <button
+          onClick={() => setCreatemodelopen(false)}
+          className="text-gray-500 hover:text-red-500 text-lg font-bold"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Body */}
+      <form
+        onSubmit={(e)=>{handelpkgcreate(e)}}
+        className="px-5 py-4 space-y-4"
+      >
+        {/* Package Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Package Name
+          </label>
+          <input
+            type="text"
+            name="pkg_name"
+            value={pkgname}
+            onChange={(e)=>{setPkgname(e.target.value)}}
+            placeholder="Enter package name"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          />
+        </div>
+
+      
+
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Status
+          </label>
+          <select
+            name="status"
+            value={pkgstatus}
+            onChange={(e)=>{setPkgstatus(e.target.value)}}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          >
+            
+            <option selected value="">Select Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+     
+        <div className="flex justify-end gap-3 pt-3">
+          <button
+            type="button"
+            onClick={() => setModelopen(false)}
+            className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-md transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition"
+          >
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
 
 
             <table className="w-full text-sm text-left text-gray-600 border border-gray-200 overflow-hidden">
@@ -624,7 +599,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
           </tbody>
         ) : (
           <tbody className="text-[13px] font-medium">
-            {Masters.length > 0 ? (
+            {Array.isArray(Masters)&&Masters.length > 0 ? (
               Masters.map((pkg, i) => (
                 <tr
                   key={i}
@@ -646,7 +621,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
                   <td className="px-4 py-3 text-gray-600">{pkg.create_on}</td>
                   <td className="px-4 py-3 flex gap-2 items-center">
                     <button
-                      onClick={() => setModelopen((prev)=>!prev)}
+                      onClick={() => navigate(`/dashboard/packagemaster/${pkg.id}`)}
                       className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
                     >
                       <FaEdit size={12} />
@@ -682,139 +657,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
         )}
       </table>
 
-              {totalPages > 0 ? (
-                <div
-                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${
-                    theme === "dark"
-                      ? "bg-gray-900 text-gray-300 border-gray-700"
-                      : "bg-white text-gray-600 border-gray-200"
-                  }`}
-                >
-                  <div>
-                    Show{" "}
-                    <select
-                      className={`rounded border outline-none px-[5px] py-[5px] ${
-                        theme === "dark"
-                          ? "bg-gray-800 text-gray-200 border-gray-600"
-                          : "bg-white text-gray-700 border-gray-300"
-                      }`}
-                      value={perPage}
-                      onChange={(e) => {
-                        setPerPage(Number(e.target.value));
-                        setPage(1);
-                      }}
-                    >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={30}>30</option>
-                    </select>{" "}
-                    per page
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-  {/* Showing range */}
-  <p>
-    {(page - 1) * perPage + 1}-{Math.min(page * perPage, totalRecords)} of {totalRecords}
-  </p>
-
-  {/* Prev Button */}
-  <button
-  
-    onClick={() => setPage(page - 1)}
-    disabled={page === 1}
-    className={`px-3 py-1 rounded-md ${
-      page === 1
-        ? "opacity-50 cursor-not-allowed"
-        : theme === "dark"
-        ? "hover:bg-gray-700"
-        : "hover:bg-gray-200"
-    }`}
-  >
-  <ChevronLeft/>
-  </button>
-
-  {/* First Page */}
-  <button
-    onClick={() => setPage(1)}
-    className={`px-3 py-1 rounded-md ${
-      page === 1
-        ? theme === "dark"
-          ? "bg-gray-700 font-semibold"
-          : "bg-gray-200 font-semibold"
-        : theme === "dark"
-        ? "hover:bg-gray-800"
-        : "hover:bg-gray-100"
-    }`}
-  >
-    1
-  </button>
-
-  {/* Dots before current group */}
-  {page > 3 && <span className="px-2">...</span>}
-
-  {/* Nearby page numbers */}
-  {Array.from({ length: 3 }, (_, i) => page - 1 + i)
-    .filter((num) => num > 1 && num < totalPages)
-    .map((num) => (
-      <button
-        key={num}
-        onClick={() => setPage(num)}
-        className={`px-3 py-1 rounded-md ${
-          num === page
-            ? theme === "dark"
-              ? "bg-gray-700 font-semibold"
-              : "bg-gray-200 font-semibold"
-            : theme === "dark"
-            ? "hover:bg-gray-800"
-            : "hover:bg-gray-100"
-        }`}
-      >
-        {num}
-      </button>
-    ))}
-
-  {/* Dots after current group */}
-  {page < totalPages - 2 && <span className="px-2">...</span>}
-
-  {/* Last Page */}
-  {totalPages > 1 && (
-    <button
-      onClick={() => setPage(totalPages)}
-      className={`px-3 py-1 rounded-md ${
-        page === totalPages
-          ? theme === "dark"
-            ? "bg-gray-700 font-semibold"
-            : "bg-gray-200 font-semibold"
-          : theme === "dark"
-          ? "hover:bg-gray-800"
-          : "hover:bg-gray-100"
-      }`}
-    >
-      {totalPages}
-    </button>
-  )}
-
-  {/* Next Button */}
-  <button
-    onClick={() => setPage(page + 1)}
-    disabled={page === totalPages}
-    className={`px-3 py-1 rounded-md ${
-      page === totalPages
-        ? "opacity-50 cursor-not-allowed"
-        : theme === "dark"
-        ? "hover:bg-gray-700"
-        : "hover:bg-gray-200"
-    }`}
-  >
-   <ChevronRight/>
-  </button>
-</div>
-
-                </div>
-              ) : (
-                ""
-              )}
-
+          
             </div>
 
 

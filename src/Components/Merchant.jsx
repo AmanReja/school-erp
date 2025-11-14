@@ -313,7 +313,7 @@ onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`),localStora
 
 
 }}
-className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs"
+className="bg-sky-400 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
 >
 Settlement
 </button>

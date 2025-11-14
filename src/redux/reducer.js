@@ -10,8 +10,8 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   PKG_MASTER_GET,
   PKG_MASTER_CREATE,
   PKG_MASTER_UPDATE,
-  PKG_MASTER_DELETE,
-
+  PKG_MASTER_DELETE,PKG_CMS_MASTER_GET,PKG_CMS_MASTER_CREATE,SERVICELIST_GET,SERVICELIST_CREATE,SERVICELIST_UPDATE,SERVICELIST_DELETE
+,
 
 } from "../redux/action";
 
@@ -215,72 +215,114 @@ const initialSettlementState = {
 
   // ✅ Initial State (Paginated Data Format)
   const initialPkgMasterState = {
-    pkgMasters: {
-      page: 1,
-      limit: 10,
-      total: 0,
-      totalPages: 0,
-      count: 0,
-      data: [], // actual package list
-    },
-  };
+    pkgMasters: [],
   
-  // ✅ Reducer
+  };
   export const pkgMasterReducer = (state = initialPkgMasterState, action) => {
     switch (action.type) {
-      // ✅ Get all packages (paginated or complete)
+  
+      // ---------------- GET LIST ----------------
       case PKG_MASTER_GET:
         return {
           ...state,
-          pkgMasters: {
-            ...state.pkgMasters,
-            ...action.payload, // Expect payload like: { page, limit, total, totalPages, count, data: [...] }
-          },
+          pkgMasters: action.payload,   // FLAT ARRAY ONLY
         };
   
-      // ✅ Create new package
+      // ---------------- CREATE NEW PACKAGE ----------------
       case PKG_MASTER_CREATE:
         return {
           ...state,
-          pkgMasters: {
-            ...state.pkgMasters,
-            data: [action.payload, ...state.pkgMasters.data],
-            count: state.pkgMasters.count + 1,
-            total: state.pkgMasters.total + 1,
-          },
+          pkgMasters: [action.payload, ...state.pkgMasters], // prepend
         };
-  
-      // ✅ Update existing package
-      case PKG_MASTER_UPDATE:
-        return {
-          ...state,
-          pkgMasters: {
-            ...state.pkgMasters,
-            data: state.pkgMasters.data.map((pkg) =>
-              pkg.id === action.payload.pkg_id
-                ? { ...pkg, ...action.payload.data }
-                : pkg
-            ),
-          },
-        };
-  
-      // ✅ Delete a package
       case PKG_MASTER_DELETE:
         return {
-          ...state,
-          pkgMasters: {
-            ...state.pkgMasters,
-            data: state.pkgMasters.data.filter(
-              (pkg) => pkg.id !== action.payload
-            ),
-            count: state.pkgMasters.count - 1,
-            total: state.pkgMasters.total - 1,
-          },
+        ...state,
+            pkgMasters: state.pkgMasters.filter(
+            (pkgMasters) => pkgMasters.id !== action.payload
+          )
         };
   
-      // ✅ Default
+      // ---------------- DEFAULT ----------------
+      default:
+        return state;
+    }
+  };
+
+
+
+
+
+  /////servicelis ////
+  const initialServiceListState = {
+    services: [],
+  };
+  
+  export const serviceListReducer = (state = initialServiceListState, action) => {
+    switch (action.type) {
+  
+      // ---------------- GET LIST ----------------
+      case SERVICELIST_GET:
+        return {
+          ...state,
+          services: action.payload,   // flat array
+        };
+  
+      // ---------------- CREATE SERVICE ----------------
+      case SERVICELIST_CREATE:
+        return {
+          ...state,
+          services: [action.payload, ...state.services],  // prepend new item
+        };
+  
+      // ---------------- UPDATE SERVICE ----------------
+      case SERVICELIST_UPDATE:
+        return {
+          ...state,
+          services: state.services.map((service) =>
+            service.id === action.payload.id ? action.payload : service
+          ),
+        };
+  
+      // ---------------- DELETE SERVICE ----------------
+      case SERVICELIST_DELETE:
+        return {
+          ...state,
+          services: state.services.filter(
+            (service) => service.id !== action.payload
+          ),
+        };
+  
+      // ---------------- DEFAULT ----------------
       default:
         return state;
     }
   };
   
+
+
+  const initialPkgcmsMasterState = {
+    pkgcmsMasters: [],
+  
+  };
+  export const pkgcmsMasterReducer = (state = initialPkgcmsMasterState, action) => {
+    switch (action.type) {
+  
+      // ---------------- GET LIST ----------------
+      case PKG_CMS_MASTER_GET:
+        return {
+          ...state,
+          pkgcmsMasters: action.payload,   // FLAT ARRAY ONLY
+        };
+  
+      // ---------------- CREATE NEW PACKAGE ----------------
+      case PKG_CMS_MASTER_CREATE:
+        return {
+          ...state,
+          pkgcmsMasters: [action.payload, ...state.pkgcmsMasters], // prepend
+        };
+  
+      // ---------------- DEFAULT ----------------
+      default:
+        return state;
+    }
+  };

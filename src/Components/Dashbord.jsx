@@ -72,6 +72,13 @@ const Dashbord = () => {
       setShow: setShowp,
     },
     {
+      to: "/dashboard/servicelist",
+      icon: "fa-arrow-right -rotate-[50deg]",
+      label: "Servicelist",
+      show: showp,
+      setShow: setShowp,
+    },
+    {
       to: "/dashboard/commercial",
       icon: "fa-arrow-right -rotate-[50deg]",
       label: "Commercial",

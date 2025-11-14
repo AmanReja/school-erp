@@ -25,6 +25,8 @@ import TransactionMaster from "./Components/TransactionMaster";
 import { LoadDetailsProvider } from "./Contexts/LoadDetails";
 import GetallTxn from "./Components/GetallTxn";
 import Commercial from "./Components/Commercial";
+import Packagemaster from "./Components/Packagemaster";
+import Servicelist from "./Components/Servicelist";
 
 
 
@@ -45,11 +47,8 @@ const router = createBrowserRouter(
         <Route path="merchant" element={<Merchant />} />
         <Route path="settlement/:merchantId" element={<Settlement />} />
         <Route path="commercial" element={<Commercial />} />
-        
-      
-
-
-  
+        <Route path="servicelist" element={<Servicelist />} />
+        <Route path="packagemaster/:pkgId" element={<Packagemaster />} />
       </Route>
     </Route>
 

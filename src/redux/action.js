@@ -33,6 +33,18 @@ export const PKG_MASTER_DELETE = "PKG_MASTER_DELETE";
 
 
 
+export const SERVICELIST_GET = "SERVICELIST_GET";
+export const SERVICELIST_CREATE = "SERVICELIST_CREATE";
+export const SERVICELIST_UPDATE = "SERVICELIST_UPDATE";
+export const SERVICELIST_DELETE = "SERVICELIST_DELETE";
+
+
+export const PKG_CMS_MASTER_GET = "PKG_CMS_MASTER_GET";
+export const PKG_CMS_MASTER_CREATE = "PKG_CMS_MASTER_CREATE";
+
+
+
+
 const baseUrl = "http://192.168.1.45:3000";
 
 export const login = (admin,setLoading,navigate) => async (dispatch) => {
@@ -656,7 +668,7 @@ export const getPkgMasters = (searchTerm, page, limit) => async (dispatch) => {
       return;
     }
 
-    dispatch({ type: PKG_MASTER_GET, payload: data });
+    dispatch({ type: PKG_MASTER_GET, payload: data.data });
   } catch (error) {
     alert("Error fetching package masters: " + error.message);
   }
@@ -664,6 +676,7 @@ export const getPkgMasters = (searchTerm, page, limit) => async (dispatch) => {
 
 // ---------------- CREATE PACKAGE ----------------
 export const createPkgMaster = (formData) => async (dispatch) => {
+  console.log(formData);
   const token = localStorage.getItem("token");
 
   try {
@@ -677,6 +690,7 @@ export const createPkgMaster = (formData) => async (dispatch) => {
     });
 
     const data = await res.json();
+    console.log("pkg",data);
 
     if (res.status === 401) {
       window.location.href = "/";
@@ -684,77 +698,163 @@ export const createPkgMaster = (formData) => async (dispatch) => {
     }
 
     if (res.status === 201) {
-      alert("Package created successfully");
-      dispatch({ type: PKG_MASTER_CREATE, payload: data });
+
+    
+      
+      
+      dispatch({ type: PKG_MASTER_CREATE, payload: data.data });
+
+      dispatch(getPkgMasters())
+      
+      
+    
+
+
     } else {
       alert(data.message || "Failed to create package");
+      
+    }
+  } catch (error) {
+    alert("Error creating package: " + error.message);
+  }
+};
+export const deletePkgMaster = (pkgid) => async (dispatch) => {
+console.log(722,pkgid);
+ 
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/${pkgid}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+     
+    });
+
+    const data = await res.json();
+    console.log("pkgdelete",data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+
+    
+      
+      
+      dispatch({ type: PKG_MASTER_DELETE, payload: data.data });
+
+      dispatch(getPkgMasters())
+      setCreatemodelopen(false)
+      
+    
+
+
+    } else {
+      // alert(data.message || "Failed to create package");
+      
     }
   } catch (error) {
     alert("Error creating package: " + error.message);
   }
 };
 
-// ---------------- UPDATE PACKAGE ----------------
-export const updatePkgMaster = (pkg_id, updatedData) => async (dispatch) => {
+
+
+
+
+
+
+
+
+////////PACKAGE_CMS_MASTER//////////
+
+
+
+
+
+export const getPkg_cms_Masters = (searchTerm, page, limit) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
+  const params = new URLSearchParams();
+  if (searchTerm) params.append("search", searchTerm);
+  if (page) params.append("page", page);
+  if (limit) params.append("limit", limit);
+
   try {
-    const res = await fetch(`${baseUrl}/v1/admin/pkg/${pkg_id}`, {
-      method: "PUT",
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms?${params.toString()}`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(updatedData),
     });
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
 
     const data = await res.json();
 
-    if (res.status === 401) {
-      window.location.href = "/";
-      return;
-    }
-
     if (!res.ok) {
-      alert(data.message || "Failed to update package");
+      console.error("Error fetching packages:", data);
+      alert(data.message || "Failed to fetch package masters");
       return;
     }
 
-    alert("Package updated successfully");
-    dispatch({ type: PKG_MASTER_UPDATE, payload: { pkg_id, data } });
+    dispatch({ type: PKG_CMS_MASTER_GET, payload: data.data });
   } catch (error) {
-    alert("Error updating package: " + error.message);
+    alert("Error fetching package masters: " + error.message);
   }
 };
 
-// ---------------- DELETE PACKAGE ----------------
-export const deletePkgMaster = (pkg_id) => async (dispatch) => {
+// ---------------- CREATE PACKAGE ----------------
+export const create_Pkg_cms_Master = (formData,setCreatemodelopen) => async (dispatch) => {
+  console.log(formData);
   const token = localStorage.getItem("token");
 
   try {
-    const res = await fetch(`${baseUrl}/v1/admin/pkg/${pkg_id}`, {
-      method: "DELETE",
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify(formData),
     });
+
+    const data = await res.json();
+    console.log("pkg",data);
 
     if (res.status === 401) {
       window.location.href = "/";
       return;
     }
 
-    if (!res.ok) {
-      const err = await res.json();
-      alert(err.message || "Failed to delete package");
-      return;
-    }
+    if (res.status === 201) {
 
-    alert("Package deleted successfully");
-    dispatch({ type: PKG_MASTER_DELETE, payload: pkg_id });
+    
+      
+      
+      dispatch({ type: PKG_CMS_MASTER_CREATE, payload: data.data });
+
+      dispatch(getPkg_cms_Masters())
+      setCreatemodelopen(false)
+      
+    
+
+
+    } else {
+      alert(data.message || "Failed to create package");
+      
+    }
   } catch (error) {
-    alert("Error deleting package: " + error.message);
+    alert("Error creating package: " + error.message);
   }
 };
 
@@ -762,6 +862,152 @@ export const deletePkgMaster = (pkg_id) => async (dispatch) => {
 
 
 
+
+
+
+
+
+
+export const createService = (formData, setCreateModalOpen) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/services`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    console.log("SERVICE CREATE", data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 201) {
+      dispatch({ type: SERVICELIST_CREATE, payload: data.data });
+      dispatch(getServiceList());
+      setCreateModalOpen(false);
+    } else {
+      alert(data.message || "Failed to create service");
+    }
+  } catch (error) {
+    alert("Error creating service: " + error.message);
+  }
+};
+
+//////////update service///////
+
+
+export const updateService = (serviceId, formData, setUpdateModalOpen) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/services/${serviceId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    console.log("SERVICE UPDATE", data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+      dispatch({ type: SERVICELIST_UPDATE, payload: data.data });
+      dispatch(getServiceList());
+      setUpdateModalOpen(false);
+    } else {
+      alert(data.message || "Failed to update service");
+    }
+  } catch (error) {
+    alert("Error updating service: " + error.message);
+  }
+};
+
+
+/////////delete///////
+
+
+export const deleteService = (serviceId) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/services/${serviceId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    console.log("SERVICE DELETE", data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+      dispatch({ type: SERVICELIST_DELETE, payload: serviceId });
+      dispatch(getServiceList());
+    } else {
+      alert(data.message || "Failed to delete service");
+    }
+  } catch (error) {
+    alert("Error deleting service: " + error.message);
+  }
+};
+
+
+////get servicelist/////
+
+
+
+export const getServiceList = (searchTerm, page, limit) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  const params = new URLSearchParams();
+  if (searchTerm) params.append("search", searchTerm);
+  if (page) params.append("page", page);
+  if (limit) params.append("limit", limit);
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/services?${params.toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    console.log("SERVICE GET", data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+      dispatch({ type: SERVICELIST_GET, payload: data.data });
+    } else {
+      alert(data.message || "Failed to fetch service list");
+    }
+  } catch (error) {
+    alert("Error fetching services: " + error.message);
+  }
+};
 
 
 
