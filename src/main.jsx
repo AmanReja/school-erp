@@ -46,7 +46,7 @@ const router = createBrowserRouter(
         <Route path="transactionmaster/:merchantId" element={<TransactionMaster />} />
         <Route path="merchant" element={<Merchant />} />
         <Route path="settlement/:merchantId" element={<Settlement />} />
-        <Route path="commercial" element={<Commercial />} />
+        <Route path="commercial/:pkgid/:serviceid" element={<Commercial />} />
         <Route path="servicelist" element={<Servicelist />} />
         <Route path="packagemaster/:pkgId" element={<Packagemaster />} />
       </Route>

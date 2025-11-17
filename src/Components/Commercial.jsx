@@ -19,7 +19,7 @@ import { DateRange } from "react-date-range";
 
 
 import {
-    update_Txn_data,getall_txn_data,getPkgMasters,createPkgMaster,deletePkgMaster
+    update_Txn_data,getall_txn_data,getPkgMasters,createPkgMaster,deletePkgMaster,create_Pkg_cms_Master,getPkg_cms_Masters,update_Pkg_cms_Master,delete_Pkg_cms_Master
 
 } from "../redux/action";
 
@@ -42,7 +42,7 @@ const Commercial = () => {
 
 
 
-  const { merchantId } = useParams();
+  const { pkgid,serviceid} = useParams();
  
 
 
@@ -58,6 +58,8 @@ const Commercial = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
+  const [isDownloading, setIsDownloading] = useState(false);
+
 
 
 
@@ -66,159 +68,140 @@ const Commercial = () => {
 
 
 
+  const [step, setStep] = useState(1);
 
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [upadtedstatus, setUpadtedstatus] = useState("");
-  const [updatedrrn, setUpdatedrrn] = useState("");
-  const [upadtedpaytmid, seUpadtedpaytmid] = useState("");
-  const [updatedremarkes, setUpdatedremarkes] = useState("");
-  const [currenttxnid, setCurrenttxnid] = useState("");
-  const [updateload, setUpdateload] = useState(false);
-  const [modelopen, setModelopen] = useState(false);
-  const [createmodelopen, setCreatemodelopen] = useState(false);
+  const nextStep = () => setStep((prev) => prev + 1);
+  const prevStep = () => setStep((prev) => prev - 1);
 
-
-
-
- const [pkgstatus,setPkgstatus] = useState("")
- const [pkgname,setPkgname] = useState("")
+const [modelopen, setModelopen] = useState(false);
+const [createmodelopen, setCreatemodelopen] = useState(false);
+// const [pkgId, setPkgId] = useState("");        
+// const [serviceId, setServiceId] = useState(""); 
+const [fromVal, setFromVal] = useState("");    
+const [toVal, setToVal] = useState("");        
+const [amount, setAmount] = useState("");     
+const [mch, setMch] = useState("");            
+const [pkgType, setPkgType] = useState("");    
 
 
+const [plusbutton,setPlusbutton] =useState(false)
+const[iseditingcom,setIseditingcom] =useState(false)
+const[currentcomid,setCurrentcomid] =useState(false)
+const[service_id,setService_id] =useState(serviceid)
+const[pkg_id,setPkg_id] =useState(pkgid)
 
 
 
 
 
-  const handelupdate = (txn)=>{
 
-  setUpadtedstatus(txn.status)
-  setUpdatedremarkes(txn.message)
-  setCurrenttxnid(txn.txn_id)
-  setUpdatedrrn(txn.rrn)
-  seUpadtedpaytmid(txn.paytmOrderId)
+
+
+
+
+//   const handelupdate = (txn)=>{
+
+//   setUpadtedstatus(txn.status)
+//   setUpdatedremarkes(txn.message)
+//   setCurrenttxnid(txn.txn_id)
+//   setUpdatedrrn(txn.rrn)
+//   seUpadtedpaytmid(txn.paytmOrderId)
 
 
 
 
  
 
-}
-  const update = async()=>{
+// }
+//   const update = async()=>{
 
 
 
-  const updateddata ={
-    paytmOrderId:upadtedpaytmid,
-    rrn:updatedrrn,
+//   const updateddata ={
+//     paytmOrderId:upadtedpaytmid,
+//     rrn:updatedrrn,
 
-    status
-:upadtedstatus,
+//     status
+// :upadtedstatus,
     
-message:updatedremarkes,
+// message:updatedremarkes,
 
 
-  }
+//   }
 
 
- await dispatch(update_Txn_data(currenttxnid,updateddata,setUpdateload))
+//  await dispatch(update_Txn_data(currenttxnid,updateddata,setUpdateload))
  
 
-}
+// }
 
 
 
 
 
-const handelpkgcreate= (e)=>{
-
-  e.preventDefault()
+const handelcommercialCreate = (e) => {
+  e.preventDefault();
 
   try {
     const formdata = {
-      pkg_name:pkgname,
-      status:pkgstatus
-     }
-  
-  dispatch(createPkgMaster(formdata,setCreatemodelopen))
-  
+     
+
+      pkg_id: pkg_id,
+      service_id: service_id,
+      fromval: fromVal,
+      toval: toVal,
+      amount: amount,
+      mch: mch,
+      type: pkgType
+    };
+
+    dispatch(create_Pkg_cms_Master(formdata, setCreatemodelopen));
 
   } catch (error) {
     console.log(error);
-  } finally{
-  setPkgname("")
-  setPkgstatus("")
   }
-  
+};
+
+
+
+ const pkgcmsData = useSelector((state)=>state.pkgcmsMasters?.pkgcmsMasters?.data);
+ console.log(156,pkgcmsData);
+
+ const pkgcmsTotalpages = useSelector((state)=>state.pkgcmsMasters.pkgcmsMasters?.
+ totalPages
+ );
+ console.log(156,pkgcmsData);
+
+ const pkgcmsCurrentpage = useSelector((state)=>state.pkgcmsMasters.pkgcmsMasters?.page
+ );
+ console.log(156,pkgcmsData);
+
+ const pkgcmsTotalrecords = useSelector((state)=>state.pkgcmsMasters.pkgcmsMasters?.total
+ );
+ console.log(156,pkgcmsData);
+
+    // if (pkgcmsData.length>0) {
+    //   setPlusbutton(true)
+    // }
 
 
 
 
 
 
-}
 
 
-
-
-
-  const transactionData = useSelector((state) => state.transactions?.transactions || []);
-
-  const transactionDataArray = useSelector((state) => state.transactions?.transactions.data || []);
-
- 
-
-
-  // const totalRecords = transactionData?.pagination?.totalRecords
-  // ;
-  
-
-
-
-
-  // const totalPages = transactionData?.pagination?.totalPages;
-
-  
-  const Masters = useSelector((state)=>state.pkgMasters.pkgMasters
-
-  )
-//   const Masters1 = useSelector((state)=>state.pkgMasters.pkgMasters
-
-//   )
-
-// console.log(Masters1);
 
   useEffect(() => {
    
-      dispatch(getall_txn_data( searchTerm, searchStatus, page, perPage, false, setLoad, dateRange.startDate,
-        dateRange.endDate));
+      dispatch(getPkg_cms_Masters(searchTerm,page,perPage,searchStatus));
 
-        dispatch(getPkgMasters())
+       
     
-  }, [merchantId, searchTerm, searchStatus, dispatch, page, perPage, dateRange.startDate,
-    dateRange.endDate]);
+  }, [dispatch,searchTerm,page,perPage,searchStatus]);
 
 
-  const handleDownload = async () => {
-    try {
-      setIsDownloading(true)
 
-      await dispatch(
-        
-        getall_txn_data(
-           searchTerm, searchStatus, page, perPage, true, setLoad, dateRange.startDate,
-          dateRange.endDate
-        )
-      );
-      
-      setIsDownloading(false)
-
-
-    } catch (error) {
-      console.log("Download error:", error);
-
-    };
-  }
 
 
   useEffect(() => {
@@ -240,10 +223,90 @@ dispatch(deletePkgMaster(pkgid))
 }
 
 
+const handelEditcom =(pkg)=>{
+
+  setPkg_id(pkg.pkg_id),
+  setService_id(pkg.service_id)
+  setFromVal(pkg.fromval),
+  setToVal(pkg.toval
+    ),
+  setAmount(pkg.amount),
+  setMch(pkg.mch),
+  setPkgType(pkg.type),
+  setCurrentcomid(pkg.id)
+
+
+ 
+
+}
+
+const handelUpdate =()=>{
+
+  try {
+    const updatedFormdata = {
+     
+
+      pkg_id: pkgid,
+        service_id: serviceid,
+        fromval: fromVal,
+        toval: toVal,
+        amount: amount,
+        mch: mch,
+        type: pkgType
+    };
+    dispatch(update_Pkg_cms_Master(currentcomid,updatedFormdata))
+  } catch (error) {
+    console.log(error);
+  } finally{
+    setPkg_id("");
+    setService_id("");
+    setFromVal("");
+    setToVal("");
+    setAmount("");
+    setMch("");
+    setPkgType("");
+
+    
+    setCurrentcomid("");
+
+   
+    setCreatemodelopen(false);
+
+    
+    setIseditingcom(false);
+  }
+
+  
+  
+}
+
    
 
+const handelcomDelete =(com)=>{
+
+  dispatch(delete_Pkg_cms_Master(com.id))
+
+}
 
 
+
+const handleDownload = async () => {
+  try {
+    setIsDownloading(true)
+
+    await dispatch(
+      
+      getPkg_cms_Masters(searchTerm,page,perPage,searchStatus, true)
+    );
+    
+    
+    setIsDownloading(false)
+
+  } catch (error) {
+    console.log("Download error:", error);
+
+  };
+}
 
 
 
@@ -369,7 +432,7 @@ dispatch(deletePkgMaster(pkgid))
                     />
                   </div>
                 )}
-<button onClick={()=>{setCreatemodelopen(true)}} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Cretate Commercial</button>
+{Array.isArray(pkgcmsData)&&pkgcmsData.length===0&&<button onClick={()=>{setCreatemodelopen(true)}} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Create Commercial</button>}
                 {/* 📋 Status Dropdown */}
                 <select onChange={(e) => { setSearchStatus(e.target.value) }}
                   value={searchStatus}
@@ -377,10 +440,10 @@ dispatch(deletePkgMaster(pkgid))
                   defaultValue=""
                 >
                   <option selected value="">ALL</option>
-                  <option value="SUCCESS">SUCCESS</option>
+                  <option value="FLAT">FLAT</option>
 
-                  <option value="PENDING">PENDING</option>
-                  <option value="FAILED">FAILED</option>
+                  <option value="PERCENTAGE">PERCENTAGE</option>
+                  
                 </select>
               </div>
               
@@ -408,183 +471,250 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
 
             <div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
               
-            {modelopen && (
-  <div
-    className="fixed inset-0 flex justify-center items-center z-50"
-  >
-    <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
-      {/* Header */}
-      <div className="px-5 py-3 border-b flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Add / Edit Package Master
-        </h2>
-        <button
-          onClick={() => setModelopen(false)}
-          className="text-gray-500 hover:text-red-500 text-lg font-bold"
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* Body */}
-      <form
-        onSubmit={""}
-        className="px-5 py-4 space-y-4"
-      >
-        {/* Package Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Package Name
-          </label>
-          <input
-            type="text"
-            name="pkg_name"
-            value={""}
-            onChange={""}
-            placeholder="Enter package name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          />
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Description
-          </label>
-          <input
-            type="text"
-            name="description"
-            value={""}
-            onChange={""}
-            placeholder="Enter short description"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          />
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Status
-          </label>
-          <select
-            name="status"
-            value={""}
-            onChange={""}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-end gap-3 pt-3">
-          <button
-            type="button"
-            onClick={() => setModelopen(false)}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-md transition"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition"
-          >
-            Save Changes
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
             {createmodelopen && (
-  <div
-    className="fixed inset-0 flex justify-center items-center z-50"
-  >
+  <div className="fixed inset-0 flex justify-center items-center z-50">
     <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
-      {/* Header */}
+
+      {/* HEADER */}
       <div className="px-5 py-3 border-b flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Create Package
-        </h2>
-        <button
-          onClick={() => setCreatemodelopen(false)}
+        <h2 className="text-lg font-semibold text-gray-800">{iseditingcom?"Edit Commercial":"Create Commercial"}</h2>
+        <button 
+          onClick={() =>{ setCreatemodelopen(false), setIseditingcom(false)}}
           className="text-gray-500 hover:text-red-500 text-lg font-bold"
         >
           ✕
         </button>
       </div>
 
-      {/* Body */}
+      {/* if (step !== 3) return: */}
+
+      {/* BODY */}
       <form
-        onSubmit={(e)=>{handelpkgcreate(e)}}
+        onSubmit={(e) => { 
+
+          if (step!==3) return
+{
+          iseditingcom?handelUpdate(e)
+          
+         
+         :
+          handelcommercialCreate(e)}
+        }}
         className="px-5 py-4 space-y-4"
       >
-        {/* Package Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Package Name
-          </label>
-          <input
-            type="text"
-            name="pkg_name"
-            value={pkgname}
-            onChange={(e)=>{setPkgname(e.target.value)}}
-            placeholder="Enter package name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          />
+
+        {/* Step Indicators */}
+        <div className="flex justify-center gap-2 mb-3">
+          {[1, 2, 3].map((n) => (
+            <div
+              key={n}
+              className={`w-3 h-3 rounded-full ${
+                step === n ? "bg-blue-600" : "bg-gray-300"
+              }`}
+            />
+          ))}
         </div>
 
-      
+        {/* ---------------- STEP 1 ---------------- */}
+        {step === 1 && (
+          <div className="flex flex-col gap-3">
 
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Status
-          </label>
-          <select
-            name="status"
-            value={pkgstatus}
-            onChange={(e)=>{setPkgstatus(e.target.value)}}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          >
-            
-            <option selected value="">Select Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
+            {/* pkg_id */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Package ID
+              </label>
+              <input
+                type="text"
+                value={pkg_id}
+                // onChange={(e) => setPkgId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                required
+                readOnly
+              />
+            </div>
 
-     
-        <div className="flex justify-end gap-3 pt-3">
-          <button
-            type="button"
-            onClick={() => setModelopen(false)}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-md transition"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition"
-          >
-            Save Changes
-          </button>
-        </div>
+            {/* service_id */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Service ID
+              </label>
+              <input
+                type="text"
+                value={service_id}
+                // onChange={(e) => setServiceId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                required 
+                readOnly
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (!pkgid || !serviceid) {
+                  alert("All fields must be filled");
+                  return;
+                }
+                nextStep();
+              }}
+              className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+            >
+              Next
+            </button>
+          </div>
+        )}
+
+        {/* ---------------- STEP 2 ---------------- */}
+        {step === 2 && (
+          <div className="flex flex-col gap-3">
+
+            {/* fromVal */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                From Value
+              </label>
+              <input
+                type="number"
+                value={fromVal}
+                onChange={(e) => setFromVal(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                required
+              />
+            </div>
+
+            {/* toVal */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                To Value
+              </label>
+              <input
+                type="number"
+                value={toVal}
+                onChange={(e) => setToVal(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                required
+              />
+            </div>
+
+            {/* amount */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Amount
+              </label>
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                required
+              />
+            </div>
+
+            <div className="flex justify-between mt-3">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300"
+              >
+                Back
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!fromVal || !toVal || !amount) {
+                    alert("Please fill all fields");
+                    return;
+                  }
+                  nextStep();
+                }}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ---------------- STEP 3 ---------------- */}
+        {step === 3 && (
+          <div className="flex flex-col gap-3">
+
+            {/* mch */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                MCH
+              </label>
+              <input
+                type="text"
+                value={mch}
+                onChange={(e) => setMch(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                required
+              />
+            </div>
+
+            {/* type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Type
+              </label>
+              <select  value={pkgType}   onChange={(e) => setPkgType(e.target.value)}  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                required name="type" id="">
+
+                  <option value="Select Type">Select Type</option>
+                  <option value="FLAT">FLAT</option>
+                  <option value="PERCENTAGE">PERCENTAGE</option>
+                
+               
+
+              </select>
+           
+            </div>
+
+            <div className="flex justify-between mt-3">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300"
+              >
+                Back
+              </button>
+
+              <button
+                type="submit"
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        )}
       </form>
     </div>
   </div>
 )}
+
+
 
 
             <table className="w-full text-sm text-left text-gray-600 border border-gray-200 overflow-hidden">
         <thead className="text-[11px] text-gray-500 uppercase bg-[#f9f9f9] border-b border-gray-300">
-          <tr>
-            <th className="py-2 px-3 text-left">ID</th>
-            <th className="py-2 px-3 text-left">Package Name</th>
-            <th className="py-2 px-3 text-left">Status</th>
-            <th className="py-2 px-3 text-left">Created On</th>
-            <th className="py-2 px-3 text-left">Action</th>
-          </tr>
+        <tr>
+  <th className="py-2 px-3 text-left">Package Info</th>
+ 
+ 
+  <th className="py-2 px-3 text-left">Service ID</th>
+  <th className="py-2 px-3 text-left">Service Name</th>
+  <th className="py-2 px-3 text-left">From Value</th>
+  <th className="py-2 px-3 text-left">To Value</th>
+  <th className="py-2 px-3 text-left">Amount</th>
+  <th className="py-2 px-3 text-left">MCH</th>
+  <th className="py-2 px-3 text-left">Type</th>
+  <th className="py-2 px-3 text-left">Action</th>
+</tr>
+
         </thead>
 
         {load ? (
@@ -599,63 +729,214 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
           </tbody>
         ) : (
           <tbody className="text-[13px] font-medium">
-            {Array.isArray(Masters)&&Masters.length > 0 ? (
-              Masters.map((pkg, i) => (
-                <tr
-                  key={i}
-                  className="hover:bg-gray-50 transition-colors text-[13px] border-b border-gray-100"
-                >
-                  <td className="px-4 py-3 text-gray-800">{pkg.id}</td>
-                  <td className="px-4 py-3 text-gray-700">{pkg.pkg_name}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`text-[11px] font-bold px-[6px] py-[3px] rounded-[6px] text-center tracking-wide ${
-                        pkg.status?.toLowerCase() === "active"
-                          ? "bg-green-400 text-white border border-green-300"
-                          : "bg-red-400 text-white border border-red-300"
-                      }`}
-                    >
-                      {pkg.status?.toUpperCase()}
-                    </span>
+          {Array.isArray(pkgcmsData) && pkgcmsData.length > 0 ? (
+            pkgcmsData.map((pkg, i) => (
+              <tr
+                key={i}
+                className="hover:bg-gray-50 transition-colors text-[13px] border-b border-gray-100"
+              >
+                <td className="px-4 py-3">
+                    <div className="space-y-[2px]">
+                      <p className="text-[12px] text-gray-700">
+                        PKG ID: <span className="font-medium">{pkg.pkg_id}</span>
+                      </p>
+                      <p className="text-[12px] text-gray-700">
+                        PKG Name: <span className="font-medium">{pkg.pkg_name}</span>
+                      </p>
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{pkg.create_on}</td>
-                  <td className="px-4 py-3 flex gap-2 items-center">
-                    <button
-                      onClick={() => navigate(`/dashboard/packagemaster/${pkg.id}`)}
-                      className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                    >
-                      <FaEdit size={12} />
-                      Set Commercial
-                    </button>
-                    <button
-                      onClick={() => handleEdit(pkg)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                    >
-                      <FaEdit size={12} />
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(pkg.id)}
-                      className="bg-red-500 hover:bg-red-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                    >
-                      <FaTrashAlt size={12} />
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="py-10">
-                  <div className="flex justify-center items-center w-full">
-                    <div>No Package Master data found</div>
-                  </div>
+
+                <td className="px-4 py-3 text-gray-800">{pkg.service_id}</td>
+                <td className="px-4 py-3 text-gray-800">{pkg.service_name}</td>
+               
+                <td className="px-4 py-3 text-gray-800">{pkg.fromval}</td>
+                <td className="px-4 py-3 text-gray-800">{pkg.toval}</td>
+                <td className="px-4 py-3 text-gray-800">{pkg.amount}</td>
+                <td className="px-4 py-3 text-gray-800">{pkg.mch}</td>
+                <td className="px-4 py-3 text-gray-800">{pkg.type}</td>
+        
+                {/* Actions (keep your buttons) */}
+                <td className="px-4 py-3 flex gap-2 items-center">
+
+                  {
+                        
+                        
+                i===pkgcmsData.length - 1 && <button
+                      onClick={()=>{setCreatemodelopen(true)}}
+                    className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
+                  >
+                    <FaEdit size={12} />
+                    +
+                  </button>}
+
+                 
+        
+                  <button
+                    onClick={() => {setIseditingcom(true),setCreatemodelopen(true),handelEditcom(pkg)}}
+                    className="bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
+                  >
+                    <FaEdit size={12} />
+                    Edit
+                  </button>
+        
+                  <button
+                    onClick={() => handelcomDelete(pkg)}
+                    className="bg-red-500 hover:bg-red-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
+                  >
+                    <FaTrashAlt size={12} />
+                    Delete
+                  </button>
                 </td>
               </tr>
-            )}
-          </tbody>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="10" className="py-10">
+                <div className="flex justify-center items-center w-full">
+                  <div>No Package Data Found</div>
+                </div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+        
         )}
+
       </table>
+      
+      
+      {pkgcmsTotalpages > 0 ? (
+                <div
+                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${
+                    theme === "dark"
+                      ? "bg-gray-900 text-gray-300 border-gray-700"
+                      : "bg-white text-gray-600 border-gray-200"
+                  }`}
+                >
+                  <div>
+                    Show{" "}
+                    <select
+                      className={`rounded border outline-none px-[5px] py-[5px] ${
+                        theme === "dark"
+                          ? "bg-gray-800 text-gray-200 border-gray-600"
+                          : "bg-white text-gray-700 border-gray-300"
+                      }`}
+                      value={perPage}
+                      onChange={(e) => {
+                        setPerPage(Number(e.target.value));
+                        setPage(1);
+                      }}
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={30}>30</option>
+                    </select>{" "}
+                    per page
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+  {/* Showing range */}
+  <p>
+    {(page - 1) * perPage + 1}-{Math.min(page * perPage, pkgcmsTotalrecords)} of {pkgcmsTotalrecords}
+  </p>
+
+  {/* Prev Button */}
+  <button
+  
+    onClick={() => setPage(page - 1)}
+    disabled={page === 1}
+    className={`px-3 py-1 rounded-md ${
+      page === 1
+        ? "opacity-50 cursor-not-allowed"
+        : theme === "dark"
+        ? "hover:bg-gray-700"
+        : "hover:bg-gray-200"
+    }`}
+  >
+  <ChevronLeft/>
+  </button>
+
+  {/* First Page */}
+  <button
+    onClick={() => setPage(1)}
+    className={`px-3 py-1 rounded-md ${
+      page === 1
+        ? theme === "dark"
+          ? "bg-gray-700 font-semibold"
+          : "bg-gray-200 font-semibold"
+        : theme === "dark"
+        ? "hover:bg-gray-800"
+        : "hover:bg-gray-100"
+    }`}
+  >
+    1
+  </button>
+
+  {/* Dots before current group */}
+  {page > 3 && <span className="px-2">...</span>}
+
+  {/* Nearby page numbers */}
+  {Array.from({ length: 3 }, (_, i) => page - 1 + i)
+    .filter((num) => num > 1 && num < pkgcmsTotalpages)
+    .map((num) => (
+      <button
+        key={num}
+        onClick={() => setPage(num)}
+        className={`px-3 py-1 rounded-md ${
+          num === page
+            ? theme === "dark"
+              ? "bg-gray-700 font-semibold"
+              : "bg-gray-200 font-semibold"
+            : theme === "dark"
+            ? "hover:bg-gray-800"
+            : "hover:bg-gray-100"
+        }`}
+      >
+        {num}
+      </button>
+    ))}
+
+  {/* Dots after current group */}
+  {page < pkgcmsTotalpages - 2 && <span className="px-2">...</span>}
+
+  {/* Last Page */}
+  {pkgcmsTotalpages > 1 && (
+    <button
+      onClick={() => setPage(pkgcmsTotalpages)}
+      className={`px-3 py-1 rounded-md ${
+        page === pkgcmsTotalpages
+          ? theme === "dark"
+            ? "bg-gray-700 font-semibold"
+            : "bg-gray-200 font-semibold"
+          : theme === "dark"
+          ? "hover:bg-gray-800"
+          : "hover:bg-gray-100"
+      }`}
+    >
+      {pkgcmsTotalpages}
+    </button>
+  )}
+
+  {/* Next Button */}
+  <button
+    onClick={() => setPage(page + 1)}
+    disabled={page === pkgcmsTotalpages}
+    className={`px-3 py-1 rounded-md ${
+      page === pkgcmsTotalpages
+        ? "opacity-50 cursor-not-allowed"
+        : theme === "dark"
+        ? "hover:bg-gray-700"
+        : "hover:bg-gray-200"
+    }`}
+  >
+   <ChevronRight/>
+  </button>
+</div>
+
+                </div>
+              ) : (
+                ""
+              )}
 
           
             </div>

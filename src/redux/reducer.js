@@ -10,7 +10,7 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   PKG_MASTER_GET,
   PKG_MASTER_CREATE,
   PKG_MASTER_UPDATE,
-  PKG_MASTER_DELETE,PKG_CMS_MASTER_GET,PKG_CMS_MASTER_CREATE,SERVICELIST_GET,SERVICELIST_CREATE,SERVICELIST_UPDATE,SERVICELIST_DELETE
+  PKG_MASTER_DELETE,PKG_CMS_MASTER_GET,PKG_CMS_MASTER_CREATE,PKG_CMS_MASTER_UPDATE,PKG_CMS_MASTER_DELETE,SERVICELIST_GET,SERVICELIST_CREATE,SERVICELIST_UPDATE,SERVICELIST_DELETE
 ,
 
 } from "../redux/action";
@@ -271,14 +271,14 @@ const initialSettlementState = {
       case SERVICELIST_CREATE:
         return {
           ...state,
-          services: [action.payload, ...state.services],  // prepend new item
+          services: [action.payload, ...state.services.data],  // prepend new item
         };
   
       // ---------------- UPDATE SERVICE ----------------
       case SERVICELIST_UPDATE:
         return {
           ...state,
-          services: state.services.map((service) =>
+          services: state.services.data.map((service) =>
             service.id === action.payload.id ? action.payload : service
           ),
         };
@@ -287,7 +287,7 @@ const initialSettlementState = {
       case SERVICELIST_DELETE:
         return {
           ...state,
-          services: state.services.filter(
+          services: state.services.data.filter(
             (service) => service.id !== action.payload
           ),
         };
@@ -318,8 +318,15 @@ const initialSettlementState = {
       case PKG_CMS_MASTER_CREATE:
         return {
           ...state,
-          pkgcmsMasters: [action.payload, ...state.pkgcmsMasters], // prepend
+          pkgcmsMasters: [action.payload, ...state.pkgcmsMasters.data], // prepend
         };
+        case PKG_CMS_MASTER_UPDATE:
+          return {
+            ...state,
+            pkgcmsMasters: state.pkgcmsMasters.data.map((pkgcms) =>
+            pkgcms.id === action.payload.id ? action.payload : pkgcms
+            ),
+          };
   
       // ---------------- DEFAULT ----------------
       default:

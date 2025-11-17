@@ -19,7 +19,7 @@ import { DateRange } from "react-date-range";
 
 
 import {
-    getServiceList, createService, getPkgMasters, createPkgMaster, deleteService,deletePkgMaster
+    getServiceList, createService, getPkgMasters, createPkgMaster, deleteService,deletePkgMaster,updateService
 
 } from "../redux/action";
 
@@ -79,12 +79,20 @@ const Servicelist = () => {
     const [createmodelopenpkg, setCreatemodelopenpkg] = useState(false);
 
 
+    const [ispkgserEditing,setIspkgserEditing] = useState(false);
+
+
+
+    const [selectedpkgname,SetSelectedpkgname] =useState("")
+    const [selectedserviceid,SetSelectedserviceid] =useState("")
+
 
 
     const [servicestatus, setServicestatus] = useState("")
     const [servicename, setServicename] = useState("")
     const [serviceid, setServiceid] = useState("")
     const [isPkgopen, setIsPkgopen] = useState(false)
+    const [currentsrvid,SetCurrentsrvid] = useState("")
 
 
 
@@ -105,41 +113,49 @@ const Servicelist = () => {
 
 
 
-    const handelupdate = (txn) => {
-
-        setUpadtedstatus(txn.status)
-        setUpdatedremarkes(txn.message)
-        setCurrenttxnid(txn.txn_id)
-        setUpdatedrrn(txn.rrn)
-        seUpadtedpaytmid(txn.paytmOrderId)
 
 
 
 
+     const handelsrvEdit = (pkg)=>{
+         setServicename(pkg.service_name)
+         setServicestatus(pkg.status
+            )
+            SetCurrentsrvid(pkg.service_id)
+            setServiceid(pkg.service_id
+                )
+          
+
+     }
 
 
-    }
-    //   const update = async()=>{
+     const handelsrvUpdate = (e)=>{
+
+        try {
+            e.preventDefault()
+
+            const updatedsrvdata ={
+                service_name: servicename,
+                // service_id: serviceid,
+                status: servicestatus,
+            
+            
+                 }
+    
+                 dispatch(updateService(currentsrvid,updatedsrvdata))
+        } catch (error) {
+            console.log(error);
+        } finally{
+            setServiceid(""),
+            setServicename(""),
+            setServicestatus(""),
+            SetCurrentsrvid("")
+            setIspkgserEditing(false)
+        }
+       
 
 
-
-    //   const updateddata ={
-    //     paytmOrderId:upadtedpaytmid,
-    //     rrn:updatedrrn,
-
-    //     status
-    // :upadtedstatus,
-
-    // message:updatedremarkes,
-
-
-    //   }
-
-
-    //  await dispatch(update_Txn_data(currenttxnid,updateddata,setUpdateload))
-
-
-    // }
+     }
 
 
 
@@ -163,8 +179,9 @@ const Servicelist = () => {
         } catch (error) {
             console.log(error);
         } finally {
-            setPkgname("")
-            setPkgstatus("")
+          setServiceid("")
+          setServicename("")
+          setServicestatus("")
         }
 
 
@@ -235,7 +252,16 @@ const Servicelist = () => {
     // const totalPages = transactionData?.pagination?.totalPages;
 
 
-    const serviceList = useSelector((state) => state.services.services
+    const serviceList = useSelector((state) => state.services.services?.data
+
+    )
+    const srvTotalpages = useSelector((state) => state.services.services?.totalPages
+
+    )
+    const srvCurrentpage = useSelector((state) => state.services.services?.page
+
+    )
+    const srvTotalrecord = useSelector((state) => state.services.services?.total
 
     )
 
@@ -277,10 +303,10 @@ const Servicelist = () => {
     //   }, [searchTerm, searchStatus, dateRange.startDate,
     //     dateRange.endDate]);
     useEffect(() => {
-        dispatch(getServiceList())
+        dispatch(getServiceList(searchTerm,page,perPage,searchStatus))
         dispatch(getPkgMasters())
     }, [
-        dispatch]);
+        dispatch,searchTerm,page,perPage,searchStatus]);
 
 
 
@@ -363,7 +389,7 @@ const Servicelist = () => {
                                         type="text"
                                         value={searchTerm}
                                         onChange={(e) => { setSearchTerm(e.target.value) }}
-                                        placeholder="Search services..."
+                                        placeholder= {isPkgopen?"Search Packages...":"Search services..."}
                                         className="w-full border outline-none border-gray-200 rounded-[10px] pl-10 pr-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 transition-all duration-300 ease-in-out shadow-sm"
                                     />
 
@@ -430,7 +456,7 @@ const Servicelist = () => {
                                 )}
 
 
-                                {isPkgopen ? <button onClick={() => { setCreatemodelopenpkg(true) }} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Cretate Package</button> : <button onClick={() => { setCreatemodelopen(true) }} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Cretate Services</button>}
+                                {isPkgopen ? <button onClick={() => { setCreatemodelopenpkg(true) }} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Create Package</button> : <button onClick={() => { setCreatemodelopen(true) }} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Create Services</button>}
 
                                 {isPkgopen ? <button onClick={(e) => { setIsPkgopen(false) }} className="bg-black rounded-2xl text-white flex p-2"><ArrowLeft />Back</button> : ""}
 
@@ -442,10 +468,10 @@ const Servicelist = () => {
                                     defaultValue=""
                                 >
                                     <option selected value="">ALL</option>
-                                    <option value="SUCCESS">SUCCESS</option>
+                                    <option value="ACTIVE">ACTIVE</option>
 
-                                    <option value="PENDING">PENDING</option>
-                                    <option value="FAILED">FAILED</option>
+                                    <option value="INACTIVE">INACTIVE</option>
+                                    
                                 </select>
                             </div>
 
@@ -473,96 +499,7 @@ const Servicelist = () => {
 
                         <div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
 
-                            {modelopen && (
-                                <div
-                                    className="fixed inset-0 flex justify-center items-center z-50"
-                                >
-                                    <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
-                                        {/* Header */}
-                                        <div className="px-5 py-3 border-b flex justify-between items-center">
-                                            <h2 className="text-lg font-semibold text-gray-800">
-                                                Add / Edit Package Master
-                                            </h2>
-                                            <button
-                                                onClick={() => setModelopen(false)}
-                                                className="text-gray-500 hover:text-red-500 text-lg font-bold"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-
-                                        {/* Body */}
-                                        <form
-                                            onSubmit={""}
-                                            className="px-5 py-4 space-y-4"
-                                        >
-                                            {/* Package Name */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                    Service Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="pkg_name"
-                                                    value={servicename}
-                                                    onChange={(e) => { setServicename(e.target.value) }}
-                                                    placeholder="Enter package name"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                                />
-                                            </div>
-
-                                            {/* Description */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                    Service Id
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="description"
-                                                    value={serviceList}
-                                                    onChange={(e) => { setServiceid(e.target.value) }}
-                                                    placeholder="Enter short description"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                                />
-                                            </div>
-
-                                            {/* Status */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                    Service Status
-                                                </label>
-                                                <select
-                                                    name="status"
-                                                    value={servicestatus}
-                                                    onChange={(e) => { setServicestatus(e.target.value) }}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                                >
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
-                                                </select>
-                                            </div>
-
-                                            {/* Actions */}
-                                            <div className="flex justify-end gap-3 pt-3">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setModelopen(false)}
-                                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-md transition"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    type="submit"
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition"
-                                                >
-                                                    Save Changes
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            )}
-
+                        
 
 
 
@@ -653,7 +590,7 @@ const Servicelist = () => {
                                         {/* Header */}
                                         <div className="px-5 py-3 border-b flex justify-between items-center">
                                             <h2 className="text-lg font-semibold text-gray-800">
-                                                Create Services
+                                              {ispkgserEditing?"Edit Services":"Create Services"}  
                                             </h2>
                                             <button
                                                 onClick={() => setCreatemodelopen(false)}
@@ -665,7 +602,7 @@ const Servicelist = () => {
 
                                         {/* Body */}
                                         <form
-                                            onSubmit={(e) => { handelsrvcreate(e) }}
+                                            onSubmit={(e) => { ispkgserEditing?handelsrvUpdate(e): handelsrvcreate(e) }}
                                             className="px-5 py-4 space-y-4"
                                         >
                                             {/* Package Name */}
@@ -689,6 +626,8 @@ const Servicelist = () => {
                                                     Service Id
                                                 </label>
                                                 <input
+
+                                                readOnly={ispkgserEditing}
                                                     type="text"
                                                     name="Service Id"
                                                     value={serviceid}
@@ -728,7 +667,7 @@ const Servicelist = () => {
                                                     type="submit"
                                                     className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition"
                                                 >
-                                                    Save Changes
+                                                   {ispkgserEditing?"Edit Services":"Create Services"}
                                                 </button>
                                             </div>
                                         </form>
@@ -785,7 +724,7 @@ const Servicelist = () => {
                                                     <td className="px-4 py-3 text-gray-600">{pkg.create_on}</td>
                                                     <td className="px-4 py-3 flex gap-2 items-center">
                                                         <button
-                                                            onClick={() => { setIsPkgopen(true) }}
+                                                            onClick={() => { setIsPkgopen(true),navigate(`/dashboard/commercial/${pkg.id}/${selectedserviceid}`) }}
                                                             className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
                                                         >
                                                             <FaEdit size={12} />
@@ -866,14 +805,14 @@ const Servicelist = () => {
                                                         }</td>
                                                         <td className="px-4 py-3 flex gap-2 items-center">
                                                             <button
-                                                                onClick={() => { setIsPkgopen(true) }}
+                                                                onClick={() => { setIsPkgopen(true),SetSelectedserviceid(pkg.service_id) }}
                                                                 className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
                                                             >
                                                                 <FaEdit size={12} />
                                                                 Set Package
                                                             </button>
                                                             <button
-                                                                onClick={() => handleEdit(pkg)}
+                                                                onClick={() => {setIspkgserEditing(true),setCreatemodelopen(true),handelsrvEdit(pkg)}}
                                                                 className="bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
                                                             >
                                                                 <FaEdit size={12} />
@@ -898,10 +837,107 @@ const Servicelist = () => {
                                                     </td>
                                                 </tr>
                                             )}
+                                                     
                                         </tbody>
+                                        
+                                        
                                     )}
+                              
                                 </table>
-                            }
+                                
+                                
+                              
+                                 
+                      
+                                
+                            }{srvTotalpages > 0 ? (
+                                <div
+                                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"
+                                    ? "bg-gray-900 text-gray-300 border-gray-700"
+                                    : "bg-white text-gray-600 border-gray-200"
+                                    }`}
+                                >
+                                  <div>
+                                    Show{" "}
+                                    <select
+                                      className={`rounded border outline-none px-[5px] py-[5px] ${theme === "dark"
+                                        ? "bg-gray-800 text-gray-200 border-gray-600"
+                                        : "bg-white text-gray-700 border-gray-300"
+                                        }`}
+                                      value={perPage}
+                                      onChange={(e) => {
+                                        setPerPage(Number(e.target.value));
+                                        setPage(1);
+                                      }}
+                                    >
+                                      <option value={10}>10</option>
+                                      <option value={20}>20</option>
+                                      <option value={30}>30</option>
+                                    </select>{" "}
+                                    per page
+                                  </div>
+                  
+                                  <div className="flex items-center space-x-2">
+                                    {/* Showing range */}
+                                    <p>
+                                      {(page - 1) * perPage + 1}-
+                                      {Math.min(page * perPage, srvTotalrecord)} of {srvTotalrecord}
+                                    </p>
+                  
+                  
+                                    <button
+                                      onClick={() => setPage(page - 1)}
+                                      disabled={page === 1}
+                                      className={`px-3 py-1  rounded-md ${page === 1
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : theme === "dark"
+                                          ? "hover:bg-gray-700"
+                                          : "hover:bg-gray-200"
+                                        }`}
+                                    >
+                                      <i className="fa-solid fa-arrow-left"></i>
+                                    </button>
+                  
+                  
+                                    {Array.from({ length: 3 }, (_, i) => page + i).map((num) => (
+                                      num <= srvTotalpages && (
+                                        <button
+                                          key={num}
+                                          onClick={() => setPage(num)}
+                                          className={`px-3 py-1  rounded-md ${num === page
+                                              ? theme === "dark"
+                                                ? "bg-gray-700 font-semibold"
+                                                : "bg-gray-200 font-semibold"
+                                              : theme === "dark"
+                                                ? "hover:bg-gray-800"
+                                                : "hover:bg-gray-100"
+                                            }`}
+                                        >
+                                          {num}
+                                        </button>
+                                      )
+                                    ))}
+                  
+                  
+                  
+                                    <button
+                                      onClick={() => setPage(page + 1)}
+                                      disabled={page === srvTotalpages}
+                                      className={`px-3 py-1  rounded-md ${page === srvTotalpages
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : theme === "dark"
+                                          ? "hover:bg-gray-700"
+                                          : "hover:bg-gray-200"
+                                        }`}
+                                    >
+                                      <i className="fa-solid fa-arrow-right"></i>
+                                    </button>
+                                  </div>
+                  
+                                </div>
+                              ) : (
+                                ""
+                              )}
 
 
 

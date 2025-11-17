@@ -41,6 +41,8 @@ export const SERVICELIST_DELETE = "SERVICELIST_DELETE";
 
 export const PKG_CMS_MASTER_GET = "PKG_CMS_MASTER_GET";
 export const PKG_CMS_MASTER_CREATE = "PKG_CMS_MASTER_CREATE";
+export const PKG_CMS_MASTER_UPDATE = "PKG_CMS_MASTER_UPDATE";
+export const PKG_CMS_MASTER_DELETE = "PKG_CMS_MASTER_DELETE";
 
 
 
@@ -463,6 +465,7 @@ export const getTransactions_by_companyid = (corpid,searchTerm,searchStatus,page
     console.error("Error fetching settlements:");
     return;
   }
+
   if (downloadexcl==true) {
     const blob = await res.blob();
     const fileURL = window.URL.createObjectURL(blob);
@@ -749,7 +752,7 @@ console.log(722,pkgid);
       dispatch({ type: PKG_MASTER_DELETE, payload: data.data });
 
       dispatch(getPkgMasters())
-      setCreatemodelopen(false)
+   
       
     
 
@@ -777,13 +780,14 @@ console.log(722,pkgid);
 
 
 
-export const getPkg_cms_Masters = (searchTerm, page, limit) => async (dispatch) => {
+export const getPkg_cms_Masters = (searchTerm, page, limit,status,downloadexcl=false) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
   const params = new URLSearchParams();
-  if (searchTerm) params.append("search", searchTerm);
   if (page) params.append("page", page);
+  if (status) params.append("type", status);
   if (limit) params.append("limit", limit);
+  if(downloadexcl) params.append("download", "excel");
 
   try {
     const res = await fetch(`${baseUrl}/v1/admin/pkg/cms?${params.toString()}`, {
@@ -799,6 +803,19 @@ export const getPkg_cms_Masters = (searchTerm, page, limit) => async (dispatch) 
       return;
     }
 
+    if (downloadexcl==true) {
+      const blob = await res.blob();
+      const fileURL = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.setAttribute("download", "PKG_CMS_DATA.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      return; 
+    }
+
+
     const data = await res.json();
 
     if (!res.ok) {
@@ -807,7 +824,7 @@ export const getPkg_cms_Masters = (searchTerm, page, limit) => async (dispatch) 
       return;
     }
 
-    dispatch({ type: PKG_CMS_MASTER_GET, payload: data.data });
+    dispatch({ type: PKG_CMS_MASTER_GET, payload: data });
   } catch (error) {
     alert("Error fetching package masters: " + error.message);
   }
@@ -815,7 +832,7 @@ export const getPkg_cms_Masters = (searchTerm, page, limit) => async (dispatch) 
 
 // ---------------- CREATE PACKAGE ----------------
 export const create_Pkg_cms_Master = (formData,setCreatemodelopen) => async (dispatch) => {
-  console.log(formData);
+  console.log("818 CMS",formData);
   const token = localStorage.getItem("token");
 
   try {
@@ -841,10 +858,96 @@ export const create_Pkg_cms_Master = (formData,setCreatemodelopen) => async (dis
     
       
       
-      dispatch({ type: PKG_CMS_MASTER_CREATE, payload: data.data });
+      dispatch({ type: PKG_CMS_MASTER_CREATE, payload: data });
 
       dispatch(getPkg_cms_Masters())
       setCreatemodelopen(false)
+      
+    
+
+
+    } else {
+      alert(data.message || "Failed to create package");
+      
+    }
+  } catch (error) {
+    alert("Error creating package: " + error.message);
+  }
+};
+export const update_Pkg_cms_Master = (id,formData) => async (dispatch) => {
+  console.log("863 CMS",formData);
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    console.log("pkg",data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+
+    
+      
+      
+      dispatch({ type: PKG_CMS_MASTER_UPDATE, payload: data });
+
+      dispatch(getPkg_cms_Masters())
+    
+      
+    
+
+
+    } else {
+      alert(data.message || "Failed to create package");
+      
+    }
+  } catch (error) {
+    alert("Error creating package: " + error.message);
+  }
+};
+export const delete_Pkg_cms_Master = (id) => async (dispatch) => {
+  console.log("906 CMS id",id);
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    
+    });
+
+    const data = await res.json();
+    console.log("pkg",data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+
+    
+      
+      
+      dispatch({ type: PKG_CMS_MASTER_DELETE, payload: data });
+
+      dispatch(getPkg_cms_Masters())
+    
       
     
 
@@ -904,12 +1007,12 @@ export const createService = (formData, setCreateModalOpen) => async (dispatch) 
 //////////update service///////
 
 
-export const updateService = (serviceId, formData, setUpdateModalOpen) => async (dispatch) => {
+export const updateService = (serviceId, formData) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
   try {
     const res = await fetch(`${baseUrl}/v1/admin/services/${serviceId}`, {
-      method: "PATCH",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -926,9 +1029,9 @@ export const updateService = (serviceId, formData, setUpdateModalOpen) => async 
     }
 
     if (res.status === 200) {
-      dispatch({ type: SERVICELIST_UPDATE, payload: data.data });
+      dispatch({ type: SERVICELIST_UPDATE, payload: data });
       dispatch(getServiceList());
-      setUpdateModalOpen(false);
+      // setUpdateModalOpen(false);
     } else {
       alert(data.message || "Failed to update service");
     }
@@ -976,11 +1079,12 @@ export const deleteService = (serviceId) => async (dispatch) => {
 
 
 
-export const getServiceList = (searchTerm, page, limit) => async (dispatch) => {
+export const getServiceList = (searchTerm, page, limit,status) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
   const params = new URLSearchParams();
   if (searchTerm) params.append("search", searchTerm);
+  if (status) params.append("status", status);
   if (page) params.append("page", page);
   if (limit) params.append("limit", limit);
 
@@ -1000,7 +1104,7 @@ export const getServiceList = (searchTerm, page, limit) => async (dispatch) => {
     }
 
     if (res.status === 200) {
-      dispatch({ type: SERVICELIST_GET, payload: data.data });
+      dispatch({ type: SERVICELIST_GET, payload: data });
     } else {
       alert(data.message || "Failed to fetch service list");
     }
@@ -1008,6 +1112,8 @@ export const getServiceList = (searchTerm, page, limit) => async (dispatch) => {
     alert("Error fetching services: " + error.message);
   }
 };
+
+
 
 
 
