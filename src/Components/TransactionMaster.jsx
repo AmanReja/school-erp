@@ -270,7 +270,7 @@ message:updatedremarkes,
             <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md  border border-gray-100">
               {/* Title */}
               <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
-                Transaction list
+                Transaction List
               </h2>
 
               {/* Search Input */}

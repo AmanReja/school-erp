@@ -241,7 +241,13 @@ const initialSettlementState = {
             (pkgMasters) => pkgMasters.id !== action.payload
           )
         };
-  
+        case PKG_MASTER_UPDATE:
+          return {
+            ...state,
+            pkgMasters: state.pkgMasters.map((pkg) =>
+              pkg.id === action.payload.id ? action.payload : pkg
+            ),
+          };
       // ---------------- DEFAULT ----------------
       default:
         return state;

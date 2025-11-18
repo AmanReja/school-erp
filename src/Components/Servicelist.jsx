@@ -19,7 +19,7 @@ import { DateRange } from "react-date-range";
 
 
 import {
-    getServiceList, createService, getPkgMasters, createPkgMaster, deleteService,deletePkgMaster,updateService
+    getServiceList, createService, getPkgMasters, createPkgMaster, deleteService,deletePkgMaster,updateService,updatePkgMaster
 
 } from "../redux/action";
 
@@ -98,6 +98,9 @@ const Servicelist = () => {
 
     const [pkgstatus, setPkgstatus] = useState("")
     const [pkgname, setPkgname] = useState("")
+    const [ispkgedit, setIspkgedit] = useState(false)
+    const[currentpkgid,setCurrentpkgid] = useState("")
+
 
 
 
@@ -106,7 +109,6 @@ const Servicelist = () => {
 
 
     console.log(servicestatus, servicename, serviceid);
-
 
 
 
@@ -235,6 +237,53 @@ const Servicelist = () => {
      }
 
 
+     
+   const handelEditpkg =(pkg)=>{
+
+
+    setCreatemodelopenpkg(true)
+    setPkgstatus(pkg.status)
+    setPkgname(pkg.pkg_name)
+    setIspkgedit(true)
+    setCurrentpkgid(pkg.id)
+
+   }
+
+
+
+   const handelpkgUpdate = (e)=>{
+    e.preventDefault()
+
+    try {
+        const updatedpkgdata = {
+            pkg_name: pkgname,
+            status: pkgstatus
+        }
+
+        dispatch(updatePkgMaster(currentpkgid,updatedpkgdata))
+
+
+    } catch (error) {
+        console.log(error);
+    } finally {
+
+        setPkgname("")
+        setPkgstatus("")
+        setIspkgedit(false)
+        setCreatemodelopenpkg(false)
+    }
+
+
+
+
+
+
+    
+   }
+
+
+
+
 
 
 
@@ -304,9 +353,9 @@ const Servicelist = () => {
     //     dateRange.endDate]);
     useEffect(() => {
         dispatch(getServiceList(searchTerm,page,perPage,searchStatus))
-        dispatch(getPkgMasters())
+        dispatch(getPkgMasters(searchTerm,page,perPage,searchStatus,dateRange.startDate,dateRange.endDate))
     }, [
-        dispatch,searchTerm,page,perPage,searchStatus]);
+        dispatch,searchTerm,page,perPage,searchStatus,dateRange.startDate,dateRange.endDate]);
 
 
 
@@ -376,10 +425,10 @@ const Servicelist = () => {
                             }`}
                     >
                         <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md  border border-gray-100">
-                            {/* Title */}
-                            {/* <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
-                Transaction list
-              </h2> */}
+                            
+                            <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
+                {isPkgopen?"Package List":"Service List"}
+              </h2>
 
                             {/* Search Input */}
                             <div className="flex items-center gap-4">
@@ -394,16 +443,22 @@ const Servicelist = () => {
                                     />
 
                                 </div>
-                                <button
-                                    className="px-3 py-2 text-sm bg-indigo-500 text-white rounded-md"
-                                    onClick={() => setShowDatePicker(!showDatePicker)}
-                                >
-                                    {dateRange.startDate && dateRange.endDate
-                                        ? `${dateRange.startDate} → ${dateRange.endDate}`
-                                        : "Filter by Date"}
-                                </button>
+                              
+                              {isPkgopen?
+     <button
+     className="px-3 py-2 text-sm bg-indigo-500 text-white rounded-md"
+     onClick={() => setShowDatePicker(!showDatePicker)}
+ >
+     {dateRange.startDate && dateRange.endDate
+         ? `${dateRange.startDate} → ${dateRange.endDate}`
+         : "Filter by Date"}
+ </button>:""
 
-                                {dateRange.
+                              }
+                              
+                           
+
+                               {isPkgopen?dateRange.
                                     startDate !== null || !"" &&
                                     dateRange.endDate !== null || !"" ?
                                     <button
@@ -418,7 +473,7 @@ const Servicelist = () => {
 
                                     >
                                         <Undo2></Undo2>
-                                    </button> : ""}
+                                    </button> : "":""} 
 
 
                                 {showDatePicker && (
@@ -476,7 +531,7 @@ const Servicelist = () => {
                             </div>
 
 
-                            <button
+                            {/* <button
                                 onClick={handleDownload}
 
                                 className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-700 transition"
@@ -489,7 +544,7 @@ const Servicelist = () => {
                                     <span class="sr-only">Loading...</span>
                                 </div><div />
                                 </div> : "Download Exel"}
-                            </button>
+                            </button> */}
 
 
 
@@ -511,10 +566,10 @@ const Servicelist = () => {
                                         {/* Header */}
                                         <div className="px-5 py-3 border-b flex justify-between items-center">
                                             <h2 className="text-lg font-semibold text-gray-800">
-                                                Create Package
+                                               {ispkgedit?"Edit Package":"Create Package"} 
                                             </h2>
                                             <button
-                                                onClick={() => setCreatemodelopenpkg(false)}
+                                                onClick={() => {setCreatemodelopenpkg(false),setIspkgedit(false)}}
                                                 className="text-gray-500 hover:text-red-500 text-lg font-bold"
                                             >
                                                 ✕
@@ -523,7 +578,7 @@ const Servicelist = () => {
 
                                         {/* Body */}
                                         <form
-                                            onSubmit={(e) => { handelpkgcreate(e) }}
+                                            onSubmit={(e) => { ispkgedit? handelpkgUpdate(e) :handelpkgcreate(e) }}
                                             className="px-5 py-4 space-y-4"
                                         >
                                             {/* Package Name */}
@@ -573,7 +628,7 @@ const Servicelist = () => {
                                                     type="submit"
                                                     className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition"
                                                 >
-                                                    Save Changes
+                                                    {ispkgedit?"Edit Package":"Create Package"} 
                                                 </button>
                                             </div>
                                         </form>
@@ -645,7 +700,7 @@ const Servicelist = () => {
                                                 <select
                                                     name="status"
                                                     value={servicestatus}
-                                                    onChange={(e) => { setServicestatus(e.target.value) }}
+                                                    onChange={(e) => {setServicestatus(e.target.value) }}
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
                                                 >
                                                     <option value="">Select Status</option>
@@ -731,7 +786,7 @@ const Servicelist = () => {
                                                             Set Commercial
                                                         </button>
                                                         <button
-                                                            onClick={() => handleEdit(pkg)}
+                                                            onClick={() => {handelEditpkg(pkg)}}
                                                             className="bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
                                                         >
                                                             <FaEdit size={12} />
@@ -751,7 +806,7 @@ const Servicelist = () => {
                                             <tr>
                                                 <td colSpan="5" className="py-10">
                                                     <div className="flex justify-center items-center w-full">
-                                                        <div>No Package Master data found</div>
+                                                        <div>No Package data found</div>
                                                     </div>
                                                 </td>
                                             </tr>

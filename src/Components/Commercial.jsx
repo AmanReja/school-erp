@@ -91,6 +91,12 @@ const[service_id,setService_id] =useState(serviceid)
 const[pkg_id,setPkg_id] =useState(pkgid)
 
 
+const [commerciallist,setCommerciallist] =useState([])
+console.log(95,commerciallist);
+
+
+
+
 
 
 
@@ -138,29 +144,73 @@ const[pkg_id,setPkg_id] =useState(pkgid)
 
 
 
+const handelcommercialCreate = () => {
 
-const handelcommercialCreate = (e) => {
-  e.preventDefault();
-
-  try {
-    const formdata = {
-     
-
-      pkg_id: pkg_id,
-      service_id: service_id,
-      fromval: fromVal,
-      toval: toVal,
-      amount: amount,
-      mch: mch,
-      type: pkgType
-    };
-
-    dispatch(create_Pkg_cms_Master(formdata, setCreatemodelopen));
-
-  } catch (error) {
-    console.log(error);
+  // validation
+  if (!fromVal || !toVal || !amount || !mch || !pkgType) {
+    alert("Please fill all fields");
+    return;
   }
+
+  const formdata = {
+    fromval: Number(fromVal),
+    toval: Number(toVal),
+    amount: Number(amount),
+    mch,
+    type: pkgType,
+  };
+
+  setCommerciallist((prev) => [...prev, formdata]);
+
+  // CLEAR INPUTS
+  setFromVal("");
+  setToVal("");
+  setAmount("");
+  setMch("");
+  setPkgType("");
+
+  // RETURN TO STEP 1
+  setStep(1);
 };
+const resetCommercialForm = () => {
+  setCommerciallist([]);
+  setFromVal("");
+  setToVal("");
+  setAmount("");
+  setMch("");
+  setPkgType("");
+  setStep(1);
+  setCreatemodelopen(false); // close modal
+};
+
+
+const submitCommercials = () => {
+  let finalRanges = [...commerciallist];
+
+  // If there is unsaved last row (user did not click Save The Row)
+  if (fromVal && toVal && amount && mch && pkgType) {
+    finalRanges.push({
+      fromval: Number(fromVal),
+      toval: Number(toVal),
+      amount: Number(amount),
+      mch,
+      type: pkgType
+    });
+  }
+
+ 
+  dispatch(create_Pkg_cms_Master(finalRanges, service_id, pkg_id))
+    .then(() => {
+      resetCommercialForm(); // ⬅ reset everything here
+    });
+};
+
+
+
+
+
+
+ 
 
 
 
@@ -310,6 +360,15 @@ const handleDownload = async () => {
 
 
 
+  // const handelSinglesubmit =()=>{
+    
+  // }
+  // const handelMultipulesubmit =()=>{
+
+  // }
+
+
+
 
   return (
     <div
@@ -357,9 +416,9 @@ const handleDownload = async () => {
           >
             <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md  border border-gray-100">
               {/* Title */}
-              {/* <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
-                Transaction list
-              </h2> */}
+              <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
+                Commercial List
+              </h2>
 
               {/* Search Input */}
               <div className="flex items-center gap-4">
@@ -369,21 +428,21 @@ const handleDownload = async () => {
                     type="text"
                     value={searchTerm}
                     onChange={(e) => { setSearchTerm(e.target.value) }}
-                    placeholder="Search Transactions..."
+                    placeholder="Search Commercial..."
                     className="w-full border outline-none border-gray-200 rounded-[10px] pl-10 pr-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 transition-all duration-300 ease-in-out shadow-sm"
                   />
 
                 </div>
-                <button
+                {/* <button
                   className="px-3 py-2 text-sm bg-indigo-500 text-white rounded-md"
                   onClick={() => setShowDatePicker(!showDatePicker)}
                 >
                   {dateRange.startDate && dateRange.endDate
                     ? `${dateRange.startDate} → ${dateRange.endDate}`
                     : "Filter by Date"}
-                </button>
+                </button> */}
 
-                {dateRange.
+                {/* {dateRange.
                   startDate !== null || !"" &&
                   dateRange.endDate !== null||!"" ?
                   <button
@@ -398,7 +457,7 @@ const handleDownload = async () => {
 
                   >
                     <Undo2></Undo2>
-                  </button> : ""}
+                  </button> : ""} */}
 
 
                 {showDatePicker && (
@@ -470,36 +529,32 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
 
 
             <div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
-              
             {createmodelopen && (
   <div className="fixed inset-0 flex justify-center items-center z-50">
     <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
 
       {/* HEADER */}
       <div className="px-5 py-3 border-b flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">{iseditingcom?"Edit Commercial":"Create Commercial"}</h2>
-        <button 
-          onClick={() =>{ setCreatemodelopen(false), setIseditingcom(false)}}
+        <h2 className="text-lg font-semibold text-gray-800">
+          {iseditingcom ? "Edit Commercial" : "Create Commercial"}
+        </h2>
+
+        <button
+          onClick={() => {
+            setCreatemodelopen(false);
+            setIseditingcom(false);
+            resetCommercialForm()
+          }}
           className="text-gray-500 hover:text-red-500 text-lg font-bold"
         >
           ✕
         </button>
       </div>
 
-      {/* if (step !== 3) return: */}
-
       {/* BODY */}
-      <form
-        onSubmit={(e) => { 
-
-          if (step!==3) return
-{
-          iseditingcom?handelUpdate(e)
-          
-         
-         :
-          handelcommercialCreate(e)}
-        }}
+      {/* if (step !== 3) return; */}
+      <div
+       
         className="px-5 py-4 space-y-4"
       >
 
@@ -527,9 +582,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
               <input
                 type="text"
                 value={pkg_id}
-                // onChange={(e) => setPkgId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                required
                 readOnly
               />
             </div>
@@ -542,9 +595,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
               <input
                 type="text"
                 value={service_id}
-                // onChange={(e) => setServiceId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                required 
                 readOnly
               />
             </div>
@@ -552,7 +603,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
             <button
               type="button"
               onClick={() => {
-                if (!pkgid || !serviceid) {
+                if (!pkg_id || !service_id) {
                   alert("All fields must be filled");
                   return;
                 }
@@ -660,17 +711,16 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
               <label className="block text-sm font-medium text-gray-600 mb-1">
                 Type
               </label>
-              <select  value={pkgType}   onChange={(e) => setPkgType(e.target.value)}  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                required name="type" id="">
-
-                  <option value="Select Type">Select Type</option>
-                  <option value="FLAT">FLAT</option>
-                  <option value="PERCENTAGE">PERCENTAGE</option>
-                
-               
-
+              <select
+                value={pkgType}
+                onChange={(e) => setPkgType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                required
+              >
+                <option value="Select Type">Select Type</option>
+                <option value="FLAT">FLAT</option>
+                <option value="PERCENTAGE">PERCENTAGE</option>
               </select>
-           
             </div>
 
             <div className="flex justify-between mt-3">
@@ -682,16 +732,55 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
                 Back
               </button>
 
-              <button
-                type="submit"
-                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-              >
-                Submit
-              </button>
+              {commerciallist.length === 0 && (
+                !iseditingcom?<div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={()=>{handelcommercialCreate(),setStep(1)}}
+                  className="bg-green-600 text-white px-4 py-2 rounded-md"
+                >
+                  Save The Row
+                </button>
+                <button
+                  onClick={submitCommercials}
+                  className="bg-amber-600 text-white px-4 py-2 rounded-md"
+                >
+                  Submit Single
+                </button>
+              </div>: <button
+                  onClick={()=>{handelUpdate()}}
+                  className="bg-violet-600 text-white px-4 py-2 rounded-md"
+                >
+                  Update
+                </button>
+                
+)}
+
+{commerciallist.length > 0 && (
+  !iseditingcom? <div className="flex gap-3">
+  <button
+    type="button"
+    onClick={()=>{handelcommercialCreate(),setStep(1)}}
+    className="bg-green-600 text-white px-4 py-2 rounded-md"
+  >
+     Save The Row
+  </button>
+  <button
+    onClick={submitCommercials}
+    className="bg-amber-600 text-white px-4 py-2 rounded-md"
+  >
+    Submit Multiple
+  </button>
+</div>:""
+ 
+)}
+
+
+
             </div>
           </div>
         )}
-      </form>
+      </div>
     </div>
   </div>
 )}
@@ -765,7 +854,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
                       onClick={()=>{setCreatemodelopen(true)}}
                     className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
                   >
-                    <FaEdit size={12} />
+                    
                     +
                   </button>}
 
@@ -793,7 +882,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
             <tr>
               <td colSpan="10" className="py-10">
                 <div className="flex justify-center items-center w-full">
-                  <div>No Package Data Found</div>
+                  <div>No Commercial Data Found</div>
                 </div>
               </td>
             </tr>

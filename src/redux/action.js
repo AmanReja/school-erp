@@ -641,11 +641,14 @@ export const update_Txn_data = (txn_id,updateddata,setUpdateload) => async (disp
 
 
 // ---------------- GET ALL PACKAGES ----------------
-export const getPkgMasters = (searchTerm, page, limit) => async (dispatch) => {
+export const getPkgMasters = (searchTerm, page, limit,status,start_date,end_date) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
   const params = new URLSearchParams();
   if (searchTerm) params.append("search", searchTerm);
+  if (status) params.append("status", status);
+  if (start_date) params.append("start_date", start_date);
+  if (end_date) params.append("end_date", end_date);
   if (page) params.append("page", page);
   if (limit) params.append("limit", limit);
 
@@ -765,6 +768,51 @@ console.log(722,pkgid);
     alert("Error creating package: " + error.message);
   }
 };
+export const updatePkgMaster = (pkgid,updateddata) => async (dispatch) => {
+console.log(769,pkgid,updateddata);
+ 
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/${pkgid}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body:JSON.stringify(updateddata)
+     
+    });
+
+    const data = await res.json();
+    console.log("pkgdelete",data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+
+    
+      
+      
+      dispatch({ type: PKG_MASTER_UPDATE, payload: data });
+
+      dispatch(getPkgMasters())
+   
+      
+    
+
+
+    } else {
+      // alert(data.message || "Failed to create package");
+      
+    }
+  } catch (error) {
+    alert("Error creating package: " + error.message);
+  }
+};
 
 
 
@@ -785,6 +833,7 @@ export const getPkg_cms_Masters = (searchTerm, page, limit,status,downloadexcl=f
 
   const params = new URLSearchParams();
   if (page) params.append("page", page);
+  if (searchTerm) params.append("search", searchTerm);
   if (status) params.append("type", status);
   if (limit) params.append("limit", limit);
   if(downloadexcl) params.append("download", "excel");
@@ -831,9 +880,15 @@ export const getPkg_cms_Masters = (searchTerm, page, limit,status,downloadexcl=f
 };
 
 // ---------------- CREATE PACKAGE ----------------
-export const create_Pkg_cms_Master = (formData,setCreatemodelopen) => async (dispatch) => {
-  console.log("818 CMS",formData);
+export const create_Pkg_cms_Master = (ranges,service_id,pkg_id) => async (dispatch) => {
+  // console.log("883 CMS",commerciallist);
   const token = localStorage.getItem("token");
+
+  const datarow = {
+    pkg_id,
+    service_id,
+    ranges
+  };
 
   try {
     const res = await fetch(`${baseUrl}/v1/admin/pkg/cms`, {
@@ -842,7 +897,7 @@ export const create_Pkg_cms_Master = (formData,setCreatemodelopen) => async (dis
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(datarow),
     });
 
     const data = await res.json();
@@ -861,7 +916,7 @@ export const create_Pkg_cms_Master = (formData,setCreatemodelopen) => async (dis
       dispatch({ type: PKG_CMS_MASTER_CREATE, payload: data });
 
       dispatch(getPkg_cms_Masters())
-      setCreatemodelopen(false)
+      // setCreatemodelopen(false)
       
     
 

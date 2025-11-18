@@ -7,7 +7,7 @@ import { createMerchant ,getDetails,updateMerchant, deleteMerchant} from "../red
 import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { LoadDetails } from "../Contexts/LoadDetails";
 
-const Merchant = () => {
+const Getcommercial = () => {
   const { theme } = useContext(Theme);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,18 +51,16 @@ const Merchant = () => {
 
 
 
+  const [openModal, setOpenModal] = useState(false);
 
-//////commercial/////
-const [openModal, setOpenModal] = useState(false);
-
-console.log(58,openModal);
-
-
-
-const [company_id, setCompany_id] = useState("");
-const [service_id, setService_id] = useState("");
-const [pkg_id, setPkg_id] = useState("");
-
+  console.log(58,openModal);
+  
+  
+  
+  const [company_id, setCompany_id] = useState("");
+  const [service_id, setService_id] = useState("");
+  const [pkg_id, setPkg_id] = useState("");
+  
 
   
   // State for update modal
@@ -245,7 +243,116 @@ const [pkg_id, setPkg_id] = useState("");
       <main className="w-full h-full flex flex-col overflow-y-scroll">
         <section className="w-full flex flex-col sm:flex-row gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
           {/* Single Payout Form */}
-       
+          {openModal && (
+  <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+    <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
+
+      {/* HEADER */}
+      <div className="px-5 py-3 border-b flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-gray-800">
+        Create Entry
+        </h2>
+
+        <button
+          onClick={() => {
+               ""
+          }}
+          className="text-gray-500 hover:text-red-500 text-lg font-bold"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* BODY */}
+      <div className="px-5 py-4 space-y-4">
+
+        {/* ID - readonly */}
+        {/* <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            ID
+          </label>
+          <input
+            type="text"
+            value={""}
+            readOnly
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100"
+          />
+        </div> */}
+
+        {/* company_id */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Company ID
+          </label>
+          <input
+            type="text"
+            value={company_id}
+            onChange={(e) => setCompany_id(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            required
+          />
+        </div>
+
+        {/* service_id */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Service ID
+          </label>
+          <input
+            type="text"
+            value={service_id}
+            onChange={(e) => setService_id(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            required
+          />
+        </div>
+
+        {/* pkg_id */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Package ID
+          </label>
+          <input
+            type="text"
+            value={pkg_id}
+            onChange={(e) => setPkg_id(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            required
+          />
+        </div>
+
+        {/* FOOTER BUTTONS */}
+        <div className="flex justify-end gap-3 pt-2">
+          <button
+            onClick={() => {
+              setOpenModal(false);
+              // resetForm();
+            }}
+            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+
+          {/* {isEditing ? (
+            <button
+              onClick={updateRow}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Update
+            </button>
+          ) : (
+            <button
+              onClick={createRow}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            >
+              Save
+            </button>
+          )} */}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
           {/* Transactions Table */}
           <div
@@ -325,9 +432,7 @@ const [pkg_id, setPkg_id] = useState("");
       <td className="px-4 py-2 uppercase">{merchant.kyc_status}</td>
       <td className="px-4 py-2 flex gap-2">
 
-
-
-        <button onClick={()=>{setOpenModal(true)}} className="bg-amber-600 text-white font-bold p-2">Commercial</button>
+        <button onClick={()=>{navigate(`/dashboard/getcommercial/${merchant.corp_id}`)}} className="bg-amber-600 text-white font-bold p-2">Commercial</button>
       <button
 onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
 
@@ -354,9 +459,6 @@ Settlement
 
 
 </table>
-
-
-
 
 <div className={`flex flex-col sm:flex-row justify-between items-center p-4 border-t ${
               theme === "dark" ? "border-gray-700" : "border-gray-200"
@@ -649,4 +751,4 @@ Settlement
   );
 };
 
-export default Merchant;
+export default Getcommercial;
