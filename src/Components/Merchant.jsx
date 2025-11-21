@@ -53,15 +53,15 @@ const Merchant = () => {
 
 
 //////commercial/////
-const [openModal, setOpenModal] = useState(false);
+// const [openModal, setOpenModal] = useState(false);
 
-console.log(58,openModal);
+// console.log(58,openModal);
 
 
 
-const [company_id, setCompany_id] = useState("");
-const [service_id, setService_id] = useState("");
-const [pkg_id, setPkg_id] = useState("");
+// const [company_id, setCompany_id] = useState("");
+// const [service_id, setService_id] = useState("");
+// const [pkg_id, setPkg_id] = useState("");
 
 
   
@@ -327,15 +327,14 @@ const [pkg_id, setPkg_id] = useState("");
 
 
 
-        <button onClick={()=>{setOpenModal(true)}} className="bg-amber-600 text-white font-bold p-2">Commercial</button>
+        <button onClick={()=>{navigate(`/dashboard/getcommercial/${merchant.corp_id}`)}} className="bg-lime-600 rounded-[5px] text-white font-bold p-2">Commercial</button>
       <button
-onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
+onClick={() => {navigate(`/dashboard/transactionmaster/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
 
-
-}}
+}}  
 className="bg-sky-400 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
 >
-Settlement
+Transactions
 </button>
 
         <button onClick={() => handleEdit(merchant)} className="bg-gray-900 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs">Edit</button>

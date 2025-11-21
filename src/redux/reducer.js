@@ -11,7 +11,7 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   PKG_MASTER_CREATE,
   PKG_MASTER_UPDATE,
   PKG_MASTER_DELETE,PKG_CMS_MASTER_GET,PKG_CMS_MASTER_CREATE,PKG_CMS_MASTER_UPDATE,PKG_CMS_MASTER_DELETE,SERVICELIST_GET,SERVICELIST_CREATE,SERVICELIST_UPDATE,SERVICELIST_DELETE
-,
+  ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS
 
 } from "../redux/action";
 
@@ -339,3 +339,65 @@ const initialSettlementState = {
         return state;
     }
   };
+
+  const initialcmsassignState = {
+    cmsassign: {
+      services: [],
+      total_assigned: 0,
+      total_not_assigned: 0,
+    },
+  };
+  
+  export const cmsassignReducer = (state = initialcmsassignState, action) => {
+    switch (action.type) {
+  
+      // ---------------- GET LIST ----------------
+      case GET_CMS_ASSIGN:
+        return {
+          ...state,
+          cmsassign: action.payload,   // full object from backend
+        };
+  
+      // ---------------- CREATE ----------------
+      case ASSIGNED_CMS:
+        return {
+          ...state,
+          cmsassign: {
+            ...state.cmsassign,
+            services: [action.payload, ...state.cmsassign.services],
+            total_assigned: state.cmsassign.total_assigned + 1,
+            total_not_assigned: state.cmsassign.total_not_assigned - 1,
+          }
+        };
+  
+      // ---------------- UPDATE ----------------
+      case UPDATE_ASSIGNED_CMS:
+        return {
+          ...state,
+          cmsassign: {
+            ...state.cmsassign,
+            services: state.cmsassign.services.map((srv) =>
+              srv.id === action.payload.id ? action.payload : srv
+            ),
+          },
+        };
+  
+      // ---------------- DELETE ----------------
+      case DELETE_ASSIGNED_CMS:
+        return {
+          ...state,
+          cmsassign: {
+            ...state.cmsassign,
+            services: state.cmsassign.services.filter(
+              (service) => service.id !== action.payload
+            ),
+            total_assigned: state.cmsassign.total_assigned - 1,
+            total_not_assigned: state.cmsassign.total_not_assigned + 1,
+          }
+        };
+  
+      default:
+        return state;
+    }
+  };
+  

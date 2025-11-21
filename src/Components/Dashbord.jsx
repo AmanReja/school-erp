@@ -40,7 +40,7 @@ const Dashbord = () => {
 
 
   useEffect(() => {
-    if (location.pathname.startsWith("/dashboard/settlement/")) {
+    if (location.pathname.startsWith("/dashboard/transactionmaster/")) {
       setLoadD(true);
     } else {
       setLoadD(false);
@@ -191,7 +191,7 @@ const Dashbord = () => {
           style={{ fontFamily: "Montserrat" }}
           className="w-[80%] h-full flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-8 px-4 py-2 text-xl whitespace-nowrap font-bold"
         >
-         See All Transaction Lists <ArrowRight />
+         See All Settlement Lists <ArrowRight />
 
         
         </div>)}
@@ -199,7 +199,7 @@ const Dashbord = () => {
         
       {loadD && (
   <button
-    onClick={() => navigate(`/dashboard/transactionmaster/${merchantId}`)}
+    onClick={() => navigate(`/dashboard/settlement/${merchantId}`)}
     className="
       bg-gradient-to-r from-blue-500 to-indigo-600 
       text-white px-4 py-2 rounded-xl text-sm
@@ -209,7 +209,7 @@ const Dashbord = () => {
       transition-all duration-200 ease-out
     "
   >
-    Transactions
+   Settlement
     <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
   </button>
 )}

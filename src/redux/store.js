@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { loginReducer ,merchantReducer,merchantSettlementReducer,transactionReducer,pkgMasterReducer,pkgcmsMasterReducer,serviceListReducer} from "./reducer";
+import { loginReducer ,merchantReducer,merchantSettlementReducer,transactionReducer,pkgMasterReducer,pkgcmsMasterReducer,serviceListReducer,cmsassignReducer} from "./reducer";
 
 
 
@@ -14,6 +14,7 @@ settlements:merchantSettlementReducer,
 transactions:transactionReducer,
 pkgMasters:pkgMasterReducer,
 pkgcmsMasters:pkgcmsMasterReducer,
-services:serviceListReducer
+services:serviceListReducer,
+cmsassign:cmsassignReducer
     },
 });

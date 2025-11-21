@@ -247,66 +247,96 @@ const statusCard = [
 
 
 <div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
-  <table className="w-full table-auto text-sm">
-    <thead className={`uppercase text-gray-600 ${theme === "dark" ? "bg-gray-100 text-gray-400" : "bg-gray-50 text-gray-600"}`}>
-      <tr>
-        <th className="py-3 px-6 text-left">Account Name</th>
-        <th className="py-3 px-6 text-left">Corp Id</th>
-        <th className="py-3 px-6 text-left">Account Number</th>
-        <th className="py-3 px-6 text-left">IFSC Code</th>
-        <th className="py-3 px-6 text-left">Validated</th>
-        <th className="py-3 px-6 text-left">Status</th>
-      
-      </tr>
-    </thead>
-    <tbody className={`text-gray-600 ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-      {Array.isArray(settlementRowsArray) && settlementRowsArray.length > 0 ? (
-        settlementRowsArray.map((settlement, i) => (
-          <tr key={i} className={`border-b ${theme === "dark" ? "border-gray-700 hover:bg-gray-700" : "border-gray-200 hover:bg-gray-100"}`}>
-            <td className="py-3 px-6 text-left">{settlement.account_name}</td>
-            <td className="py-3 px-6 text-left">{settlement.company_id}</td>
-            <td className="py-3 px-6 text-left">{settlement.account_number}</td>
-            <td className="py-3 px-6 text-left">{settlement.ifsc_code}</td>
-            <td className="py-3 px-6 text-left">
-              <span className={`px-2 py-1 rounded text-xs ${
-                settlement.is_validated === "1" 
-                  ? "bg-green-500 text-white" 
-                  : "bg-yellow-500 text-white"
-              }`}>
-                {settlement.is_validated === "1" ? "Validated" : "Not Validated"}
-              </span>
-            </td>
-            <td className="py-3 px-6 text-left">
-              <span className={`px-2 py-1 rounded-[5px] text-xs ${
-                settlement.status.toLowerCase() === 'active' 
+<table className="w-full table-auto text-[12px]">
+  {/* HEADER */}
+  <thead
+    className={`uppercase font-semibold ${
+      theme === "dark"
+        ? "bg-gray-800 text-gray-300 border-b border-gray-700"
+        : "bg-gray-100 text-gray-600 border-b border-gray-200"
+    }`}
+  >
+    <tr>
+      <th className="py-3 px-5 text-left">Account Name</th>
+      <th className="py-3 px-5 text-left">Corp Id</th>
+      <th className="py-3 px-5 text-left">Account Number</th>
+      <th className="py-3 px-5 text-left">IFSC Code</th>
+      <th className="py-3 px-5 text-left">Validated</th>
+      <th className="py-3 px-5 text-left">Status</th>
+    </tr>
+  </thead>
+
+  {/* BODY */}
+  <tbody
+    className={`${
+      theme === "dark" ? "text-gray-300" : "text-gray-700"
+    }`}
+  >
+    {Array.isArray(settlementRowsArray) && settlementRowsArray.length > 0 ? (
+      settlementRowsArray.map((settlement, i) => (
+        <tr
+          key={i}
+          className={`transition-all ${
+            theme === "dark"
+              ? "border-b border-gray-700 hover:bg-gray-700/60"
+              : "border-b border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          {/* Account Name */}
+          <td className="py-2.5 px-5">{settlement.account_name}</td>
+
+          {/* Corp ID */}
+          <td className="py-2.5 px-5">{settlement.company_id}</td>
+
+          {/* Account Number */}
+          <td className="py-2.5 px-5">{settlement.account_number}</td>
+
+          {/* IFSC */}
+          <td className="py-2.5 px-5">{settlement.ifsc_code}</td>
+
+          {/* VALIDATION BADGE */}
+          <td className="py-2.5 px-5">
+            <span
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium shadow-sm ${
+                settlement.is_validated === "1"
                   ? "bg-green-500 text-white"
-                  : settlement.status.toLowerCase() === 'inactive'
+                  : "bg-yellow-500 text-white"
+              }`}
+            >
+              {settlement.is_validated === "1"
+                ? "Validated"
+                : "Not Validated"}
+            </span>
+          </td>
+
+          {/* STATUS BADGE */}
+          <td className="py-2.5 px-5">
+            <span
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium shadow-sm ${
+                settlement.status.toLowerCase() === "active"
+                  ? "bg-green-500 text-white"
+                  : settlement.status.toLowerCase() === "inactive"
                   ? "bg-gray-500 text-white"
                   : "bg-red-500 text-white"
-              }`}>
-                {
-                
-                
-                
-                
-                
-                settlement?.status.charAt(0).toUpperCase()+settlement.status.slice(1).toLowerCase()}
-
-
-              </span>
-            </td>
-          
-          </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan={6} className="text-center py-4 text-gray-400">
-            No settlements found.
+              }`}
+            >
+              {settlement?.status
+                .charAt(0)
+                .toUpperCase() + settlement.status.slice(1).toLowerCase()}
+            </span>
           </td>
         </tr>
-      )}
-    </tbody>
-  </table>
+      ))
+    ) : (
+      <tr>
+        <td colSpan={6} className="text-center py-3 text-gray-400">
+          No settlements found.
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
   {totalPages > 0 ? (
                 <div
                   className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"

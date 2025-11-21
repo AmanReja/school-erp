@@ -28,6 +28,7 @@ import Commercial from "./Components/Commercial";
 import Packagemaster from "./Components/Packagemaster";
 import Servicelist from "./Components/Servicelist";
 import Getcommercial from "./Components/Getcommercial";
+import Notassigned from "./Components/Notassigned";
 
 
 
@@ -49,6 +50,7 @@ const router = createBrowserRouter(
         <Route path="settlement/:merchantId" element={<Settlement />} />
         <Route path="commercial/:pkgid/:serviceid" element={<Commercial />} />
         <Route path="servicelist" element={<Servicelist />} />
+        <Route path="notassigned" element={<Notassigned />} />
         <Route path="getcommercial/:compid" element={<Getcommercial />} />
         <Route path="packagemaster/:pkgId" element={<Packagemaster />} />
       </Route>

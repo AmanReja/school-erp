@@ -47,6 +47,20 @@ export const PKG_CMS_MASTER_DELETE = "PKG_CMS_MASTER_DELETE";
 
 
 
+
+
+export const GET_CMS_ASSIGN = "GET_CMS_ASSIGN";
+export const ASSIGNED_CMS = "ASSIGNED_CMS";
+export const DELETE_ASSIGNED_CMS = "DELETE_ASSIGNED_CMS";
+export const UPDATE_ASSIGNED_CMS = "UPDATE_ASSIGNED_CMS";
+
+
+
+
+
+
+
+
 const baseUrl = "http://192.168.1.45:3000";
 
 export const login = (admin,setLoading,navigate) => async (dispatch) => {
@@ -1167,6 +1181,164 @@ export const getServiceList = (searchTerm, page, limit,status) => async (dispatc
     alert("Error fetching services: " + error.message);
   }
 };
+
+
+
+
+
+/////get marchent by corp id////
+export const get_cms_assign = (corp_id,currentPage,itemsPerPage,searchTerm) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+
+
+  try {
+    const params = new URLSearchParams();
+    if (currentPage) params.append("page", currentPage);
+    if (itemsPerPage) params.append("limit", itemsPerPage);
+    if (searchTerm) params.append("search", searchTerm);
+   
+ 
+
+    const res = await fetch(`${baseUrl}/v1/admin/cms/assign/${corp_id}?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+
+    const data = await res.json();
+    
+
+    if (res.ok) {
+      dispatch({ type: GET_CMS_ASSIGN, payload: data.data });
+    } else {
+      alert(data.message || "Failed to fetch merchants");
+    }
+  } catch (error) {
+    alert("Error fetching merchants: " + error.message);
+
+  }
+};
+
+
+
+export const assignedCms = (corp_id,formData) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/cms/assign/${corp_id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    console.log("CMS ASSIGNED", data.data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+     
+    if (res.status === 201) {
+      dispatch({ type: ASSIGNED_CMS, payload: data });
+      dispatch(get_cms_assign());
+      // setCreateModalOpen(false);
+
+      // window.location.href=""
+    } else {
+      alert(data.message || "Failed to create service");
+    }
+  } catch (error) {
+    // alert("Error creating service: " + error.message);
+  }
+};
+
+
+
+
+
+export const updateAssignedCms = (company_id,service_id, formData) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/cms/assign/${company_id}/${service_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    console.log("CMS UPDATED", data.data.old_service_id);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+      dispatch({ type: UPDATE_ASSIGNED_CMS, payload: data.data.old_service_id });
+      dispatch(get_cms_assign());
+      // window.location.href=""
+    } else {
+      alert(data.message || "Failed to update CMS assignment");
+    }
+  } catch (error) {
+    alert("Error updating service: " + error.message);
+  }
+};
+
+
+
+
+export const deleteAssignedCms = (company_id,service_id) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/cms/assign/${company_id}/${service_id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    console.log("CMS DELETED", data);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+    console.log(1324,data);
+
+    if (res.status === 200) {
+      dispatch({ type: DELETE_ASSIGNED_CMS, payload: data.service.id});
+    await  dispatch(get_cms_assign());
+      // window.location.href=""
+    } else {
+      alert(data.message || "Failed to delete CMS assignment");
+    }
+  } catch (error) {
+    alert("Error deleting service: " + error.message);
+  }
+};
+
 
 
 

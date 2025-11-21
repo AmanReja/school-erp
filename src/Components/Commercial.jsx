@@ -382,25 +382,7 @@ const handleDownload = async () => {
         <section className="w-full p-2 py-4 px-6 h-[200px]">
           <div className="mx-auto max-w-7xl">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* {statusCard.map((card, idx) => (
-        <div
-          key={idx}
-          className={`overflow-hidden rounded-2xl bg-gradient-to-r ${card.gradient} text-white transition-transform duration-300 hover:-translate-y-2`}
-        >
-          <div className="p-4">
-            <div className="mb-2 flex items-start justify-between">
-              <div>
-                <h3 className="text-xl font-bold">{card.title}</h3>
-                <p className="opacity-90">{card.credit}</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
-                {card.icon}
-              </div>
-            </div>
-          
-          </div>
-        </div>
-      ))} */}
+             
             </div>
           </div>
         </section>
@@ -530,12 +512,12 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
 
             <div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
             {createmodelopen && (
-  <div className="fixed inset-0 flex justify-center items-center z-50">
-    <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
+  <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/30 backdrop-blur-sm">
+    <div className="bg-white w-[420px] max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-gray-100 animate-fadeIn">
 
       {/* HEADER */}
-      <div className="px-5 py-3 border-b flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">
+      <div className="px-5 py-4 border-b flex justify-between items-center sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl">
+        <h2 className="text-lg font-semibold">
           {iseditingcom ? "Edit Commercial" : "Create Commercial"}
         </h2>
 
@@ -543,243 +525,137 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
           onClick={() => {
             setCreatemodelopen(false);
             setIseditingcom(false);
-            resetCommercialForm()
+            resetCommercialForm();
           }}
-          className="text-gray-500 hover:text-red-500 text-lg font-bold"
+          className="text-white/80 hover:text-white text-xl font-bold"
         >
           ✕
         </button>
       </div>
 
       {/* BODY */}
-      {/* if (step !== 3) return; */}
-      <div
-       
-        className="px-5 py-4 space-y-4"
-      >
+      <div className="px-5 py-5 space-y-4 bg-gray-50">
 
-        {/* Step Indicators */}
-        <div className="flex justify-center gap-2 mb-3">
-          {[1, 2, 3].map((n) => (
-            <div
-              key={n}
-              className={`w-3 h-3 rounded-full ${
-                step === n ? "bg-blue-600" : "bg-gray-300"
-              }`}
-            />
-          ))}
+        {/* FROM VALUE */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">From Value</label>
+          <input
+            type="number"
+            value={fromVal}
+            onChange={(e) => setFromVal(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
+          />
         </div>
 
-        {/* ---------------- STEP 1 ---------------- */}
-        {step === 1 && (
-          <div className="flex flex-col gap-3">
+        {/* TO VALUE */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">To Value</label>
+          <input
+            type="number"
+            value={toVal}
+            onChange={(e) => setToVal(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
+          />
+        </div>
 
-            {/* pkg_id */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Package ID
-              </label>
-              <input
-                type="text"
-                value={pkg_id}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                readOnly
-              />
-            </div>
+        {/* AMOUNT */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Amount</label>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
+          />
+        </div>
 
-            {/* service_id */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Service ID
-              </label>
-              <input
-                type="text"
-                value={service_id}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                readOnly
-              />
-            </div>
+        {/* MCH */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">MCH</label>
+          <input
+            type="text"
+            value={mch}
+            onChange={(e) => setMch(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
+          />
+        </div>
 
+        {/* TYPE */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Type</label>
+          <select
+            value={pkgType}
+            onChange={(e) => setPkgType(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
+          >
+            <option value="Select Type">Select Type</option>
+            <option value="FLAT">FLAT</option>
+            <option value="PERCENTAGE">PERCENTAGE</option>
+          </select>
+        </div>
+
+        {/* BUTTONS */}
+        <div className="flex justify-between mt-5">
+
+          {/* EDIT BUTTON */}
+          {iseditingcom ? (
             <button
-              type="button"
-              onClick={() => {
-                if (!pkg_id || !service_id) {
-                  alert("All fields must be filled");
-                  return;
-                }
-                nextStep();
-              }}
-              className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+              onClick={() => handelUpdate()}
+              className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-lg shadow-md transition-all duration-150"
             >
-              Next
+              Update
             </button>
-          </div>
-        )}
-
-        {/* ---------------- STEP 2 ---------------- */}
-        {step === 2 && (
-          <div className="flex flex-col gap-3">
-
-            {/* fromVal */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                From Value
-              </label>
-              <input
-                type="number"
-                value={fromVal}
-                onChange={(e) => setFromVal(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                required
-              />
-            </div>
-
-            {/* toVal */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                To Value
-              </label>
-              <input
-                type="number"
-                value={toVal}
-                onChange={(e) => setToVal(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                required
-              />
-            </div>
-
-            {/* amount */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Amount
-              </label>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                required
-              />
-            </div>
-
-            <div className="flex justify-between mt-3">
-              <button
-                type="button"
-                onClick={prevStep}
-                className="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300"
-              >
-                Back
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (!fromVal || !toVal || !amount) {
-                    alert("Please fill all fields");
-                    return;
-                  }
-                  nextStep();
-                }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ---------------- STEP 3 ---------------- */}
-        {step === 3 && (
-          <div className="flex flex-col gap-3">
-
-            {/* mch */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                MCH
-              </label>
-              <input
-                type="text"
-                value={mch}
-                onChange={(e) => setMch(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                required
-              />
-            </div>
-
-            {/* type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Type
-              </label>
-              <select
-                value={pkgType}
-                onChange={(e) => setPkgType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                required
-              >
-                <option value="Select Type">Select Type</option>
-                <option value="FLAT">FLAT</option>
-                <option value="PERCENTAGE">PERCENTAGE</option>
-              </select>
-            </div>
-
-            <div className="flex justify-between mt-3">
-              <button
-                type="button"
-                onClick={prevStep}
-                className="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300"
-              >
-                Back
-              </button>
-
+          ) : (
+            <>
+              {/* IF NO ROWS */}
               {commerciallist.length === 0 && (
-                !iseditingcom?<div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={()=>{handelcommercialCreate(),setStep(1)}}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md"
-                >
-                  Save The Row
-                </button>
-                <button
-                  onClick={submitCommercials}
-                  className="bg-amber-600 text-white px-4 py-2 rounded-md"
-                >
-                  Submit Single
-                </button>
-              </div>: <button
-                  onClick={()=>{handelUpdate()}}
-                  className="bg-violet-600 text-white px-4 py-2 rounded-md"
-                >
-                  Update
-                </button>
-                
-)}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handelcommercialCreate();
+                      setStep(1);
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-150"
+                  >
+                    Save Row
+                  </button>
 
-{commerciallist.length > 0 && (
-  !iseditingcom? <div className="flex gap-3">
-  <button
-    type="button"
-    onClick={()=>{handelcommercialCreate(),setStep(1)}}
-    className="bg-green-600 text-white px-4 py-2 rounded-md"
-  >
-     Save The Row
-  </button>
-  <button
-    onClick={submitCommercials}
-    className="bg-amber-600 text-white px-4 py-2 rounded-md"
-  >
-    Submit Multiple
-  </button>
-</div>:""
- 
-)}
+                  <button
+                    onClick={submitCommercials}
+                    className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-150"
+                  >
+                    Submit Single
+                  </button>
+                </div>
+              )}
 
+              {/* IF MULTIPLE ROWS */}
+              {commerciallist.length > 0 && (
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handelcommercialCreate();
+                      setStep(1);
+                    }}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-150"
+                  >
+                    Save Row
+                  </button>
 
+                  <button
+                    onClick={submitCommercials}
+                    className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-150"
+                  >
+                    Submit Multiple
+                  </button>
+                </div>
+              )}
+            </>
+          )}
 
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   </div>
@@ -788,110 +664,118 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
 
 
 
-            <table className="w-full text-sm text-left text-gray-600 border border-gray-200 overflow-hidden">
-        <thead className="text-[11px] text-gray-500 uppercase bg-[#f9f9f9] border-b border-gray-300">
-        <tr>
-  <th className="py-2 px-3 text-left">Package Info</th>
- 
- 
-  <th className="py-2 px-3 text-left">Service ID</th>
-  <th className="py-2 px-3 text-left">Service Name</th>
-  <th className="py-2 px-3 text-left">From Value</th>
-  <th className="py-2 px-3 text-left">To Value</th>
-  <th className="py-2 px-3 text-left">Amount</th>
-  <th className="py-2 px-3 text-left">MCH</th>
-  <th className="py-2 px-3 text-left">Type</th>
-  <th className="py-2 px-3 text-left">Action</th>
-</tr>
 
-        </thead>
 
-        {load ? (
-          <tbody>
-            <tr>
-              <td colSpan="5" className="py-10">
-                <div className="flex justify-center items-center w-full">
-                  <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        ) : (
-          <tbody className="text-[13px] font-medium">
-          {Array.isArray(pkgcmsData) && pkgcmsData.length > 0 ? (
-            pkgcmsData.map((pkg, i) => (
-              <tr
-                key={i}
-                className="hover:bg-gray-50 transition-colors text-[13px] border-b border-gray-100"
+<table className="w-full text-sm text-left border border-gray-200 overflow-hidden rounded-2xl shadow-xl bg-white">
+
+{/* TABLE HEADER */}
+<thead className="text-[12px] text-gray-700 uppercase bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
+  <tr className="">
+    <th className="py-3 px-4 font-semibold tracking-wide">Package Info</th>
+    <th className="py-3 px-4 font-semibold tracking-wide">Service ID</th>
+    <th className="py-3 px-4 font-semibold tracking-wide">Service Name</th>
+    <th className="py-3 px-4 font-semibold tracking-wide">From Value</th>
+    <th className="py-3 px-4 font-semibold tracking-wide">To Value</th>
+    <th className="py-3 px-4 font-semibold tracking-wide">Amount</th>
+    <th className="py-3 px-4 font-semibold tracking-wide">MCH</th>
+    <th className="py-3 px-4 font-semibold tracking-wide">Type</th>
+    <th className="py-3 px-4 font-semibold tracking-wide">Action</th>
+  </tr>
+</thead>
+
+{/* LOADING */}
+{load ? (
+  <tbody>
+    <tr>
+      <td colSpan="9" className="py-10">
+        <div className="flex justify-center items-center w-full">
+          <div className="w-7 h-7 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+) : (
+  <tbody className="text-[13px] font-medium">
+
+    {Array.isArray(pkgcmsData) && pkgcmsData.length > 0 ? (
+      pkgcmsData.map((pkg, i) => (
+        <tr
+          key={i}
+          className={`transition-all border-b border-gray-100 ${
+            i % 2 === 0 ? "bg-white" : "bg-gray-50"
+          } hover:bg-blue-50 hover:shadow-sm`}
+        >
+          {/* PACKAGE INFO */}
+          <td className="px-4 py-4">
+            <div className="space-y-1">
+              <p className="text-[12px] text-gray-800">
+                <span className="font-semibold text-blue-700">PKG ID:</span> {pkg.pkg_id}
+              </p>
+              <p className="text-[12px] text-gray-800">
+                <span className="font-semibold text-blue-700">PKG Name:</span> {pkg.pkg_name}
+              </p>
+            </div>
+          </td>
+
+          <td className="px-4 py-4">{pkg.service_id}</td>
+          <td className="px-4 py-4">{pkg.service_name}</td>
+          <td className="px-4 py-4">{pkg.fromval}</td>
+          <td className="px-4 py-4">{pkg.toval}</td>
+          <td className="px-4 py-4">{pkg.amount}</td>
+          <td className="px-4 py-4">{pkg.mch}</td>
+          <td className="px-4 py-4">{pkg.type}</td>
+
+          {/* ACTION BUTTONS */}
+          <td className="px-4 py-4 flex gap-2 items-center">
+
+            {i === pkgcmsData.length - 1 && (
+              <button
+                onClick={() => setCreatemodelopen(true)}
+                className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 
+                           text-white text-[12px] font-medium px-3 py-[6px]
+                           rounded-lg shadow transition-all"
               >
-                <td className="px-4 py-3">
-                    <div className="space-y-[2px]">
-                      <p className="text-[12px] text-gray-700">
-                        PKG ID: <span className="font-medium">{pkg.pkg_id}</span>
-                      </p>
-                      <p className="text-[12px] text-gray-700">
-                        PKG Name: <span className="font-medium">{pkg.pkg_name}</span>
-                      </p>
-                    </div>
-                  </td>
+                +
+              </button>
+            )}
 
-                <td className="px-4 py-3 text-gray-800">{pkg.service_id}</td>
-                <td className="px-4 py-3 text-gray-800">{pkg.service_name}</td>
-               
-                <td className="px-4 py-3 text-gray-800">{pkg.fromval}</td>
-                <td className="px-4 py-3 text-gray-800">{pkg.toval}</td>
-                <td className="px-4 py-3 text-gray-800">{pkg.amount}</td>
-                <td className="px-4 py-3 text-gray-800">{pkg.mch}</td>
-                <td className="px-4 py-3 text-gray-800">{pkg.type}</td>
-        
-                {/* Actions (keep your buttons) */}
-                <td className="px-4 py-3 flex gap-2 items-center">
+            <button
+              onClick={() => {
+                setIseditingcom(true);
+                setCreatemodelopen(true);
+                handelEditcom(pkg);
+              }}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+                         text-white text-[12px] font-medium px-3 py-[6px]
+                         rounded-lg shadow transition-all flex items-center gap-1"
+            >
+              <FaEdit size={12} />
+              Edit
+            </button>
 
-                  {
-                        
-                        
-                i===pkgcmsData.length - 1 && <button
-                      onClick={()=>{setCreatemodelopen(true)}}
-                    className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                  >
-                    
-                    +
-                  </button>}
+            <button
+              onClick={() => handelcomDelete(pkg)}
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700
+                         text-white text-[12px] font-medium px-3 py-[6px]
+                         rounded-lg shadow transition-all flex items-center gap-1"
+            >
+              <FaTrashAlt size={12} />
+              Delete
+            </button>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="9" className="py-10 text-center text-gray-500">
+          No Commercial Data Found
+        </td>
+      </tr>
+    )}
+  </tbody>
+)}
+</table>
 
-                 
-        
-                  <button
-                    onClick={() => {setIseditingcom(true),setCreatemodelopen(true),handelEditcom(pkg)}}
-                    className="bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                  >
-                    <FaEdit size={12} />
-                    Edit
-                  </button>
-        
-                  <button
-                    onClick={() => handelcomDelete(pkg)}
-                    className="bg-red-500 hover:bg-red-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                  >
-                    <FaTrashAlt size={12} />
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="10" className="py-10">
-                <div className="flex justify-center items-center w-full">
-                  <div>No Commercial Data Found</div>
-                </div>
-              </td>
-            </tr>
-          )}
-        </tbody>
-        
-        )}
-
-      </table>
       
       
       {pkgcmsTotalpages > 0 ? (

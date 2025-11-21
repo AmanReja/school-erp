@@ -1,752 +1,379 @@
-import React, { useState, useContext,useEffect } from "react";
-import Hdfc from "../assets/images/HDFC.png";
-import { Link,useNavigate,useLocation } from "react-router-dom";
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Theme } from "../Contexts/Theme";
-import { useDispatch,useSelector } from "react-redux";
-import { createMerchant ,getDetails,updateMerchant, deleteMerchant} from "../redux/action";
-import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { LoadDetails } from "../Contexts/LoadDetails";
+
+import {
+  get_cms_assign,
+  assignedCms,
+  deleteAssignedCms,
+  updateAssignedCms,
+} from "../redux/action";
+
+import { useDispatch, useSelector } from "react-redux";
 
 const Getcommercial = () => {
   const { theme } = useContext(Theme);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const location = useLocation()
-
+  const { compid } = useParams();
   const dispatch = useDispatch();
-  const [step, setStep] = useState(1);
-  const navigate =useNavigate()
-  const [marchentid,setMarchentid] =useState ("")
 
- const [searchTerm, setSearchTerm] = useState("");
- const {loadD,setLoadD} =useContext(LoadDetails)
+  const [searchTerm, setSearchTerm] = useState("");
 
- const [load,setLoad] =useState(false)
+  const [createModelOpen, setCreateModelOpen] = useState(false);
+  const [serviceId, setServiceId] = useState("");
+  const [packageId, setPackageId] = useState("");
+  const [isediting, setIsediting] = useState(false);
+  const [currentsrvid, setCurrentsrvid] = useState("");
 
+  const [showPkgModal, setShowPkgModal] = useState(false);
+  const [selectedPackages, setSelectedPackages] = useState([]);
+
+  const cmsassigned = useSelector(
+    (state) => state.cmsassign.cmsassign?.services
+
+  );
+  const cmsassigned1 = useSelector(
+    (state) => state.cmsassign.cmsassign
+  );
  
- 
+  console.log(38,cmsassigned1);
 
-  
-
-
-  
-
-  // ✅ Individual state hooks for each field
-  const [name, setName] = useState("");
-  // const [org_id, setOrgId] = useState("");
-  // const [program_id, setProgramId] = useState("");
-  const [wallet_id, setWalletId] = useState("");
- 
-  const [user_id, setUserId] = useState("");
-  const [user_pass, setUserPass] = useState("");
-  const [address, setAddress] = useState("");
-  const [pan, setPan] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobile_number, setMobileNumber] = useState("");
-  const [gst, setGst] = useState("");
-  const [kyc_status, setKyc_status] = useState("");
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-
-
-  const [openModal, setOpenModal] = useState(false);
-
-  console.log(58,openModal);
-  
-  
-  
-  const [company_id, setCompany_id] = useState("");
-  const [service_id, setService_id] = useState("");
-  const [pkg_id, setPkg_id] = useState("");
-  
-
-  
-  // State for update modal
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedMerchant, setSelectedMerchant] = useState(null);
-  const [updateFormData, setUpdateFormData] = useState({
-    name: "",
-    // org_id: "",
-    // program_id: "",
-    wallet_id: "",
-    userid: "",
-    user_pass: "",
-    address: "",
-    pan: "",
-    email: "",
-    mobile_number: "",
-    gst: "",
-    kyc_status: ""
-  });
-
-
-   // Pagination functions
-   const handlePageChange = (page) => {
-    setCurrentPage(page);
-    // You can dispatch getDetails with page parameter if your API supports pagination
-    // dispatch(getDetails(page, itemsPerPage));
-  };
-
-  const handleItemsPerPageChange = (e) => {
-    const newItemsPerPage = parseInt(e.target.value);
-    setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1);
-    // You can dispatch getDetails with new items per page if your API supports it
-    // dispatch(getDetails(1, newItemsPerPage));
-  };
-
-  const merchantsResponse = useSelector((state) => state.merchants?.merchants || {});
-  console.log(52,merchantsResponse);
-  
-  // Extract merchants data
-  const merchantsData = merchantsResponse.data || [];
-  const totalRecords = merchantsResponse.total || 0;
-  const totalPages = merchantsResponse.totalPages || 1;
-  const currentLimit = merchantsResponse.limit || itemsPerPage;
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = merchantsData.slice(startIndex, endIndex);
-
-  // Generate page numbers
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    
-    return pages;
-  };
-  
-  
-  
-  
+  // const cmsnotassigned = useSelector(
+  //   (state) => state.cmsassign.cmsassign?.not_assigned_services
+  // );
 
   useEffect(() => {
-    const generatePassword = () => {
-      const chars =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-      let pass = "";
-      for (let i = 0; i < 10; i++) {
-        pass += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return pass;
+    dispatch(get_cms_assign(compid));
+  }, [dispatch, compid]);
+
+  // ========= RESET FORM =============
+  const resetform = () => {
+    setServiceId("");
+    setPackageId("");
+    setIsediting(false);
+    setCurrentsrvid("");
+  };
+
+  // ========= ADD SUBMIT ============
+  const handleSubmit = () => {
+    const assigneddata = {
+      service_id: serviceId,
+      pkg_id: packageId,
     };
-    setUserPass(generatePassword());
-  }, []);
-  useEffect(() => {
-    dispatch(getDetails(currentPage, itemsPerPage,searchTerm,setLoad));
-  }, [dispatch, currentPage, itemsPerPage,searchTerm]);
-  
 
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
+    dispatch(assignedCms(compid, assigneddata));
+    setCreateModelOpen(false);
+    resetform();
+    
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-  
-    const formData = {
-      name,
-      // org_id,
-      // program_id,
-      wallet_id,
-      userid: user_id,     
-      user_pass,
-      address,
-      pan,
-      email,
-      mobile_number,
-      gst,
-      kyc_status: kyc_status 
+  // ========= DELETE =============
+  const handleDelete = (service_id) => {
+    if (!window.confirm("Are you sure you want to delete this assignment?"))
+      return;
+
+    dispatch(deleteAssignedCms(compid, service_id));
+  };
+
+  // ========= EDIT SETUP ==========
+  const handeledit = (srv) => {
+    setCurrentsrvid(srv.service_id);
+    setServiceId(srv.service_id);
+    setPackageId(srv.pkg_id);
+    setIsediting(true);
+    setCreateModelOpen(true);
+  };
+
+  // ========= UPDATE ============
+  const handelUpdate = () => {
+    const updatedData = {
+      service_id: serviceId,
+      pkg_id: packageId,
     };
-  
-    console.log("Payload:", formData); // debug
-    dispatch(createMerchant(formData,setStep));
+
+    dispatch(updateAssignedCms(compid, currentsrvid, updatedData));
+    setCreateModelOpen(false);
+    resetform();
   };
 
-
-
-
-
-  // Handle Edit - Open update modal with merchant data
-  const handleEdit = (merchant) => {
-    setSelectedMerchant(merchant);
-    setUpdateFormData({
-      name: merchant.name || "",
-      // org_id: merchant.org_id || "",
-      // program_id: merchant.program_id || "",
-      wallet_id: merchant.wallet_id || "",
-      userid: merchant.userid || "",
-      user_pass: merchant.user_pass || "",
-      address: merchant.address || "",
-      pan: merchant.pan || "",
-      email: merchant.email || "",
-      mobile_number: merchant.mobile_number || "",
-      gst: merchant.gst || "",
-      kyc_status: merchant.kyc_status || ""
-    });
-    setIsUpdateModalOpen(true);
-  };
-
-  // Handle Update - Submit updated data
-  const handleUpdate = async () => {
-    if (selectedMerchant) {
-      await dispatch(updateMerchant(selectedMerchant.corp_id, updateFormData));
-      // Fetch updated list
-      dispatch(getDetails());
-  
-      setIsUpdateModalOpen(false);
-      setSelectedMerchant(null);
-    }
-  };
-
-  // Handle input change in update form
-  const handleUpdateInputChange = (e) => {
-    const { name, value } = e.target;
-    setUpdateFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-
-  const handleDelete = async(merchant) => {
-    if (window.confirm("Are you sure you want to delete this merchant?")) {
-      await dispatch(deleteMerchant(merchant.corp_id))
-    }
-  };
-
-  const steps = ["Basic Info", "Organization", "User Details", "Financial", "Status"];
-
-  const formCardStyle = `
-    w-full sm:w-[30%] min-w-[350px] flex flex-col gap-6 rounded-2xl border p-6 shadow-md
-    ${theme === "dark" ? "bg-gray-800 border-gray-700 text-gray-200" : "bg-white border-gray-200 text-gray-800"}
-  `;
+  // MERGE BOTH LISTS IN ONE TABLE
+  // const mergedData = [
+  //   ...(cmsassigned || []),
+  //   ...(cmsnotassigned || []),
+  // ];
+  // console.log(96,mergedData);
 
   return (
     <div
-      className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${
-        theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"
-      }`}
+    className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"
+  }`}
     >
       <main className="w-full h-full flex flex-col overflow-y-scroll">
-        <section className="w-full flex flex-col sm:flex-row gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
-          {/* Single Payout Form */}
-          {openModal && (
-  <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-    <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
+        <section className="w-full flex flex-col sm:flex-col gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
 
-      {/* HEADER */}
-      <div className="px-5 py-3 border-b flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">
-        Create Entry
-        </h2>
-
-        <button
-          onClick={() => {
-               ""
-          }}
-          className="text-gray-500 hover:text-red-500 text-lg font-bold"
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* BODY */}
-      <div className="px-5 py-4 space-y-4">
-
-        {/* ID - readonly */}
-        {/* <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            ID
-          </label>
-          <input
-            type="text"
-            value={""}
-            readOnly
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100"
-          />
-        </div> */}
-
-        {/* company_id */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Company ID
-          </label>
-          <input
-            type="text"
-            value={company_id}
-            onChange={(e) => setCompany_id(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-            required
-          />
-        </div>
-
-        {/* service_id */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Service ID
-          </label>
-          <input
-            type="text"
-            value={service_id}
-            onChange={(e) => setService_id(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-            required
-          />
-        </div>
-
-        {/* pkg_id */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Package ID
-          </label>
-          <input
-            type="text"
-            value={pkg_id}
-            onChange={(e) => setPkg_id(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-            required
-          />
-        </div>
-
-        {/* FOOTER BUTTONS */}
-        <div className="flex justify-end gap-3 pt-2">
-          <button
-            onClick={() => {
-              setOpenModal(false);
-              // resetForm();
-            }}
-            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-          >
-            Cancel
-          </button>
-
-          {/* {isEditing ? (
-            <button
-              onClick={updateRow}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Update
-            </button>
-          ) : (
-            <button
-              onClick={createRow}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-            >
-              Save
-            </button>
-          )} */}
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-          {/* Transactions Table */}
-          <div
-            className={`flex sm:w-[100%] w-full h-full flex-col rounded-xl overflow-y-auto border ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-gray-300"
-                : "bg-white border-gray-100 text-gray-800"
-            }`}
-          >
-            <div className="flex justify-between items-center p-4 h-[60px] w-full">
-              <h2 className="text-[16px] font-semibold">Merchant List</h2>  <div className="flex items-center gap-4">
-  {/* 🔍 Search Input */}
-  <div className="relative w-[220px]">
-    <input
-      type="text"
-      value={searchTerm}
-      onChange={(e)=>{setSearchTerm(e.target.value)}}
-      placeholder="Search settlements..."
-      className="w-full border outline-none border-gray-200 rounded-[10px] pl-10 pr-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 transition-all duration-300 ease-in-out shadow-sm"
-    />
-   
-  </div>
-
-  {/* 📋 Status Dropdown */}
-  <button 
-  
-
-  onClick={()=>{navigate("/dashboard/createmerchants")}}
-    className="p-2 bg-violet-400 text-white px-[20px] rounded-2xl"
-   
-  > Create Merchants
-    
-  </button>
-</div>
-             
-            </div>
-
-            <table className="w-full text-sm text-left">
-  <thead
-    className={`text-[11px] uppercase border-b border-t ${
-      theme === "dark"
-        ? "text-gray-400 border-gray-600 bg-gray-700"
-        : "text-gray-400 border-gray-300 bg-[#fcfcfc]"
-    }`}
-  >
-    <tr>
-      <th className="px-4 py-4">Name</th>
-      
-      <th className="px-4 py-4">Corp ID</th>
-      <th className="px-4 py-4">Wallet ID</th>
-      <th className="px-4 py-4">Email</th>
-      <th className="px-4 py-4">Mobile</th>
-      <th className="px-4 py-4">KYC Status</th>
-      <th className="px-4 py-4">Actions</th>
-    </tr>
-  </thead>
-
-
-{load?(
-   <tr>
-   <td colSpan="9" className="py-10">
-     <div className="flex justify-center items-center w-full">
-       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-     </div>
-   </td>
- </tr>
-):(  <tbody className="text-[12px] font-semibold">
-{merchantsData? (
-  merchantsData?.map((merchant, i) => (
-    <tr key={i} className={`border-b hover:bg-gray-50 ${theme === "dark" ? "border-gray-700 hover:bg-gray-700" : "border-gray-100 hover:bg-gray-50"}`}>
-      <td className="px-4 py-2">{merchant.name}</td>
-      <td className="px-4 py-2">{merchant.corp_id}</td>
-      
-      <td className="px-4 py-2">{merchant.wallet_id}</td>
-      <td className="px-4 py-2">{merchant.email}</td>
-      <td className="px-4 py-2">{merchant.mobile_number}</td>
-      <td className="px-4 py-2 uppercase">{merchant.kyc_status}</td>
-      <td className="px-4 py-2 flex gap-2">
-
-        <button onClick={()=>{navigate(`/dashboard/getcommercial/${merchant.corp_id}`)}} className="bg-amber-600 text-white font-bold p-2">Commercial</button>
-      <button
-onClick={() => {navigate(`/dashboard/settlement/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
-
-
-}}
-className="bg-sky-400 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
->
-Settlement
-</button>
-
-        <button onClick={() => handleEdit(merchant)} className="bg-gray-900 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs">Edit</button>
-        <button onClick={() => handleDelete(merchant)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
-      </td>
-    </tr>
-  ))
-) : (
-  <tr>
-    <td colSpan={8} className="text-center py-4 text-gray-400">
-      No merchants found.
-    </td>
-  </tr>
-)}
-</tbody>)}
-
-
-</table>
-
-<div className={`flex flex-col sm:flex-row justify-between items-center p-4 border-t ${
-              theme === "dark" ? "border-gray-700" : "border-gray-200"
-            }`}>
-              <div className="text-sm text-gray-500 mb-2 sm:mb-0">
-                Showing {startIndex + 1} to {Math.min(endIndex, totalRecords)} of {totalRecords} entries
-              </div>
-              
-              <div className="flex items-center gap-1">
-                {/* First Page */}
-                <button
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  className={`p-2 rounded ${
-                    currentPage === 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : theme === "dark"
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <ChevronsLeft size={16} />
-                </button>
-
-                {/* Previous Page */}
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`p-2 rounded ${
-                    currentPage === 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : theme === "dark"
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <ChevronLeft size={16} />
-                </button>
-
-                {/* Page Numbers */}
-                {getPageNumbers().map((page) => (
+          {/* =================== ASSIGN/EDIT MODAL =================== */}
+          {createModelOpen && (
+            <div className="fixed inset-0 flex justify-center items-center z-50">
+              <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
+                
+                <div className="px-5 py-3 border-b flex justify-between items-center">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {isediting ? "Edit Service" : "Assign Service"}
+                  </h2>
                   <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`min-w-[32px] h-8 rounded text-sm font-medium ${
-                      currentPage === page
-                        ? "bg-violet-600 text-white"
-                        : theme === "dark"
-                        ? "text-gray-300 hover:bg-gray-700"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                    onClick={() => {
+                      setCreateModelOpen(false);
+                      resetform();
+                    }}
+                    className="text-gray-500 hover:text-gray-700"
                   >
-                    {page}
+                    ✖
                   </button>
-                ))}
+                </div>
 
-                {/* Next Page */}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`p-2 rounded ${
-                    currentPage === totalPages
-                      ? "text-gray-400 cursor-not-allowed"
-                      : theme === "dark"
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <ChevronRight size={16} />
-                </button>
+                <div className="px-5 py-4 flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Service ID
+                    </label>
+                    <input
+                      type="text"
+                      className="border-gray-300 rounded px-3 py-2 border"
+                      value={serviceId}
+                      onChange={(e) => setServiceId(e.target.value)}
+                      placeholder="Enter Service ID"
+                    
+                    />
+                  </div>
 
-                {/* Last Page */}
-                <button
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className={`p-2 rounded ${
-                    currentPage === totalPages
-                      ? "text-gray-400 cursor-not-allowed"
-                      : theme === "dark"
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <ChevronsRight size={16} />
-                </button>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Package ID
+                    </label>
+                    <input
+                      type="text"
+                      className="border-gray-300 rounded px-3 py-2 border"
+                      value={packageId}
+                      onChange={(e) => setPackageId(e.target.value)}
+                      placeholder="Enter Package ID"
+                    />
+                  </div>
+                </div>
+
+                <div className="px-5 py-3 border-t flex justify-end gap-3">
+                  <button
+                    onClick={() => setCreateModelOpen(false)}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+
+                  {isediting ? (
+                    <button
+                      onClick={handelUpdate}
+                      className="bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded"
+                    >
+                      Update
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSubmit}
+                      className="bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded"
+                    >
+                      Submit
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
+          )}
 
+          {/* =================== PAGE HEADER =================== */}
+          <div className="flex justify-between items-center p-4">
+            <h2 className="text-[16px] font-semibold">CMS Services</h2>
 
-          </div>
-        </section>
-      </main>
+            <div className="flex items-center gap-4">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search..."
+                className="w-[220px] border border-gray-200 rounded-[10px] pl-3 pr-4 py-2 text-sm bg-gray-50"
+              />
 
-      {/* Update Merchant Modal */}
-      {isUpdateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl border shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
-            theme === "dark" 
-              ? "bg-gray-800 border-gray-700 text-gray-200" 
-              : "bg-white border-gray-200 text-gray-800"
-          }`}>
-            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold">Update Merchant</h2>
-              <button 
-                onClick={() => setIsUpdateModalOpen(false)}
-                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"
+              <button
+                onClick={() => {
+                  setCreateModelOpen(true);
+                  resetform();
+                }}
+                className="p-2 bg-violet-400 text-white px-[20px] rounded-2xl"
               >
-                <X size={20} />
+                Assign CMS
               </button>
             </div>
+          </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={updateFormData.name}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
+          {/* =================== ONE MERGED TABLE =================== */}
+          <table className="w-full text-sm text-left">
+            <thead
+              className={`text-[11px] uppercase border-b border-t ${
+                theme === "dark"
+                  ? "text-gray-400 border-gray-600 bg-gray-700"
+                  : "text-gray-400 border-gray-300 bg-[#fcfcfc]"
+              }`}
+            >
+              <tr>
+                <th className="px-4 py-4">Service ID</th>
+                <th className="px-4 py-4">Service Name</th>
+                <th className="px-4 py-4">Status</th>
+                <th className="px-4 py-4">Package(s)</th>
+                <th className="px-4 py-4">Actions</th>
+              </tr>
+            </thead>
 
-                {/* <div>
-                  <label className="block text-sm font-medium mb-2">Organization ID</label>
-                  <input
-                    type="text"
-                    name="org_id"
-                    value={updateFormData.org_id}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div> */}
-{/* 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Program ID</label>
-                  <input
-                    type="text"
-                    name="program_id"
-                    value={updateFormData.program_id}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div> */}
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Wallet ID</label>
-                  <input
-                    type="text"
-                    name="wallet_id"
-                    value={updateFormData.wallet_id}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={updateFormData.email}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Mobile Number</label>
-                  <input
-                    type="tel"
-                    name="mobile_number"
-                    value={updateFormData.mobile_number}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">PAN</label>
-                  <input
-                    type="text"
-                    name="pan"
-                    value={updateFormData.pan}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">GST</label>
-                  <input
-                    type="text"
-                    name="gst"
-                    value={updateFormData.gst}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-2">Address</label>
-                  <textarea
-                    name="address"
-                    value={updateFormData.address}
-                    onChange={handleUpdateInputChange}
-                    rows="3"
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-2">KYC Status</label>
-                  <select
-                    name="kyc_status"
-                    value={updateFormData.kyc_status}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
+            <tbody className="text-[12px] font-semibold">
+              {cmsassigned.length > 0 ? (
+                cmsassigned.map((srv, i) => (
+                  <tr
+                    key={i}
+                    className={`border-b ${
+                      theme === "dark"
+                        ? "border-gray-700 hover:bg-gray-700"
+                        : "border-gray-100 hover:bg-gray-50"
                     }`}
                   >
-                    <option value="Pending">Pending</option>
-                    <option value="Completed">Completed</option>
-                  </select>
+                    <td className="px-4 py-2">{srv.service_id}</td>
+                    <td className="px-4 py-2">{srv.service_name}</td>
+
+                    <td className="px-4 py-2">
+                      {srv.assigned ? (
+                        <span className="text-green-600">Assigned</span>
+                      ) : (
+                        <span className="text-red-500">Not Assigned</span>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-2">
+                      {srv.assigned ? (
+                        `${srv.pkg_name} (${srv.pkg_id})`
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setSelectedPackages(srv.packages || []);
+                            setShowPkgModal(true);
+                          }}
+                          className="text-blue-600 underline"
+                        >
+                          View Packages
+                        </button>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-2 flex gap-2">
+                      {srv.assigned ? (
+                        <>
+                          <button
+                            onClick={() => handeledit(srv)}
+                            className="bg-gray-900 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(srv.service_id)}
+                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+                          >
+                            Unassigned
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setServiceId(srv.service_id);
+                            setIsediting(false);
+                            setCreateModelOpen(true);
+                          }}
+                          className="bg-violet-500 hover:bg-violet-600 text-white px-3 py-1 rounded text-xs"
+                        >
+                          Assign
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center py-4 text-gray-400">
+                    No services found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* =================== PACKAGE MODAL =================== */}
+          {showPkgModal && (
+            <div className="fixed inset-0 flex justify-center items-center z-50">
+              <div className="bg-white w-[500px] rounded-lg shadow-xl border border-gray-300">
+                <div className="px-5 py-3 border-b flex justify-between items-center">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Package Details
+                  </h2>
+                  <button
+                    onClick={() => setShowPkgModal(false)}
+                    className="text-gray-600 hover:text-black text-xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="px-5 py-4 max-h-[320px] overflow-y-auto">
+                  <table className="w-full text-sm border">
+                    <thead className="bg-gray-100 text-gray-600 text-xs uppercase border-b">
+                      <tr>
+                        <th className="px-3 py-2 border">#</th>
+                        <th className="px-3 py-2 border">Package Name</th>
+                        <th className="px-3 py-2 border">Package ID</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {selectedPackages.length > 0 ? (
+                        selectedPackages.map((pkg, idx) => (
+                          <tr key={idx} className="border-b">
+                            <td className="px-3 py-2 border">{idx + 1}</td>
+                            <td className="px-3 py-2 border">{pkg.pkg_name}</td>
+                            <td className="px-3 py-2 border">{pkg.pkg_id}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="3"
+                            className="text-center py-4 text-gray-400 border"
+                          >
+                            No Packages Found
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="px-5 py-3 border-t text-right">
+                  <button
+                    onClick={() => setShowPkgModal(false)}
+                    className="bg-gray-700 text-white px-4 py-2 rounded-md"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
-
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => setIsUpdateModalOpen(false)}
-                  className={`px-4 py-2 rounded-lg border ${
-                    theme === "dark"
-                      ? "bg-gray-700 border-gray-600 hover:bg-gray-600"
-                      : "bg-gray-200 border-gray-300 hover:bg-gray-300"
-                  }`}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpdate}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Update Merchant
-                </button>
-              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+
+        </section>
+      </main>
     </div>
   );
 };
