@@ -6,6 +6,7 @@ import { useDispatch,useSelector } from "react-redux";
 import { createMerchant ,getDetails,updateMerchant, deleteMerchant} from "../redux/action";
 import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { LoadDetails } from "../Contexts/LoadDetails";
+import "../App.css"
 
 const Merchant = () => {
   const { theme } = useContext(Theme);
@@ -19,9 +20,9 @@ const Merchant = () => {
   const [marchentid,setMarchentid] =useState ("")
 
  const [searchTerm, setSearchTerm] = useState("");
- const {loadD,setLoadD} =useContext(LoadDetails)
+//  const {loadD,setLoadD} =useContext(LoadDetails)
 
- const [load,setLoad] =useState(false)
+ const [load,setLoad] =useState(false);
 
  
  
@@ -147,8 +148,16 @@ const Merchant = () => {
     };
     setUserPass(generatePassword());
   }, []);
+
+  
   useEffect(() => {
-    dispatch(getDetails(currentPage, itemsPerPage,searchTerm,setLoad));
+
+   async function fetchData(){
+    setLoad(true)
+     await dispatch(getDetails(currentPage, itemsPerPage,searchTerm));
+     setLoad(false)
+    }
+    fetchData()
   }, [dispatch, currentPage, itemsPerPage,searchTerm]);
   
 
@@ -327,12 +336,12 @@ const Merchant = () => {
 
 
 
-        <button onClick={()=>{navigate(`/dashboard/getcommercial/${merchant.corp_id}`)}} className="bg-lime-600 rounded-[5px] text-white font-bold p-2">Commercial</button>
+        <button onClick={()=>{navigate(`/dashboard/getcommercial/${merchant.corp_id}`)}} className="button-87">Commercial</button>
       <button
 onClick={() => {navigate(`/dashboard/transactionmaster/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
 
 }}  
-className="bg-sky-400 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
+className="button-88"
 >
 Transactions
 </button>

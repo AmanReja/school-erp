@@ -57,11 +57,13 @@ export const UPDATE_ASSIGNED_CMS = "UPDATE_ASSIGNED_CMS";
 
 
 
+// "http://192.168.1.45:3000"
+
+// "https://acs.busybox.in"
 
 
 
-
-const baseUrl = "http://192.168.1.45:3000";
+const baseUrl = "https://acs.busybox.in";
 
 export const login = (admin,setLoading,navigate) => async (dispatch) => {
   try {
@@ -138,12 +140,15 @@ export const createMerchant = (formData, setStep) => async (dispatch) => {
   }
 };
 
-export const getDetails = (currentPage, itemsPerPage,searchTerm,setLoad) => async (dispatch) => {
+export const getDetails = (currentPage, itemsPerPage,searchTerm) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
-  setLoad(true)
 
+ 
+ 
   try {
+    
+   
     const params = new URLSearchParams();
     if (currentPage) params.append("page", currentPage);
     if (itemsPerPage) params.append("limit", itemsPerPage);
@@ -158,7 +163,7 @@ export const getDetails = (currentPage, itemsPerPage,searchTerm,setLoad) => asyn
         Authorization: `Bearer ${token}`,
       },
     });
-
+  
 
     if (res.status === 401) {
       localStorage.removeItem("token");
@@ -168,7 +173,7 @@ export const getDetails = (currentPage, itemsPerPage,searchTerm,setLoad) => asyn
 
     const data = await res.json();
     
-  setLoad(false)
+  
 
     if (res.ok) {
       dispatch({ type: GETDETAILS, payload: data });
@@ -178,7 +183,7 @@ export const getDetails = (currentPage, itemsPerPage,searchTerm,setLoad) => asyn
   } catch (error) {
     alert("Error fetching merchants: " + error.message);
     
-  setLoad(true)
+
   }
 };
 
@@ -197,21 +202,25 @@ export const updateMerchant = (id, updatedData) => async (dispatch) => {
     });
 
     const data = await res.json();
+    console.log(200,data);
+
+    if (res.status === 403) {
+      alert("Permission denied");
+    }
     
-    if (res.ok) {
+    if (res.status===200) {
       // Include the ID in payload for reducer to identify which merchant to update
-      dispatch({ 
-        type: UPDATE_MERCHANT, 
-        payload: { 
-          id: id, // or use corp_id if that's what you're using
-          ...updatedData,
-          ...data.data // include any returned data from API
-        } 
-      });
+      // dispatch({ 
+      //   type: UPDATE_MERCHANT, 
+      //   payload: { 
+      //     id: id, // or use corp_id if that's what you're using
+      //     ...updatedData,
+      //     ...data.data // include any returned data from API
+      //   } 
+      // });
       alert("Merchant updated successfully");
-      if (res.status === 403) {
-        alert("Permission denied");
-      }
+      dispatch(getDetails())
+      
     } else {
       alert(data.message || "Failed to update merchant");
     }
@@ -1255,7 +1264,7 @@ export const assignedCms = (corp_id,formData) => async (dispatch) => {
      
     if (res.status === 201) {
       dispatch({ type: ASSIGNED_CMS, payload: data });
-      dispatch(get_cms_assign());
+      dispatch(get_cms_assign(corp_id));
       // setCreateModalOpen(false);
 
       // window.location.href=""
@@ -1293,8 +1302,8 @@ export const updateAssignedCms = (company_id,service_id, formData) => async (dis
     }
 
     if (res.status === 200) {
-      dispatch({ type: UPDATE_ASSIGNED_CMS, payload: data.data.old_service_id });
-      dispatch(get_cms_assign());
+      dispatch({ type: UPDATE_ASSIGNED_CMS, payload: data });
+      dispatch(get_cms_assign(company_id));
       // window.location.href=""
     } else {
       alert(data.message || "Failed to update CMS assignment");
@@ -1328,8 +1337,8 @@ export const deleteAssignedCms = (company_id,service_id) => async (dispatch) => 
     console.log(1324,data);
 
     if (res.status === 200) {
-      dispatch({ type: DELETE_ASSIGNED_CMS, payload: data.service.id});
-    await  dispatch(get_cms_assign());
+      // dispatch({ type: DELETE_ASSIGNED_CMS, payload: data.service.id});
+    await  dispatch(get_cms_assign(company_id));
       // window.location.href=""
     } else {
       alert(data.message || "Failed to delete CMS assignment");

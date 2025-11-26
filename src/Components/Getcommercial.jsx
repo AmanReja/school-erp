@@ -180,7 +180,7 @@ const Getcommercial = () => {
                       onClick={handleSubmit}
                       className="bg-gray-900 hover:bg-gray-700 text-white px-4 py-2 rounded"
                     >
-                      Submit
+                      Assign
                     </button>
                   )}
                 </div>
@@ -215,102 +215,116 @@ const Getcommercial = () => {
 
           {/* =================== ONE MERGED TABLE =================== */}
           <table className="w-full text-sm text-left">
-            <thead
-              className={`text-[11px] uppercase border-b border-t ${
-                theme === "dark"
-                  ? "text-gray-400 border-gray-600 bg-gray-700"
-                  : "text-gray-400 border-gray-300 bg-[#fcfcfc]"
-              }`}
-            >
-              <tr>
-                <th className="px-4 py-4">Service ID</th>
-                <th className="px-4 py-4">Service Name</th>
-                <th className="px-4 py-4">Status</th>
-                <th className="px-4 py-4">Package(s)</th>
-                <th className="px-4 py-4">Actions</th>
-              </tr>
-            </thead>
+    <thead
+      className={`text-[11px] uppercase font-semibold ${
+        theme === "dark"
+          ? "bg-gray-700 text-gray-300 border-b border-gray-600"
+          : "bg-gray-50 text-gray-600 border-b border-gray-200"
+      }`}
+    >
+      <tr>
+        <th className="px-5 py-4">Service ID</th>
+        <th className="px-5 py-4">Service Name</th>
+        <th className="px-5 py-4">Status</th>
+        <th className="px-5 py-4">Package(s)</th>
+        <th className="px-5 py-4">Actions</th>
+      </tr>
+    </thead>
 
-            <tbody className="text-[12px] font-semibold">
-              {cmsassigned.length > 0 ? (
-                cmsassigned.map((srv, i) => (
-                  <tr
-                    key={i}
-                    className={`border-b ${
-                      theme === "dark"
-                        ? "border-gray-700 hover:bg-gray-700"
-                        : "border-gray-100 hover:bg-gray-50"
-                    }`}
-                  >
-                    <td className="px-4 py-2">{srv.service_id}</td>
-                    <td className="px-4 py-2">{srv.service_name}</td>
+    <tbody className="text-[12px] font-medium">
+      {cmsassigned.length > 0 ? (
+        cmsassigned.map((srv, i) => (
+          <tr
+            key={i}
+            className={`transition-all duration-200 ${
+              i % 2 === 0
+                ? theme === "dark"
+                  ? "bg-gray-800"
+                  : "bg-white"
+                : theme === "dark"
+                ? "bg-gray-750"
+                : "bg-gray-50"
+            } hover:bg-violet-50 hover:scale-[1.01] ${
+              theme === "dark" ? "hover:bg-gray-700" : ""
+            }`}
+          >
+            <td className="px-5 py-3">{srv.service_id}</td>
+            <td className="px-5 py-3">{srv.service_name}</td>
 
-                    <td className="px-4 py-2">
-                      {srv.assigned ? (
-                        <span className="text-green-600">Assigned</span>
-                      ) : (
-                        <span className="text-red-500">Not Assigned</span>
-                      )}
-                    </td>
-
-                    <td className="px-4 py-2">
-                      {srv.assigned ? (
-                        `${srv.pkg_name} (${srv.pkg_id})`
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setSelectedPackages(srv.packages || []);
-                            setShowPkgModal(true);
-                          }}
-                          className="text-blue-600 underline"
-                        >
-                          View Packages
-                        </button>
-                      )}
-                    </td>
-
-                    <td className="px-4 py-2 flex gap-2">
-                      {srv.assigned ? (
-                        <>
-                          <button
-                            onClick={() => handeledit(srv)}
-                            className="bg-gray-900 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs"
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            onClick={() => handleDelete(srv.service_id)}
-                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
-                          >
-                            Unassigned
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setServiceId(srv.service_id);
-                            setIsediting(false);
-                            setCreateModelOpen(true);
-                          }}
-                          className="bg-violet-500 hover:bg-violet-600 text-white px-3 py-1 rounded text-xs"
-                        >
-                          Assign
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+            <td className="px-5 py-3">
+              {srv.assigned ? (
+                <span className="text-green-600 font-semibold bg-green-100 px-2 py-[2px] rounded-full text-[11px]">
+                  Assigned
+                </span>
               ) : (
-                <tr>
-                  <td colSpan="5" className="text-center py-4 text-gray-400">
-                    No services found
-                  </td>
-                </tr>
+                <span className="text-red-500 font-semibold bg-red-100 px-2 py-[2px] rounded-full text-[11px]">
+                  Not Assigned
+                </span>
               )}
-            </tbody>
-          </table>
+            </td>
 
+            <td className="px-5 py-3">
+              {srv.assigned ? (
+                <span className="text-gray-700 dark:text-gray-300">
+                  {srv.pkg_name} ({srv.pkg_id})
+                </span>
+              ) : (
+                <button
+                  onClick={() => {
+                    setSelectedPackages(srv.packages || []);
+                    setShowPkgModal(true);
+                  }}
+                  className="text-violet-600 hover:text-violet-800 underline"
+                >
+                  View Packages
+                </button>
+              )}
+            </td>
+
+            <td className="px-5 py-3 flex gap-2">
+              {srv.assigned ? (
+                <>
+                  <button
+                    onClick={() => handeledit(srv)}
+                    className="bg-gray-900 hover:bg-gray-700 text-white px-3 py-1 rounded-md text-xs transition"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(srv.service_id)}
+                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs transition"
+                  >
+                    Unassign
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    setServiceId(srv.service_id);
+                    setIsediting(false);
+                    setCreateModelOpen(true);
+                  }}
+                  className="bg-violet-500 hover:bg-violet-600 text-white px-3 py-1 rounded-md text-xs transition"
+                >
+                  Assign
+                </button>
+              )}
+            </td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td
+            colSpan="5"
+            className="text-center py-6 text-gray-400 text-sm"
+          >
+            No services found
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
           {/* =================== PACKAGE MODAL =================== */}
           {showPkgModal && (
             <div className="fixed inset-0 flex justify-center items-center z-50">

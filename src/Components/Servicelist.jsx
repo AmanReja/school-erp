@@ -648,7 +648,7 @@ const Servicelist = () => {
                                               {ispkgserEditing?"Edit Services":"Create Services"}  
                                             </h2>
                                             <button
-                                                onClick={() => setCreatemodelopen(false)}
+                                                onClick={() => {setCreatemodelopen(false),setServicename(""),setServiceid(""),setServicestatus("")}}
                                                 className="text-gray-500 hover:text-red-500 text-lg font-bold"
                                             >
                                                 ✕

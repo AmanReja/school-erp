@@ -31,6 +31,14 @@ import Getcommercial from "./Components/Getcommercial";
 import Notassigned from "./Components/Notassigned";
 
 
+if(import.meta.env.PROD){
+  console.log = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+}
+
 
 
 const router = createBrowserRouter(

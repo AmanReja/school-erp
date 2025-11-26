@@ -11,8 +11,10 @@ import {
 import Dashbord from "./Components/Dashbord";
 import Navbar from "./Components/Navbar";
 import { ToastContainer, toast } from "react-toastify";
+import Titlecontroller from "./Components/Titlecontroller";
 
 const App = () => {
+  Titlecontroller()
   return (
     <>
       <ToastContainer></ToastContainer>

@@ -48,46 +48,37 @@ const Dashbord = () => {
   }, [location.pathname]);
 
   console.log(loadD);
-  
   const items = [
     {
       to: "/dashboard/merchant",
-      icon: "fa-chart-simple",
+      icon: "fa-solid fa-store",            // Merchant icon
       label: "Marchants",
       show: shows,
       setShow: setShows,
     },
     {
       to: "/dashboard/getallsettlements",
-      icon: "fa-arrow-right -rotate-[50deg]",
+      icon: "fa-solid fa-scale-balanced",   // Settlements icon
       label: "All settlements",
       show: showp,
       setShow: setShowp,
     },
     {
       to: "/dashboard/getalltxn",
-      icon: "fa-arrow-right -rotate-[50deg]",
+      icon: "fa-solid fa-right-left",       // Transactions icon
       label: "Get All Transactions",
       show: showp,
       setShow: setShowp,
     },
     {
       to: "/dashboard/servicelist",
-      icon: "fa-arrow-right -rotate-[50deg]",
+      icon: "fa-solid fa-list-check",       // Services / Commercial Master
       label: "Commercial Master",
       show: showp,
       setShow: setShowp,
     },
-    // {
-    //   to: "/dashboard/commercial/:pkgid/:serviceid",
-    //   icon: "fa-arrow-right -rotate-[50deg]",
-    //   label: "Commercial",
-    //   show: showp,
-    //   setShow: setShowp,
-    // },
-   
-   
   ];
+  
 
 
 

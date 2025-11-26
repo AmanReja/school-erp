@@ -70,20 +70,20 @@ export const merchantReducer = (state = initialState, action) => {
       };
 
     // ✅ Update merchant (match by corp_id since that's what you're using in API)
-    case UPDATE_MERCHANT:
-      return {
-        ...state,
-        merchants: {
-          ...state.merchants,
-          data: state.merchants.data.map((merchant) =>
-            merchant.corp_id === action.payload.corp_id ||
-            merchant.company_id === action.payload.company_id ||
-            merchant.org_id === action.payload.org_id
-              ? { ...merchant, ...action.payload }
-              : merchant
-          ),
-        },
-      };
+    // case UPDATE_MERCHANT:
+    //   return {
+    //     ...state,
+    //     merchants: {
+    //       ...state.merchants,
+    //       data: state.merchants.data.map((merchant) =>
+    //         merchant.corp_id === action.payload.corp_id ||
+    //         merchant.company_id === action.payload.company_id ||
+    //         merchant.org_id === action.payload.org_id
+    //           ? { ...merchant, ...action.payload }
+    //           : merchant
+    //       ),
+    //     },
+    //   };
 
     // ✅ Delete merchant (match by corp_id)
     case DELETE_MERCHANT:
@@ -389,8 +389,9 @@ const initialSettlementState = {
           cmsassign: {
             ...state.cmsassign,
             services: state.cmsassign.services.filter(
-              (service) => service.id !== action.payload
+              (service) =>{ return   service.service_id !== action.payload}
             ),
+           
             total_assigned: state.cmsassign.total_assigned - 1,
             total_not_assigned: state.cmsassign.total_not_assigned + 1,
           }
