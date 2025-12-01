@@ -419,7 +419,7 @@ const Servicelist = () => {
 
 
                     <div
-                        className={`flex sm:w-[100%] w-full h-full flex-col rounded-xl overflow-y-auto border ${theme === "dark"
+                        className={`flex sm:w-[100%] w-full h-full flex-col rounded-xl overflow-y-auto  ${theme === "dark"
                             ? "bg-gray-800 border-gray-700 text-gray-300"
                             : "bg-white border-gray-100 text-gray-800"
                             }`}

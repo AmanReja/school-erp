@@ -139,7 +139,7 @@ export const Login = () => {
               {/* Forgot password */}
               <p className="text-center text-gray-600 text-sm">
                 Forgot your password?
-                <span className="text-indigo-600 cursor-pointer hover:underline">
+                <span onClick={()=>{navigate("/forgotpass")}} className="text-indigo-600 cursor-pointer hover:underline">
                   Reset here
                 </span>
               </p>

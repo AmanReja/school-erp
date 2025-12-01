@@ -181,8 +181,8 @@
   display: block;
   border: 0px;
   font-weight: 700;
-  box-shadow: 0px 0px 14px -7px #352d21;
-  background-image: linear-gradient(45deg, #2b2422 0%, #120e08  51%, #FF512F  100%);
+  box-shadow: 0px 0px 14px -7px #a6b951;
+  background-image: linear-gradient(45deg, #4149e6 0%, #6e73da  51%, #5d2dee  100%);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -217,8 +217,8 @@
   display: block;
   border: 0px;
   font-weight: 700;
-  box-shadow: 0px 0px 14px -7px #45363d;
-  background-image: linear-gradient(45deg, #59a3cb 0%, #5f6ae0  51%, #662ca8  100%);
+  box-shadow: 0px 0px 14px -7px #f97f0df1;
+  background-image: linear-gradient(45deg, #f97f0df1 0%, #f97f0df1  51%, #f97f0df1  100%);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;

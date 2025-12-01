@@ -29,6 +29,11 @@ import Packagemaster from "./Components/Packagemaster";
 import Servicelist from "./Components/Servicelist";
 import Getcommercial from "./Components/Getcommercial";
 import Notassigned from "./Components/Notassigned";
+import Protectedroutes from "./Components/Protectedroutes";
+import Otpverification from "./Components/Otpverification";
+import Resetpass from "./Components/Resetpass";
+import Forgotpass from "./Components/Forgotpass";
+import Updatepass from "./Components/Updatepass";
 
 
 if(import.meta.env.PROD){
@@ -46,10 +51,16 @@ const router = createBrowserRouter(
 
     <Route element={<App />}>
       <Route path="/" element={<Login />} />
+      <Route path="/otpverification" element={<Otpverification />} />
+      <Route path="/resetpass" element={<Resetpass />} />
+      <Route path="/forgotpass" element={<Forgotpass />} />
 
-      {/* <Route element={<Protectedroute />}> */}
+     
+
+      <Route element={<Protectedroutes />}>
       <Route path="/dashboard" element={<Dashbord />}>
         <Route path="createmerchants" element={<Createmerchants/>}/>
+        <Route path="updatepass" element={<Updatepass/>}/>
         <Route path="profile" element={<Profile />} />
         <Route path="getallsettlements" element={<Getallsettlements />} />
         <Route path="getalltxn" element={<GetallTxn />} />
@@ -62,6 +73,12 @@ const router = createBrowserRouter(
         <Route path="getcommercial/:compid" element={<Getcommercial />} />
         <Route path="packagemaster/:pkgId" element={<Packagemaster />} />
       </Route>
+
+      </Route>
+
+
+
+
     </Route>
 
 

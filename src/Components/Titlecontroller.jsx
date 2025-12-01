@@ -11,10 +11,14 @@ export default function Titlecontroller() {
     
     const routeTitles = {
       "/": "Sign In",
+      "/otpverification": "Otpverification",
+      "/forgotpass": "Forgotpass",
+      "/forgotpass": "Forgotpass",
       "/dashboard/merchant": "Merchants",
       "/dashboard/getallsettlements": "All Settlements",
       "/dashboard/getalltxn": "All Transactions",
       "/dashboard/servicelist": "Commercial",
+     
      
     };
 

@@ -57,13 +57,26 @@ export const UPDATE_ASSIGNED_CMS = "UPDATE_ASSIGNED_CMS";
 
 
 
+export const VERIFY_OTP = "VERIFY_OTP";
+export const FORGOT_PASSWORD = "FORGOT_PASSWORD";
+export const SENDOTP = "SENDOTP";
+
+
+
+export const ADMINDETAILS = "ADMINDETAILS";
+export const UPDATE_ADMIN_DETAILS = "UPDATE_ADMIN_DETAILS";
+export const UPDATE_PASSWORD = "UPDATE_PASSWORD";
+
+
+
+
 // "http://192.168.1.45:3000"
 
 // "https://acs.busybox.in"
 
 
 
-const baseUrl = "https://acs.busybox.in";
+const baseUrl = "http://192.168.1.45:3000";
 
 export const login = (admin,setLoading,navigate) => async (dispatch) => {
   try {
@@ -1354,6 +1367,190 @@ export const deleteAssignedCms = (company_id,service_id) => async (dispatch) => 
 
 
 
+/////otp////
+
+export const send_otp =
+  (forgetpassemail, seterror, navigate, setLoad) => async (dispatch) => {
+    setLoad(true);
+
+    const res = await fetch(`${baseUrl}/v1/admin/forgot-password/send-otp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: forgetpassemail }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 200) {
+      navigate("/otpverification");
+
+      setLoad(false);
+    } else {
+      seterror(true);
+      setLoad(false);
+    }
+    dispatch({ type: "SENDOTP", payload: data });
+  };
+export const verify_otp =
+  (otp, setLoad, setError, navigate) => async (dispatch) => {
+    setLoad(true);
+
+    const res = await fetch(`${baseUrl}/v1/admin/forgot-password/verify-otp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ otp: otp }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 200) {
+      alert("otp verified");
+      setLoad(false);
+
+      navigate("/resetpass");
+    } else {
+      setLoad(false);
+      setError(true);
+    }
+    dispatch({ type: "VERIFY_OTP", payload: data });
+  };
 
 
 
+  export const forgotpassword =
+  (uppassword, navigate, setLoad, setError) => async (dispatch) => {
+    if (window.confirm("Are you sure you want to update your password")) {
+      setLoad(true);
+
+      const res = await fetch(`${baseUrl}/v1/admin/forgot-password/reset`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ newPassword: uppassword }),
+      });
+
+      if (res.status === 200) {
+        alert("password hasbeen updated");
+
+        navigate("/");
+        setLoad(false);
+      }
+      if (res.status === 400) {
+        setLoad(false);
+        setError("verified email not found");
+      }
+
+      const data = await res.json();
+      dispatch({ type: "FORGOT_PASSWORD", payload: data });
+    }
+  };
+
+
+
+
+
+  ///admin detail...
+
+
+  export const admin_details = () => async (dispatch) => {
+    const token = localStorage.getItem("token");
+  
+  
+  
+    try {
+     
+  
+      const res = await fetch(`${baseUrl}/v1/admin/details`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+  
+      if (res.status === 401) {
+        localStorage.removeItem("token");
+        window.location.href = "/";
+        return;
+      }
+  
+      const data = await res.json();
+      
+  
+      if (res.ok) {
+        dispatch({ type: ADMINDETAILS, payload: data });
+      } else {
+        alert(data.message || "Failed to fetch merchants");
+      }
+    } catch (error) {
+      alert("Error fetching merchants: " + error.message);
+  
+    }
+  };
+  
+
+  export const update_admin_details = (updatedinfo) => async (dispatch) => {
+    const token = localStorage.getItem("token") || {};
+    const res = await fetch(`${baseUrl}/v1/admin/update-details`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedinfo),
+    });
+  
+    // if (res.status === 401) {
+    //   localStorage.removeItem("token");
+    //   window.location.href = "/";
+    //   return;
+    // }
+  
+    if (res.status === 200) {
+      alert("user details updated");
+  
+     dispatch(admin_details())
+    }
+  
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+  
+    dispatch({ type: "UPDATE_ADMIN_DETAILS", payload: data });
+  };
+  
+
+
+  export const updatePassword =
+  (updatedpass) => async (dispatch) => {
+    if (window.confirm("Are you sure you want to update your password")) {
+     
+      const token = localStorage.getItem("token") || {};
+
+      const res = await fetch(`${baseUrl}/v1/admin/forgot-password/current`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ newPassword:updatedpass}),
+      });
+
+      if (res.status === 200) {
+        alert("password hasbeen updated");
+
+      
+      }
+     
+      const data = await res.json();
+      dispatch({ type: "UPDATE_PASSWORD", payload: data });
+    }
+  };

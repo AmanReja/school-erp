@@ -58,7 +58,7 @@ const Dashbord = () => {
     },
     {
       to: "/dashboard/getallsettlements",
-      icon: "fa-solid fa-scale-balanced",   // Settlements icon
+      icon: "fa-arrow-down rotate-[35deg]",   // Settlements icon
       label: "All settlements",
       show: showp,
       setShow: setShowp,
