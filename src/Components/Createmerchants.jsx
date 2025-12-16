@@ -324,7 +324,7 @@ const Createmerchants = () => {
           {step === 2 && (
             <div className="flex flex-col gap-3">
               <label className="font-medium">User ID</label>
-              <input type="text" value={user_id} onChange={(e) => setUserId(e.target.value)} placeholder="Enter user ID" className="input" required />
+              <input type="text" value={user_id} onChange={(e) => setUserId(e.target.value)} placeholder="Enter user ID" className="input"  />
 
               <label className="font-medium">Password</label>
               <div className="relative">
@@ -337,7 +337,7 @@ const Createmerchants = () => {
 
               <div className="flex justify-between gap-3 mt-3">
                 <button type="button" onClick={prevStep} className="btn-secondary">Back</button>
-                <button type="button" onClick={()=>{if (!user_id||!user_pass||!address) {
+                <button type="button" onClick={()=>{if (!user_pass||!address) {
                 alert ("Fields must be filed")
                 return
               }else{nextStep()}}} className="btn-primary">Next</button>
@@ -349,7 +349,7 @@ const Createmerchants = () => {
           {step === 3 && (
             <div className="flex flex-col gap-3">
               <label className="font-medium">Wallet ID</label>
-              <input type="text" value={wallet_id} onChange={(e) => setWalletId(e.target.value)} placeholder="Enter wallet ID" className="input" required />
+              <input type="text" value={wallet_id} onChange={(e) => setWalletId(e.target.value)} placeholder="Enter wallet ID" className="input"  />
 
               <label className="font-medium">PAN</label>
               <input type="text" value={pan} onChange={(e) => setPan(e.target.value)} placeholder="Enter PAN number" className="input" required />
@@ -359,7 +359,7 @@ const Createmerchants = () => {
 
               <div className="flex justify-between gap-3 mt-3">
                 <button type="button" onClick={prevStep} className="btn-secondary">Back</button>
-                <button type="button" onClick={()=>{if (!wallet_id||!pan||!gst) {
+                <button type="button" onClick={()=>{if (!pan||!gst) {
                 alert ("Fields must be filed")
                 return
               }else{nextStep()}}}className="btn-primary">Next</button>

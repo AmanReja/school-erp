@@ -3,7 +3,7 @@ import Hdfc from "../assets/images/HDFC.png";
 import { Link,useNavigate,useLocation } from "react-router-dom";
 import { Theme } from "../Contexts/Theme";
 import { useDispatch,useSelector } from "react-redux";
-import { createMerchant ,getDetails,updateMerchant, deleteMerchant} from "../redux/action";
+import { createMerchant ,getDetails,updateMerchant, deleteMerchant,getmarchentent_by_companyid,delete_entity,getmarchentent_by_companyid_deleted} from "../redux/action";
 import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { LoadDetails } from "../Contexts/LoadDetails";
 import "../App.css"
@@ -14,15 +14,25 @@ const Merchant = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation()
 
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
   const dispatch = useDispatch();
   const [step, setStep] = useState(1);
   const navigate =useNavigate()
   const [marchentid,setMarchentid] =useState ("")
+  const [corpidforinfo,setCorpidforinfo] =useState ("")
 
  const [searchTerm, setSearchTerm] = useState("");
 //  const {loadD,setLoadD} =useContext(LoadDetails)
 
  const [load,setLoad] =useState(false);
+ const [isdeletedentopen,setIsdeletedentopen]= useState(false);
+
+
+
+
+ console.log(isdeletedentopen);
 
  
  
@@ -49,6 +59,8 @@ const Merchant = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [openInfo, setOpenInfo] = useState(false);
+  
 
 
 
@@ -112,6 +124,7 @@ const Merchant = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = merchantsData.slice(startIndex, endIndex);
+  const [corpidforfund,setCorpidforfund]=useState("")
 
   // Generate page numbers
   const getPageNumbers = () => {
@@ -155,6 +168,7 @@ const Merchant = () => {
    async function fetchData(){
     setLoad(true)
      await dispatch(getDetails(currentPage, itemsPerPage,searchTerm));
+    //  await dispatch(getmarchentent_by_companyid());
      setLoad(false)
     }
     fetchData()
@@ -232,6 +246,62 @@ const Merchant = () => {
   };
 
 
+
+  const entdata =useSelector((state)=>state.entity.entity?.data)
+  console.log(240,entdata);
+  const ent =useSelector((state)=>state.entity.entity)
+  console.log(250,ent);
+
+
+
+  const totalpage = useSelector(
+    (state) => state.entity.entity.pagination
+    ?.total_pages
+
+);
+console.log(41, totalpage);
+
+
+const totaldata = useSelector(
+    (state) => state.entity.entity.pagination?.total_records
+
+);
+
+
+
+
+
+  const handelInfo =(merchant)=>{
+
+    setOpenInfo(true);
+    
+   
+    setCorpidforinfo(merchant.corp_id)
+    setCorpidforfund(merchant.corp_id)
+    
+
+  }
+  
+  useEffect(() => {
+   if (isdeletedentopen) {
+    dispatch (getmarchentent_by_companyid_deleted(corpidforinfo))
+   } else{
+
+    dispatch(getmarchentent_by_companyid(corpidforinfo));
+
+   }
+    
+   
+  }, [corpidforinfo, isdeletedentopen, dispatch]);
+  
+
+    const handelEntdelete =(ent)=>{
+      // console.log(ent);
+   
+      dispatch(delete_entity(ent.corp_id,ent.status))
+          
+    }
+
   const handleDelete = async(merchant) => {
     if (window.confirm("Are you sure you want to delete this merchant?")) {
       await dispatch(deleteMerchant(merchant.corp_id))
@@ -252,7 +322,255 @@ const Merchant = () => {
       }`}
     >
       <main className="w-full h-full flex flex-col overflow-y-scroll">
-        <section className="w-full flex flex-col sm:flex-row gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
+
+
+    
+
+      {openInfo && (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+
+    <div className={` ${theme==="dark"?"bg-gray-800 text-white":"bg-white text-black"}  w-full max-w-3xl rounded-2xl shadow-xl p-6
+                    transform transition-all duration-300 scale-100 animate-fadeIn`}>
+
+      {/* Close */}
+      <div className="flex gap-[50px] justify-between w-full">
+        <div className="flex gap-[12px]">
+        <button
+        onClick={() => setOpenInfo(false)}
+        className="bg-gray-400 px-3 py-1 text-white rounded mb-4"
+      >
+        Close
+      </button>
+      {!isdeletedentopen?<button
+        onClick={() => {setIsdeletedentopen(true)}}
+        className="bg-red-400 px-3 py-1 text-white rounded mb-4"
+      >
+        Deleted Entity
+      </button>:  <button
+        onClick={() => {setIsdeletedentopen(false)}}
+        className="bg-red-400 px-3 py-1 text-white rounded mb-4"
+      >
+        <i class="fa-solid fa-x"></i>
+      </button>}
+      
+        </div>
+     
+      <button
+        onClick={() => {navigate(`/dashboard/fundbycorp/${corpidforfund}`)}}
+        className="bg-violet-400 px-3 text-white py-1 z-30 rounded mb-4"
+      >
+        Funds
+      </button>
+      </div>
+     
+
+      {/* Header */}
+      <h2 className="text-xl font-semibold dark:text-white mb-4">
+       {isdeletedentopen?"Deleted Entity Information":"Entity Information"} 
+      </h2>
+
+      {/* Table */}
+      <div className="overflow-auto max-h-[400px]">
+      <table className="min-w-full border-collapse">
+    <thead className="sticky top-0 bg-gradient-to-r from-gray-100 to-gray-200">
+      <tr className="text-left text-gray-600 uppercase text-[12px] tracking-wide">
+        <th className="p-3 border-b">Corp ID</th>
+        <th className="p-3 border-b">Status</th>
+        <th className="p-3 border-b">Callback URL</th>
+        <th className="p-3 border-b">Callback Event</th>
+        <th className="p-3 border-b">Created On</th>
+      </tr>
+    </thead>
+
+    {Array.isArray(entdata) && entdata.length === 0 ? (
+      <tbody>
+        <tr>
+          <td
+            colSpan={8}
+            className="text-center py-6 text-gray-500 italic"
+          >
+            No data found
+          </td>
+        </tr>
+      </tbody>
+    ) : (
+      <tbody className="text-sm text-gray-700">
+        {entdata?.map((row, idx) => (
+          <tr
+            key={idx}
+            className={`transition-all hover:bg-gray-100 
+              ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+            `}
+          >
+            <td className="p-3 ">{row?.corp_id}</td>
+            <td className="p-3 ">
+  <span
+    className={`px-3 py-1 rounded-full text-xs font-semibold border 
+      ${
+        row.status?.toLowerCase() === "active"
+          ? "bg-green-100 text-green-700 border-green-300"
+          : row.status?.toLowerCase() === "inactive"
+          ? "bg-amber-100 text-amber-700 border-amber-300"
+          : row.status?.toLowerCase() === "deleted"
+          ? "bg-red-100 text-red-700 border-red-300"
+          : "bg-gray-100 text-gray-700 border-gray-300"
+      }
+    `}
+  >
+    {row.status}
+  </span>
+</td>
+            <td className="p-3  break-all">{row?.callback_url}</td>
+            <td className="p-3 ">{row?.callback_event_name}</td>
+            <td className="p-3 ">{row?.create_on}</td>
+          </tr>
+        ))}
+      </tbody>
+    )}
+  </table>
+  {totalpage > 0 ? (
+                <div
+                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${
+                    theme === "dark"
+                      ? "bg-gray-900 text-gray-300 border-gray-700"
+                      : "bg-white text-gray-600 border-gray-200"
+                  }`}
+                >
+                  <div>
+                    Show{" "}
+                    <select
+                      className={`rounded border outline-none px-[5px] py-[5px] ${
+                        theme === "dark"
+                          ? "bg-gray-800 text-gray-200 border-gray-600"
+                          : "bg-white text-gray-700 border-gray-300"
+                      }`}
+                      value={perPage}
+                      onChange={(e) => {
+                        setPerPage(Number(e.target.value));
+                        setPage(1);
+                      }}
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={30}>30</option>
+                    </select>{" "}
+                    per page
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+  {/* Showing range */}
+  <p>
+    {(page - 1) * perPage + 1}-{Math.min(page * perPage, totaldata)} of {totaldata}
+  </p>
+
+  {/* Prev Button */}
+  <button
+  
+    onClick={() => setPage(page - 1)}
+    disabled={page === 1}
+    className={`px-3 py-1 rounded-md ${
+      page === 1
+        ? "opacity-50 cursor-not-allowed"
+        : theme === "dark"
+        ? "hover:bg-gray-700"
+        : "hover:bg-gray-200"
+    }`}
+  >
+  <ChevronLeft/>
+  </button>
+
+  {/* First Page */}
+  <button
+    onClick={() => setPage(1)}
+    className={`px-3 py-1 rounded-md ${
+      page === 1
+        ? theme === "dark"
+          ? "bg-gray-700 font-semibold"
+          : "bg-gray-200 font-semibold"
+        : theme === "dark"
+        ? "hover:bg-gray-800"
+        : "hover:bg-gray-100"
+    }`}
+  >
+    1
+  </button>
+
+  {/* Dots before current group */}
+  {page > 3 && <span className="px-2">...</span>}
+
+  {/* Nearby page numbers */}
+  {Array.from({ length: 3 }, (_, i) => page - 1 + i)
+    .filter((num) => num > 1 && num < totalpage)
+    .map((num) => (
+      <button
+        key={num}
+        onClick={() => setPage(num)}
+        className={`px-3 py-1 rounded-md ${
+          num === page
+            ? theme === "dark"
+              ? "bg-gray-700 font-semibold"
+              : "bg-gray-200 font-semibold"
+            : theme === "dark"
+            ? "hover:bg-gray-800"
+            : "hover:bg-gray-100"
+        }`}
+      >
+        {num}
+      </button>
+    ))}
+
+  {/* Dots after current group */}
+  {page < totalpage - 2 && <span className="px-2">...</span>}
+
+  {/* Last Page */}
+  {totalpage > 1 && (
+    <button
+      onClick={() => setPage(totalpage)}
+      className={`px-3 py-1 rounded-md ${
+        page === totalpage
+          ? theme === "dark"
+            ? "bg-gray-700 font-semibold"
+            : "bg-gray-200 font-semibold"
+          : theme === "dark"
+          ? "hover:bg-gray-800"
+          : "hover:bg-gray-100"
+      }`}
+    >
+      {totalpage}
+    </button>
+  )}
+
+  {/* Next Button */}
+  <button
+    onClick={() => setPage(page + 1)}
+    disabled={page === totalpage}
+    className={`px-3 py-1 rounded-md ${
+      page === totalpage
+        ? "opacity-50 cursor-not-allowed"
+        : theme === "dark"
+        ? "hover:bg-gray-700"
+        : "hover:bg-gray-200"
+    }`}
+  >
+   <ChevronRight/>
+  </button>
+</div>
+
+                </div>
+              ) : (
+                ""
+              )}
+</div>
+
+
+    </div>
+
+  </div>
+)}
+
+
+
+        <section className="w-full flex flex-col sm:flex-row gap-[20px]  mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[10px]">
           {/* Single Payout Form */}
        
 
@@ -308,7 +626,7 @@ const Merchant = () => {
       <th className="px-4 py-4">Email</th>
       <th className="px-4 py-4">Mobile</th>
       <th className="px-4 py-4">KYC Status</th>
-      <th className="px-4 py-4">Actions</th>
+      <th className="px-4 py-4 pl-[200px]">Actions</th>
     </tr>
   </thead>
 
@@ -345,9 +663,10 @@ className="button-88"
 >
 Transactions
 </button>
-
-        <button onClick={() => handleEdit(merchant)} className="bg-gray-900 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs">Edit</button>
-        <button onClick={() => handleDelete(merchant)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">Delete</button>
+<button onClick={() => handelInfo(merchant)} className="bg-lime-500 hover:bg-red-600 text-white px-2 py-[5px] rounded text-[10px]">Info</button>
+        <button onClick={() => handleEdit(merchant)} className="bg-gray-900 hover:bg-gray-500 text-white px-3 py-1 rounded text-[10px]">Edit</button>
+        <button onClick={() => handleDelete(merchant)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-[10px]">Delete</button>
+        
       </td>
     </tr>
   ))
@@ -507,7 +826,7 @@ Transactions
                     }`}
                   />
                 </div> */}
-{/* 
+           {/* 
                 <div>
                   <label className="block text-sm font-medium mb-2">Program ID</label>
                   <input

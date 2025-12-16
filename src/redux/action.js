@@ -68,6 +68,21 @@ export const UPDATE_ADMIN_DETAILS = "UPDATE_ADMIN_DETAILS";
 export const UPDATE_PASSWORD = "UPDATE_PASSWORD";
 
 
+export const GET_MERCHENT_ENTITY = "GET_MARCHENT_ENTITY";
+export const GET_MERCHENT_ENTITY_DELETED = "GET_MERCHENT_ENTITY_DELETED";
+export const DELETE_ENTITY = "DELETE_ENTITY";
+
+
+
+
+export const GETALL_FUND = "GETALL_FUND";
+export const GET_FUNDS_BY_CORPID = "GET_FUNDS_BY_CORPID";
+
+
+
+
+
+
 
 
 // "http://192.168.1.45:3000"
@@ -1554,3 +1569,255 @@ export const verify_otp =
       dispatch({ type: "UPDATE_PASSWORD", payload: data });
     }
   };
+
+
+  export const getmarchentent_by_companyid =(companyId,status)=> async (dispatch)=>{
+    console.log("status",status);
+
+    const token = localStorage.getItem("token") || {};
+
+    const params = new URLSearchParams();
+
+    if (status) params.append("status",status)
+
+    const res = await fetch(`${baseUrl}/v1/admin/callback/${companyId}?${params.toString()}`,{
+      method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+
+    })
+
+    
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+
+    const data = await res.json();
+    console.log(1582,data);
+    if (res.status===200) {
+
+      console.log(data);
+      
+     
+    }
+
+    dispatch({ type: GET_MERCHENT_ENTITY, payload: data });
+
+  } 
+  export const getmarchentent_by_companyid_deleted =(companyId)=> async (dispatch)=>{
+    
+
+    const token = localStorage.getItem("token") || {};
+
+    const params = new URLSearchParams();
+
+    // if (status) params.append("status",status)
+
+    const res = await fetch(`${baseUrl}/v1/admin/callback/${companyId}/deleted`,{
+      method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+
+    })
+
+    
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+
+    const data = await res.json();
+    console.log(1582,data);
+    if (res.status===200) {
+
+      console.log(data);
+      
+     
+    }
+
+    dispatch({ type: GET_MERCHENT_ENTITY_DELETED, payload: data });
+
+  } 
+
+
+
+  
+  export const delete_entity =
+  (companyId,status) => async (dispatch) => {
+ 
+    
+
+    try {
+      if (window.confirm("Are you sure to delete this entity")) {
+     
+
+        const res = await fetch(`${baseUrl}/v1/admin/callback/${companyId}/${status}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        
+        });
+  
+        if (res.status === 200) {
+          // alert("Entity Hasbeen Deleted");
+  
+          dispatch(getmarchentent_by_companyid(companyId))
+  
+        }
+        if (res.status === 400) {
+      // console.log(err.message);
+        }
+  
+        const data = await res.json();
+        
+      }
+    } catch (error) {
+      alert(error)
+    }
+ 
+  };
+
+
+  
+export const getall_fund = (page,perpage,search,fundstatus,searchdate_start,searchdate_end) => async (dispatch) => {
+  const token = localStorage.getItem("token") || {};
+
+
+  const params =new URLSearchParams();
+  if (page) params.append("page", page);
+  if (perpage) params.append("limit", perpage);
+  if (search) params.append("search", search);
+  if (fundstatus) params.append("status", fundstatus);
+  if (searchdate_start) params.append("start_date", searchdate_start);
+  if (searchdate_end) params.append("end_date", searchdate_end);
+
+  const res = await fetch(`${baseUrl}/v1/admin/fund-requests?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+    return;
+  }
+
+  const data = await res.json();
+  dispatch({ type: "GETALL_FUND", payload: data });
+};
+
+export const update_fund_status = (company_id,request_id, formData) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+  console.log(formData);
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/fund-requests/${company_id}/${request_id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    // console.log("CMS UPDATED", data.data.old_service_id);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+      // dispatch({ type: UPDATE_ASSIGNED_CMS, payload: data });
+      dispatch(getall_fund());
+      alert("sucess")
+      // window.location.href=""
+    } else {
+      // alert(data.message || "Failed to update CMS assignment");
+    }
+  } catch (error) {
+    // alert("Error updating service: " + error.message);
+  }
+};
+export const update_fund_status_by_corp = (company_id,request_id, formData) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+  console.log(formData);
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/fund-requests/${company_id}/${request_id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+    // console.log("CMS UPDATED", data.data.old_service_id);
+
+    if (res.status === 401) {
+      window.location.href = "/";
+      return;
+    }
+
+    if (res.status === 200) {
+      // dispatch({ type: UPDATE_ASSIGNED_CMS, payload: data });
+      dispatch(get_funds_by_Corpid(company_id));
+      alert("sucess")
+      // window.location.href=""
+    } else {
+      // alert(data.message || "Failed to update CMS assignment");
+    }
+  } catch (error) {
+    // alert("Error updating service: " + error.message);
+  }
+};
+
+
+
+
+
+
+
+export const get_funds_by_Corpid = (corp_id,page,perpage,search,fundstatus,searchdate_start,searchdate_end) => async (dispatch) => {
+  const token = localStorage.getItem("token") || {};
+
+
+  const params =new URLSearchParams();
+  if (page) params.append("page", page);
+  if (perpage) params.append("limit", perpage);
+  if (search) params.append("search", search);
+  if (fundstatus) params.append("status", fundstatus);
+  if (searchdate_start) params.append("start_date", searchdate_start);
+  if (searchdate_end) params.append("end_date", searchdate_end);
+
+  const res = await fetch(`${baseUrl}/v1/admin/fund-requests/${corp_id}?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+    return;
+  }
+
+  const data = await res.json();
+  dispatch({ type: "GET_FUNDS_BY_CORPID", payload: data });
+};

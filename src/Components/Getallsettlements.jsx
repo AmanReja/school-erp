@@ -185,7 +185,7 @@ const statusCard = [
           {/* Settlements Table */}
          
           <div
-            className={`flex sm:w-[100%] w-full h-full flex-col rounded-xl overflow-y-auto border ${
+            className={`flex sm:w-[100%]   w-full h-auto flex-col rounded-xl overflow-y-auto border ${
               theme === "dark"
                 ? "bg-gray-800 border-gray-700 text-gray-300"
                 : "bg-white border-gray-100 text-gray-800"

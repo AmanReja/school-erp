@@ -65,7 +65,7 @@ const Dashbord = () => {
     },
     {
       to: "/dashboard/getalltxn",
-      icon: "fa-solid fa-right-left",       // Transactions icon
+      icon: "fa-solid fa-right-left rotate-[55deg]",       // Transactions icon
       label: "Get All Transactions",
       show: showp,
       setShow: setShowp,
@@ -74,6 +74,13 @@ const Dashbord = () => {
       to: "/dashboard/servicelist",
       icon: "fa-solid fa-list-check",       // Services / Commercial Master
       label: "Commercial Master",
+      show: showp,
+      setShow: setShowp,
+    },
+    {
+      to: "/dashboard/fund",
+      icon: "fa-solid fa-cart-flatbed-suitcase",       // Services / Commercial Master
+      label: "Funds",
       show: showp,
       setShow: setShowp,
     },
@@ -95,7 +102,7 @@ const Dashbord = () => {
 >
   <Navbar />
 
-  <div className="w-full flex-col h-screen pb-0 sm:pb-[100px] sm:flex-row flex">
+  <div className="w-full flex-col h-screen pb-0 sm:pb-[100px] sm:flex-row flex p-2">
 
     {/* 🌈 Sidebar */}
     <div
@@ -162,7 +169,7 @@ const Dashbord = () => {
 
     {/* 🌤️ Main Section */}
     <div
-      className={`ml-0 sm:ml-1 w-full sm:w-[94%] h-full rounded-3xl border border-transparent shadow-lg transition-all duration-300
+      className={`ml-0 sm:ml-1 w-full sm:w-[83%] sm:max-w-[85%] h-full rounded-3xl border border-transparent shadow-lg transition-all duration-300
       ${theme === "dark"
         ? "bg-gradient-to-br from-gray-800 via-gray-850 to-gray-900 shadow-blue-900/30"
         : "bg-gray-50"

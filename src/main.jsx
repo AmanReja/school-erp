@@ -34,6 +34,8 @@ import Otpverification from "./Components/Otpverification";
 import Resetpass from "./Components/Resetpass";
 import Forgotpass from "./Components/Forgotpass";
 import Updatepass from "./Components/Updatepass";
+import Fund from "./Components/Fund";
+import Fund_by_corp from "./Components/fund_by_corp";
 
 
 if(import.meta.env.PROD){
@@ -69,6 +71,8 @@ const router = createBrowserRouter(
         <Route path="settlement/:merchantId" element={<Settlement />} />
         <Route path="commercial/:pkgid/:serviceid" element={<Commercial />} />
         <Route path="servicelist" element={<Servicelist />} />
+        <Route path="fund" element={<Fund />} />
+        <Route path="fundbycorp/:corpid" element={<Fund_by_corp />} />
         <Route path="notassigned" element={<Notassigned />} />
         <Route path="getcommercial/:compid" element={<Getcommercial />} />
         <Route path="packagemaster/:pkgId" element={<Packagemaster />} />
