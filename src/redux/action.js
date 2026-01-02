@@ -79,6 +79,10 @@ export const GETALL_FUND = "GETALL_FUND";
 export const GET_FUNDS_BY_CORPID = "GET_FUNDS_BY_CORPID";
 
 
+export const GET_VIRTUALFUNDS_BY_CORPID = "GET_VIRTUALFUNDS_BY_CORPID";
+export const GET_VIRTUALFUNDS = "GET_VIRTUALFUNDS";
+
+
 
 
 
@@ -1821,3 +1825,70 @@ export const get_funds_by_Corpid = (corp_id,page,perpage,search,fundstatus,searc
   const data = await res.json();
   dispatch({ type: "GET_FUNDS_BY_CORPID", payload: data });
 };
+
+
+
+
+export const getvirtualfunds = (corp_id,page,perpage,search,fundstatus,searchdate_start,searchdate_end) => async (dispatch) => {
+  const token = localStorage.getItem("token") || {};
+
+
+  const params =new URLSearchParams();
+  if (page) params.append("page", page);
+  if (perpage) params.append("limit", perpage);
+  if (search) params.append("search", search);
+  if (fundstatus) params.append("status", fundstatus);
+  if (searchdate_start) params.append("start_date", searchdate_start);
+  if (searchdate_end) params.append("end_date", searchdate_end);
+
+  const res = await fetch(`${baseUrl}/v1/admin/fund-requests/${corp_id}?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+    return;
+  }
+
+  const data = await res.json();
+  dispatch({ type: "GET_VIRTUALFUNDS", payload: data });
+};
+
+
+
+export const getvirtualfund_by_corpid = (corp_id,page,perpage,search,fundstatus,searchdate_start,searchdate_end) => async (dispatch) => {
+  const token = localStorage.getItem("token") || {};
+
+
+  const params =new URLSearchParams();
+  if (page) params.append("page", page);
+  if (perpage) params.append("limit", perpage);
+  if (search) params.append("search", search);
+  if (fundstatus) params.append("status", fundstatus);
+  if (searchdate_start) params.append("start_date", searchdate_start);
+  if (searchdate_end) params.append("end_date", searchdate_end);
+
+  const res = await fetch(`${baseUrl}/v1/admin/va-fund/${corp_id}?${params.toString()}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+    return;
+  }
+
+  const data = await res.json();
+  dispatch({ type: "GET_VIRTUALFUNDS_BY_CORPID", payload: data });
+};
+
+

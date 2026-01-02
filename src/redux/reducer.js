@@ -11,7 +11,7 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   PKG_MASTER_CREATE,
   PKG_MASTER_UPDATE,
   PKG_MASTER_DELETE,PKG_CMS_MASTER_GET,PKG_CMS_MASTER_CREATE,PKG_CMS_MASTER_UPDATE,PKG_CMS_MASTER_DELETE,SERVICELIST_GET,SERVICELIST_CREATE,SERVICELIST_UPDATE,SERVICELIST_DELETE
-  ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS,ADMINDETAILS,GET_MERCHENT_ENTITY,GET_MERCHENT_ENTITY_DELETED, DELETE_ENTITY,GETALL_FUND,GET_FUNDS_BY_CORPID
+  ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS,ADMINDETAILS,GET_MERCHENT_ENTITY,GET_MERCHENT_ENTITY_DELETED, DELETE_ENTITY,GETALL_FUND,GET_FUNDS_BY_CORPID, GET_VIRTUALFUNDS, GET_VIRTUALFUNDS_BY_CORPID
 
 } from "../redux/action";
 
@@ -470,6 +470,32 @@ const initialSettlementState = {
         return {
           ...state,
           fund: action.payload,   // full object from backend
+        };
+  
+     
+  
+      default:
+        return state;
+    }
+  };
+  
+  const initialvirtualfundstate = {
+    virtualfund: [],
+  };
+  
+  export const virtualfundReducer = (state = initialvirtualfundstate, action) => {
+    switch (action.type) {
+  
+      // ---------------- GET LIST ----------------
+      case GET_VIRTUALFUNDS:
+        return {
+          ...state,
+          virtualfund: action.payload,   // full object from backend
+        };
+      case GET_VIRTUALFUNDS_BY_CORPID:
+        return {
+          ...state,
+          virtualfund: action.payload,   // full object from backend
         };
   
      

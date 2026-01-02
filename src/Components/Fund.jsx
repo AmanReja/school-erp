@@ -283,7 +283,12 @@ const Fund = () => {
                     value: `${
                       fundreport?.success_amount === undefined
                         ? "00"
-                        : fundreport?.success_amount 
+                        : Number(
+                          fundreport.success_amount
+                        ).toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }) 
                     }`,
                   },
                   {
@@ -618,7 +623,7 @@ updateform(),e.preventDefault()
                   </div>
 
                   {/* ⬇️ Download Button */}
-                  <button
+                  {/* <button
                     onClick={downloadexcel}
                     className={`text-sm font-medium hover:shadow-xl px-4 py-1 rounded-lg transition border ${
                       theme === "dark"
@@ -632,7 +637,7 @@ updateform(),e.preventDefault()
                       }`}
                     ></i>{" "}
                     Download
-                  </button>
+                  </button> */}
                 </div>
               </div>
 

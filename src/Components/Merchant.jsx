@@ -333,8 +333,8 @@ const totaldata = useSelector(
                     transform transition-all duration-300 scale-100 animate-fadeIn`}>
 
       {/* Close */}
-      <div className="flex gap-[50px] justify-between w-full">
-        <div className="flex gap-[12px]">
+      <div className="flex gap-[50px]  justify-between w-full">
+        <div className="flex w-[50%]  gap-[12px]">
         <button
         onClick={() => setOpenInfo(false)}
         className="bg-gray-400 px-3 py-1 text-white rounded mb-4"
@@ -355,12 +355,25 @@ const totaldata = useSelector(
       
         </div>
      
-      <button
+
+
+
+
+       <div className="flex gap-[10px] w-[50%] justify-end">
+       <button
         onClick={() => {navigate(`/dashboard/fundbycorp/${corpidforfund}`)}}
         className="bg-violet-400 px-3 text-white py-1 z-30 rounded mb-4"
       >
-        Funds
+       Manual Funds
       </button>
+      <button
+        onClick={() => {navigate(`/dashboard/Virfundbycorpid/${corpidforfund}`)}}
+        className="bg-cyan-700 px-3 text-white py-1 z-30 rounded mb-4"
+      >
+       Virtual Funds
+      </button>
+       </div>
+     
       </div>
      
 

@@ -36,6 +36,7 @@ import Forgotpass from "./Components/Forgotpass";
 import Updatepass from "./Components/Updatepass";
 import Fund from "./Components/Fund";
 import Fund_by_corp from "./Components/fund_by_corp";
+import Virfund_by_corpid from "./Components/Virfund_by_corpid";
 
 
 if(import.meta.env.PROD){
@@ -73,6 +74,7 @@ const router = createBrowserRouter(
         <Route path="servicelist" element={<Servicelist />} />
         <Route path="fund" element={<Fund />} />
         <Route path="fundbycorp/:corpid" element={<Fund_by_corp />} />
+        <Route path="Virfundbycorpid/:corpid" element={<Virfund_by_corpid />} />
         <Route path="notassigned" element={<Notassigned />} />
         <Route path="getcommercial/:compid" element={<Getcommercial />} />
         <Route path="packagemaster/:pkgId" element={<Packagemaster />} />

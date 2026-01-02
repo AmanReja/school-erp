@@ -58,6 +58,11 @@ const Createmerchants = () => {
   });
 
 
+
+
+
+
+
    // Pagination functions
    const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -129,26 +134,57 @@ const Createmerchants = () => {
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
+
+
+  const resetform = () => {
+    setWalletId("");
+    setName("");
+    setUserId("");
+    setUserPass("");
+    setAddress("");
+    setPan("");
+    setEmail("");
+    setMobileNumber("");
+    setGst("");
+    setKyc_status("");
+  };
+  
+
+
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
   
-    const formData = {
-      name,
-      // org_id,
-      // program_id,
-      wallet_id,
-      userid: user_id,     
-      user_pass,
-      address,
-      pan,
-      email,
-      mobile_number,
-      gst,
-      kyc_status: kyc_status 
-    };
+
+
+try {  const formData = {
+  name,
+  // org_id,
+  // program_id,
+  wallet_id,
+  userid: user_id,     
+  user_pass,
+  address,
+  pan,
+  email,
+  mobile_number,
+  gst,
+  kyc_status: kyc_status 
+};
+
+console.log("Payload:", formData); // debug
+dispatch(createMerchant(formData,setStep));
   
-    console.log("Payload:", formData); // debug
-    dispatch(createMerchant(formData,setStep));
+} catch (error) {
+
+  console.log(error);
+  
+} finally{
+  resetform()
+}
+
+  
   };
 
   // Handle Edit - Open update modal with merchant data
@@ -355,11 +391,11 @@ const Createmerchants = () => {
               <input type="text" value={pan} onChange={(e) => setPan(e.target.value)} placeholder="Enter PAN number" className="input" required />
 
               <label className="font-medium">GST</label>
-              <input type="text" value={gst} onChange={(e) => setGst(e.target.value)} placeholder="Enter GST number" className="input" required />
+              <input type="text" value={gst} onChange={(e) => setGst(e.target.value)} placeholder="Enter GST number" className="input"  />
 
               <div className="flex justify-between gap-3 mt-3">
                 <button type="button" onClick={prevStep} className="btn-secondary">Back</button>
-                <button type="button" onClick={()=>{if (!pan||!gst) {
+                <button type="button" onClick={()=>{if (!pan) {
                 alert ("Fields must be filed")
                 return
               }else{nextStep()}}}className="btn-primary">Next</button>

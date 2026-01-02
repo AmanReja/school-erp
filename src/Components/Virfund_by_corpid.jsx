@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 
 import { useSelector, useDispatch } from "react-redux";
-import { update_fund_status_by_corp,get_funds_by_Corpid } from "../redux/action";
+import { update_fund_status_by_corp,get_funds_by_Corpid,getvirtualfund_by_corpid } from "../redux/action";
 import "../App.css";
 import "flatpickr/dist/themes/airbnb.css";
 import flatpickr from "flatpickr";
@@ -10,7 +10,7 @@ import { Check, ChevronDown ,ChevronLeft,ChevronRight} from "lucide-react";
 import { Theme } from "../Contexts/Theme";
 import { useParams } from "react-router-dom";
 
-const Fund_by_corp = () => {
+const Virfund_by_corpid = () => {
   const { theme, setTheme } = useContext(Theme);
   const [load, setLoad] = useState(false);
   const [searchtr, setSearchtr] = useState("");
@@ -130,9 +130,16 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
   const dispatch = useDispatch();
 
   const fundreport = useSelector(
-    (state) => state.fund.fund?.summary
+    (state) => state.virtualfund.virtualfund?.summary
   );
   console.log(81,fundreport);
+
+
+  const walletdata = useSelector(
+    (state) => state.virtualfund.virtualfund?.wallet
+
+  );
+  console.log(141,walletdata);
 
 
 //   const payoutlogdata = useSelector((state) => state.payoutlog.payoutlog?.data);
@@ -149,17 +156,17 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
 
 
 
-  const funddata = useSelector((state) => state.fund.fund?.data)
+  const funddata = useSelector((state) => state.virtualfund.virtualfund?.data)
   console.log(40, funddata);
 
   const totalpage = useSelector(
-      (state) => state.fund.fund.pagination?.totalPages
+      (state) => state.virtualfund.virtualfund.pagination?.totalPages
   );
   // console.log(41, totalpage);
 
 
   const totaldata = useSelector(
-      (state) => state.fund.fund.pagination?.totalRecords
+      (state) => state.virtualfund.virtualfund.pagination?.totalRecords
   );
 
 
@@ -168,13 +175,16 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
 
   // console.log(96,payoutlogdata);
 
+
+
+
   useEffect(() => {
     if (!formdatastr || !formdataend) return;
     async function fetchdata() {
       setLoad(true);
 
       await dispatch(
-        get_funds_by_Corpid(
+        getvirtualfund_by_corpid(
             corpid, page, perPage, searchtr, fstatus,formdatastr,formdataend
         )
       );
@@ -186,7 +196,7 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
 
   const downloadexcel = () => {
     dispatch(
-        get_funds_by_Corpid(corpid,searchtr, searchtr, formdatastr, formdataend, true)
+        getvirtualfund_by_corpid(corpid,searchtr, searchtr, formdatastr, formdataend, true)
     );
   };
   useEffect(() => {
@@ -216,23 +226,54 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
             }`}
           >
             {/* Title */}
-            <div className="flex flex-col">
-              <h1
-                className={`text-xl font-semibold ${
-                  theme === "dark" ? "text-gray-100" : "text-gray-800"
-                }`}
-              >
-                Fund Report
-              </h1>
-              <p
-                className={`text-sm ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                Overview of all fund transfers including status, amount,
-                and date.
-              </p>
-            </div>
+            <div
+  className={`flex w-full items-center justify-between rounded-xl p-6 mb-6 shadow-sm ${
+    theme === "dark"
+      ? "bg-gray-900 border border-gray-800"
+      : "bg-white border border-gray-100"
+  }`}
+>
+  {/* Left Content */}
+  <div className="flex flex-col gap-1">
+    <h1
+      className={`text-2xl font-semibold tracking-tight ${
+        theme === "dark" ? "text-gray-100" : "text-gray-900"
+      }`}
+    >
+      Virtual Fund Report
+    </h1>
+
+    <p
+      className={`text-sm leading-relaxed ${
+        theme === "dark" ? "text-gray-400" : "text-gray-500"
+      }`}
+    >
+      Overview of all virtual fund transfers including status, amount, and date.
+    </p>
+  </div>
+
+  {/* Wallet Balance Card */}
+  <div
+    className={`flex flex-col items-end gap-1 rounded-lg px-5 py-3 ${
+      theme === "dark"
+        ? "bg-gray-800 text-gray-100"
+        : "bg-emerald-50 text-gray-900"
+    }`}
+  >
+    <span
+      className={`text-xs uppercase tracking-wide ${
+        theme === "dark" ? "text-gray-400" : "text-emerald-700"
+      }`}
+    >
+      Current Wallet Balance
+    </span>
+
+    <span className="text-2xl font-bold">
+      ₹{Number(walletdata?.current_wallet_balance || 0).toLocaleString("en-IN")}
+    </span>
+  </div>
+</div>
+
 
             {/* Info stats */}
           </div>
@@ -294,11 +335,11 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
                       fundreport?.success_amount === undefined
                         ? "00"
                         : Number(
-                          fundreport.success_amount
-                        ).toLocaleString("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }) 
+                            fundreport.success_amount
+                          ).toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
                     }`,
                   },
                   {
@@ -400,7 +441,7 @@ updateform(),e.preventDefault()
                     theme === "dark" ? "text-gray-100" : "text-gray-800"
                   }`}
                 >
-                 Fund Requests
+                 Virtual Funds
                 </h2>
 
                 <div className="flex gap-3 flex-wrap items-center">
@@ -672,85 +713,83 @@ updateform(),e.preventDefault()
                             </thead>
 
                             <tbody
-                                className={`text-[12px] font-semibold ${theme === "dark" ? "text-gray-300" : "text-gray-800"
-                                    }`}
-                            >
+  className={`text-[12px] font-semibold ${
+    theme === "dark" ? "text-gray-300" : "text-gray-800"
+  }`}
+>
+  {load ? (
+    Array.from({ length: 4 }).map((_, i) => <Contentloader key={i} />)
+  ) : Array.isArray(funddata) && funddata.length > 0 ? (
+    funddata.map((txn, i) => (
+      <tr
+        key={i}
+        className={`border-b ${
+          theme === "dark"
+            ? "border-gray-700 hover:bg-gray-700/60"
+            : "border-gray-100 hover:bg-gray-50"
+        }`}
+      >
+        {/* Status */}
+        <td className="px-4 py-3">
+          <span
+            className={`text-white rounded-[3px] px-[13px] py-[2px] font-bold text-[12px] ${
+              txn.txn_status === "SUCCESS"
+                ? "bg-green-500"
+                : txn.txn_status === "PENDING"
+                ? "bg-yellow-500"
+                : "bg-red-500"
+            }`}
+          >
+            {txn.txn_status}
+          </span>
+        </td>
 
+        {/* Transaction Date */}
+        <td className="px-4 py-3">
+          {txn.date_time}
+        </td>
 
-                                {load ? (
-                                    Array.from({ length: 4 }).map((_, i) => <Contentloader />)
-                                ) : Array.isArray(funddata) &&
-                                    funddata.length > 0 ? (
-                                    funddata.map((txn, i) => (
-                                        <tr
-                                            key={i}
-                                            className={`border-b ${theme === "dark"
-                                                ? "border-gray-700 hover:bg-gray-700/60"
-                                                : "border-gray-100 hover:bg-gray-50"
-                                                }`}
-                                        >
-                                            {/* Status */}
-                                            <td className="px-4 py-3">
-                                                <span
-                                                    className={`text-white rounded-[3px] px-[13px] py-[2px] font-bold text-[12px] ${txn.status?.toLowerCase() === "pending"
-                                                        ? "bg-yellow-500"
-                                                        : txn.status?.toLowerCase() === "success"
-                                                            ? "bg-green-500"
-                                                            : "bg-red-500"
-                                                        }`}
-                                                >
-                                                    {txn.status?.toUpperCase()}
-                                                </span>
-                                            </td>
+        {/* Amount */}
+        <td className="px-4 py-3 font-bold">
+          ₹{Number(txn.txn_amount).toLocaleString("en-IN")}
+        </td>
 
-                                            {/* Txn Date */}
-                                            <td className="px-4 py-3">{txn.txn_date}</td>
+        {/* Details */}
+        <td className="px-4 py-3">
+          <div className="flex flex-col text-[11px]">
+            <span>Order ID: {txn.order_id}</span>
+            <span>
+              Bal: ₹{txn.pre_balance} → ₹{txn.post_balance}
+            </span>
+          </div>
+        </td>
 
-                                            {/* Amount */}
-                                            <td className="px-4 py-3">₹{txn.amount}</td>
+        {/* Remarks */}
+        <td className="px-4 py-3">{txn.remark}</td>
 
-                                            {/* UTR */}
-                                            <td className="px-4 py-3">
+        {/* Mode */}
+        <td className="px-4 py-3">
+          <span
+            className={`px-2 py-[2px] rounded text-[11px] font-bold ${
+              txn.txn_mode === "CR"
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {txn.txn_mode}
+          </span>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan={6} className="text-center py-4 text-gray-500">
+        No data found
+      </td>
+    </tr>
+  )}
+</tbody>
 
-
-                                                <div className="flex flex-col">
-                                                    
-                                                    <p>UTR: {txn.utr_no}</p>
-                                                    <p>[request ID: #{txn.request_id}]</p>
-                                                </div>
-
-
-                                            </td>
-
-                                            {/* Mode */}
-
-
-                                            <td className="px-4 py-3">{txn.remark}</td>
-                                            <td className="px-4 py-3">{txn.mode}</td>
-                                            {/* <td className="px-4 py-3"><button onClick={()=>{handelupdate(txn)}} className="p-2 bg-blue-800 text-white font-bold rounded-[5px]">Update</button></td> */}
-
-
-
-
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td
-                                            colSpan={8}
-                                            className="text-center py-4 text-gray-600"
-                                        >
-                                            No data found
-                                        </td>
-                                    </tr>
-                                )}
-
-
-
-
-
-
-                            </tbody>
                         </table>
               {totalpage > 0 ? (
                 <div
@@ -892,4 +931,4 @@ updateform(),e.preventDefault()
   );
 };
 
-export default Fund_by_corp;
+export default Virfund_by_corpid;
