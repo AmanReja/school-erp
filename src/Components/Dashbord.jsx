@@ -84,6 +84,7 @@ const Dashbord = () => {
       show: showp,
       setShow: setShowp,
     },
+
   ];
   
 
@@ -132,7 +133,7 @@ const Dashbord = () => {
               }`
             }
           >
-            <i className={`fa-solid ${icon} text-[16px]`}></i>
+            <i className={`fa-solid ${icon} text-[12px]`}></i>
           </NavLink>
 
           {/* Expanded Label */}

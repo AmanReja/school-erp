@@ -11,7 +11,7 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   PKG_MASTER_CREATE,
   PKG_MASTER_UPDATE,
   PKG_MASTER_DELETE,PKG_CMS_MASTER_GET,PKG_CMS_MASTER_CREATE,PKG_CMS_MASTER_UPDATE,PKG_CMS_MASTER_DELETE,SERVICELIST_GET,SERVICELIST_CREATE,SERVICELIST_UPDATE,SERVICELIST_DELETE
-  ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS,ADMINDETAILS,GET_MERCHENT_ENTITY,GET_MERCHENT_ENTITY_DELETED, DELETE_ENTITY,GETALL_FUND,GET_FUNDS_BY_CORPID, GET_VIRTUALFUNDS, GET_VIRTUALFUNDS_BY_CORPID
+  ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS,ADMINDETAILS,GET_MERCHENT_ENTITY,GET_MERCHENT_ENTITY_DELETED, DELETE_ENTITY,GETALL_FUND,GET_FUNDS_BY_CORPID, GET_VIRTUALFUNDS, GET_VIRTUALFUNDS_BY_CORPID,PKG_CMS_MASTER_GET_BY_PKG_ID,PKG_CMS_MASTER_CREATE_BY_PKG_ID,DISPUTE_CREATE, DISPUTE_GET_BY_CORPID
 
 } from "../redux/action";
 
@@ -319,6 +319,16 @@ const initialSettlementState = {
           ...state,
           pkgcmsMasters: action.payload,   // FLAT ARRAY ONLY
         };
+      case PKG_CMS_MASTER_GET_BY_PKG_ID:
+        return {
+          ...state,
+          pkgcmsMasters: action.payload,   // FLAT ARRAY ONLY
+        };
+      case PKG_CMS_MASTER_CREATE_BY_PKG_ID:
+        return {
+          ...state,
+          pkgcmsMasters: [action.payload, ...state.pkgcmsMasters.data],  // FLAT ARRAY ONLY
+        };
   
       // ---------------- CREATE NEW PACKAGE ----------------
       case PKG_CMS_MASTER_CREATE:
@@ -506,3 +516,33 @@ const initialSettlementState = {
   };
   
 
+/*----//////// dispute ///// */
+
+
+
+
+
+
+  const coldisputestate = {
+    coldispute: [],
+  };
+  
+  export const coldisputeReducer = (
+    state = coldisputestate,
+    action
+  ) => {
+    if (action.type === DISPUTE_CREATE) {
+      return {
+        ...state,
+        coldispute:[action.payload,...state.coldispute]
+      };
+    } else if(action.type===DISPUTE_GET_BY_CORPID){
+      return {
+        ...state,
+        coldispute:action.payload
+      };
+    } else {
+      return state;
+    }
+  };
+  

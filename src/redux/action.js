@@ -1,4 +1,6 @@
+// import { toast } from "sooner";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "sonner";
 export const LOGIN = "LOGIN";
 export const CREATEMERCHANT = "CREATEMERCHANT";
 export const GETDETAILS = "GETDETAILS";
@@ -40,13 +42,17 @@ export const SERVICELIST_DELETE = "SERVICELIST_DELETE";
 
 
 export const PKG_CMS_MASTER_GET = "PKG_CMS_MASTER_GET";
+export const PKG_CMS_MASTER_GET_BY_PKG_ID = "PKG_CMS_MASTER_GET_BY_PKG_ID";
+export const PKG_CMS_MASTER_CREATE_BY_PKG_ID = "PKG_CMS_MASTER_CREATE_BY_PKG_ID";
 export const PKG_CMS_MASTER_CREATE = "PKG_CMS_MASTER_CREATE";
 export const PKG_CMS_MASTER_UPDATE = "PKG_CMS_MASTER_UPDATE";
 export const PKG_CMS_MASTER_DELETE = "PKG_CMS_MASTER_DELETE";
 
 
 
-
+export const DISPUTE_CREATE = "DISPUTE_CREATE";
+export const DISPUTE_GET = "DISPUTE_GET";
+export const DISPUTE_GET_BY_CORPID = "DISPUTE_GET_BY_CORPID";
 
 
 export const GET_CMS_ASSIGN = "GET_CMS_ASSIGN";
@@ -113,15 +119,23 @@ export const login = (admin,setLoading,navigate) => async (dispatch) => {
    
 
     if (res.status===200) {
-      alert("login successfull")
+      // alert("login successfull");
+      toast.success("login Successfull")
      
       setLoading(false);
       navigate("/dashboard/merchant");
       localStorage.setItem("token", data.token);
     }
 
+    if(res.status===401){
+
+      toast.error("Wrong Password")
+    
+    }
     if(res.status===404){
-      alert("invald credentials")
+
+      toast.error("Invalid Credentials")
+     
     }
 
  
@@ -699,6 +713,8 @@ export const update_Txn_data = (txn_id,updateddata,setUpdateload) => async (disp
 export const getPkgMasters = (searchTerm, page, limit,status,start_date,end_date) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
+  console.log(704,status);
+
   const params = new URLSearchParams();
   if (searchTerm) params.append("search", searchTerm);
   if (status) params.append("status", status);
@@ -883,8 +899,60 @@ console.log(769,pkgid,updateddata);
 
 
 
-export const getPkg_cms_Masters = (searchTerm, page, limit,status,downloadexcl=false) => async (dispatch) => {
+// export const getPkg_cms_Masters = (searchTerm, page, limit,status,downloadexcl=false) => async (dispatch) => {
+//   const token = localStorage.getItem("token");
+
+//   const params = new URLSearchParams();
+//   if (page) params.append("page", page);
+//   if (searchTerm) params.append("search", searchTerm);
+//   if (status) params.append("type", status);
+//   if (limit) params.append("limit", limit);
+//   if(downloadexcl) params.append("download", "excel");
+
+//   try {
+//     const res = await fetch(`${baseUrl}/v1/admin/pkg/cms?${params.toString()}`, {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     if (res.status === 401) {
+//       window.location.href = "/";
+//       return;
+//     }
+
+//     if (downloadexcl==true) {
+//       const blob = await res.blob();
+//       const fileURL = window.URL.createObjectURL(blob);
+//       const link = document.createElement("a");
+//       link.href = fileURL;
+//       link.setAttribute("download", "PKG_CMS_DATA.xlsx");
+//       document.body.appendChild(link);
+//       link.click();
+//       link.remove();
+//       return; 
+//     }
+
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       console.error("Error fetching packages:", data);
+//       alert(data.message || "Failed to fetch package masters");
+//       return;
+//     }
+
+//     dispatch({ type: PKG_CMS_MASTER_GET, payload: data });
+//   } catch (error) {
+//     alert("Error fetching package masters: " + error.message);
+//   }
+// };
+export const getPkg_cms_Masters_packageid = (searchTerm, page, limit,status,downloadexcl=false,pkg_id,service_id) => async (dispatch) => {
   const token = localStorage.getItem("token");
+  // pkg/cms/:service_id/:pkg_id
+  console.log("940",service_id,pkg_id);
 
   const params = new URLSearchParams();
   if (page) params.append("page", page);
@@ -894,7 +962,7 @@ export const getPkg_cms_Masters = (searchTerm, page, limit,status,downloadexcl=f
   if(downloadexcl) params.append("download", "excel");
 
   try {
-    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms?${params.toString()}`, {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms/${service_id}/${pkg_id}?${params.toString()}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -928,25 +996,25 @@ export const getPkg_cms_Masters = (searchTerm, page, limit,status,downloadexcl=f
       return;
     }
 
-    dispatch({ type: PKG_CMS_MASTER_GET, payload: data });
+    dispatch({ type: PKG_CMS_MASTER_GET_BY_PKG_ID, payload: data });
   } catch (error) {
     alert("Error fetching package masters: " + error.message);
   }
 };
 
 // ---------------- CREATE PACKAGE ----------------
-export const create_Pkg_cms_Master = (ranges,service_id,pkg_id) => async (dispatch) => {
+export const create_Pkg_cms_Master_packageid = (ranges,pkgid,serviceid) => async (dispatch) => {
   // console.log("883 CMS",commerciallist);
   const token = localStorage.getItem("token");
 
   const datarow = {
-    pkg_id,
-    service_id,
+    pkgid,
+    serviceid,
     ranges
   };
 
   try {
-    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms`, {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms/${serviceid}/${pkgid}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -968,9 +1036,19 @@ export const create_Pkg_cms_Master = (ranges,service_id,pkg_id) => async (dispat
     
       
       
-      dispatch({ type: PKG_CMS_MASTER_CREATE, payload: data });
+      dispatch({ type: PKG_CMS_MASTER_CREATE_BY_PKG_ID, payload: data });
 
-      dispatch(getPkg_cms_Masters())
+      dispatch(
+        getPkg_cms_Masters_packageid(
+          "",
+          1,
+          10,
+          "",
+          false,
+          pkgid,
+          serviceid
+        )
+      );
       // setCreatemodelopen(false)
       
     
@@ -984,12 +1062,14 @@ export const create_Pkg_cms_Master = (ranges,service_id,pkg_id) => async (dispat
     alert("Error creating package: " + error.message);
   }
 };
-export const update_Pkg_cms_Master = (id,formData) => async (dispatch) => {
+export const update_Pkg_cms_Master = (id,formData,serviceid,pkgid) => async (dispatch) => {
   console.log("863 CMS",formData);
+  console.log("sr CMS",serviceid);
+  console.log("pk CMS",pkgid);
   const token = localStorage.getItem("token");
 
   try {
-    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms/${id}`, {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms/${serviceid}/${pkgid}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -1013,7 +1093,18 @@ export const update_Pkg_cms_Master = (id,formData) => async (dispatch) => {
       
       dispatch({ type: PKG_CMS_MASTER_UPDATE, payload: data });
 
-      dispatch(getPkg_cms_Masters())
+   
+        dispatch(
+          getPkg_cms_Masters_packageid(
+            "",
+            1,
+            10,
+            "",
+            false,
+            pkgid,
+            serviceid
+          )
+        )
     
       
     
@@ -1027,12 +1118,12 @@ export const update_Pkg_cms_Master = (id,formData) => async (dispatch) => {
     alert("Error creating package: " + error.message);
   }
 };
-export const delete_Pkg_cms_Master = (id) => async (dispatch) => {
+export const delete_Pkg_cms_Master = (id,service_id,pkg_id) => async (dispatch) => {
   console.log("906 CMS id",id);
   const token = localStorage.getItem("token");
 
   try {
-    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms/${id}`, {
+    const res = await fetch(`${baseUrl}/v1/admin/pkg/cms/${service_id}/${pkg_id}/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -1056,7 +1147,18 @@ export const delete_Pkg_cms_Master = (id) => async (dispatch) => {
       
       dispatch({ type: PKG_CMS_MASTER_DELETE, payload: data });
 
-      dispatch(getPkg_cms_Masters())
+      dispatch(
+        getPkg_cms_Masters_packageid(
+          "",
+          1,
+          10,
+          "",
+          false,
+          pkg_id,
+          service_id
+        )
+      )
+  
     
       
     
@@ -1892,3 +1994,286 @@ export const getvirtualfund_by_corpid = (corp_id,page,perpage,search,fundstatus,
 };
 
 
+
+
+
+
+
+
+
+export const dispute_creacte=(txnId,disputedata)=>async (dispatch) =>{
+  
+
+  const token = localStorage.getItem("token") || {};
+  const res = await fetch(`${baseUrl}/v1/user/dispute/${txnId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body:JSON.stringify(disputedata)
+  });
+
+  // if (res.status === 401) {
+  //   localStorage.removeItem("token");
+  //   window.location.href = "/";
+  //   return;
+  // }
+
+  if (res.status===201) {
+    
+    const disputetype =
+  disputedata.dispute_type.charAt(0).toUpperCase() +
+  disputedata.dispute_type.slice(1);
+
+  toast.success(`${disputetype} dispute has been raised`)
+  // alert("Collection Dispute has been raised")
+
+  }
+
+  if (res.status === 405) {
+    toast.error("Dispute has already raised")
+  }
+
+
+   
+
+  const data = await res.json();
+
+  dispatch({type:DISPUTE_CREATE,payload:data})
+}
+// export const payout_dispute_creacte=(txnId,disputedata)=>async (dispatch) =>{
+  
+
+//   const token = localStorage.getItem("token") || {};
+//   const res = await fetch(`${baseUrl}/v1/user/dispute/${txnId}`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body:JSON.stringify(disputedata)
+//   });
+
+//   if (res.status === 401) {
+//     localStorage.removeItem("token");
+//     window.location.href = "/";
+//     return;
+//   }
+
+//   if (res.status===201) {
+    
+
+//   toast.success("Payout dispute has been raised")
+
+//   }
+   
+
+//   const data = await res.json();
+
+//   dispatch({type:PAYOUT_DISPUTE_CREATE,payload:data})
+// }
+
+
+
+// export const collection_dispute_delete=()=>async (dispatch) =>{
+//   const token = localStorage.getItem("token") || {};
+//   const res = await fetch(`${baseUrl}/v1/user/fund-requests`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body:JSON.stringify(addmoneydata)
+//   });
+
+//   if (res.status === 401) {
+//     localStorage.removeItem("token");
+//     window.location.href = "/";
+//     return;
+//   }
+
+//   if (res.status===201) {
+    
+//   }
+   
+
+//   const data = await res.json();
+
+//   dispatch({type:COLLECTION_DISPUTE_CREATE,payload:""})
+// }
+
+
+// export const collection_dispute_update=()=>async (dispatch) =>{
+//   const token = localStorage.getItem("token") || {};
+//   const res = await fetch(`${baseUrl}/v1/user/fund-requests`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//     body:JSON.stringify(addmoneydata)
+//   });
+
+//   if (res.status === 401) {
+//     localStorage.removeItem("token");
+//     window.location.href = "/";
+//     return;
+//   }
+
+//   if (res.status===201) {
+    
+//   }
+   
+
+//   const data = await res.json();
+
+//   dispatch({type:COLLECTION_DISPUTE_CREATE,payload:""})
+// }
+
+
+// export const all_dispute_get=(searchtr,trstatus,disputetype,searchdate_start,searchdate_end,page,pagelimit,downloadexcl=false)=>async (dispatch) =>{
+
+//   console.log(618,trstatus);
+//   console.log(619,disputetype);
+//   console.log(619,searchdate_start);
+//   console.log(619,searchdate_end);
+ 
+//   const params = new URLSearchParams();
+//   if (searchtr) params.append("search", searchtr);
+//   if (trstatus?.toLowerCase() !== "all" && trstatus) {
+//     params.append("status", trstatus);
+//   }
+//   if (disputetype) params.append("dispute_type", disputetype);
+//   if (searchdate_start) params.append("start_date", searchdate_start);
+//   if (searchdate_end) params.append("end_date", searchdate_end);
+//   // if (downloadexcl) params.append("download", "excel");
+//   if (page) params.append("page", page);
+//   if (pagelimit) params.append("limit", pagelimit);
+
+
+
+
+//   const token = localStorage.getItem("token") || {};
+//   const decoded = jwtDecode(token);
+//   const res = await fetch(`${baseUrl}/v1/user/disputes?${params.toString()}`, {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+    
+//   });
+
+//   if (res.status === 401) {
+//     localStorage.removeItem("token");
+//     window.location.href = "/";
+//     return;
+//   }
+
+
+//   if (downloadexcl == true) {
+//     const blob = await res.blob();
+//     const fileURL = window.URL.createObjectURL(blob);
+//     const link = document.createElement("a");
+//     link.href = fileURL;
+//     link.setAttribute(
+//       "download",
+//       `${decoded.corpID}_${searchdate_start}-${searchdate_end}_dispute.xlsx`
+//     );
+//     document.body.appendChild(link);
+//     link.click();
+//     link.remove();
+//     return;
+//   }
+   
+
+//   const data = await res.json();
+//   console.log(642,data);
+
+//   dispatch({type:DISPUTE_GET,payload:data})
+// }
+export const dispute_get_by_corpid =
+(
+  corpid,
+  searchtr,
+  trstatus,
+  disputetype,
+  searchdate_start,
+  searchdate_end,
+  page,
+  pagelimit,
+  downloadexcl = false
+) => async (dispatch) => {
+  try {
+
+console.log(corpid);
+  
+
+
+    const params = new URLSearchParams();
+
+    if (searchtr) params.append("search", searchtr);
+    if (trstatus?.toLowerCase() !== "all" && trstatus)
+      params.append("status", trstatus);
+    if (disputetype) params.append("dispute_type", disputetype);
+    if (searchdate_start) params.append("start_date", searchdate_start);
+    if (searchdate_end) params.append("end_date", searchdate_end);
+
+    if (page !== undefined && page !== null)
+      params.append("page", page);
+
+    if (pagelimit !== undefined && pagelimit !== null)
+      params.append("limit", pagelimit);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/";
+      return;
+    }
+
+    const res = await fetch(
+      `${baseUrl}/v1/admin/disputes/${corpid}?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+
+    if (downloadexcl) {
+      const blob = await res.blob();
+      const fileURL = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.setAttribute(
+        "download",
+        `dispute_${searchdate_start || "all"}-${
+          searchdate_end || "all"
+        }.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      return;
+    }
+
+    const data = await res.json();
+
+    dispatch({
+      type: DISPUTE_GET_BY_CORPID,
+      payload: data,
+    });
+
+  } catch (error) {
+    console.error("Dispute Fetch Error:", error);
+  }
+};

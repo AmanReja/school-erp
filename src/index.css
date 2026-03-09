@@ -59,3 +59,26 @@ input.hide-date-icon::-webkit-calendar-picker-indicator {
 .input {
   @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200;
 }
+
+
+
+/* Success */
+[data-sonner-toast][data-type="success"] {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+/* Error */
+[data-sonner-toast][data-type="error"] {
+  background: #fef2f2;
+  color: #7f1d1d;
+  border: 1px solid #fca5a5;
+}
+
+/* Info */
+[data-sonner-toast][data-type="info"] {
+  background: #eff6ff;
+  color: #1e3a8a;
+  border: 1px solid #93c5fd;
+}

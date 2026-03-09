@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { loginReducer ,merchantReducer,merchantSettlementReducer,transactionReducer,pkgMasterReducer,entityReducer, pkgcmsMasterReducer,serviceListReducer,cmsassignReducer,admindetailsReducer,fundReducer,virtualfundReducer} from "./reducer";
+import { loginReducer ,merchantReducer,merchantSettlementReducer,transactionReducer,pkgMasterReducer,entityReducer, pkgcmsMasterReducer,serviceListReducer,cmsassignReducer,admindetailsReducer,fundReducer,virtualfundReducer, coldisputeReducer} from "./reducer";
 
 
 
@@ -19,7 +19,8 @@ cmsassign:cmsassignReducer,
 admindetails:admindetailsReducer,
 entity:entityReducer,
 fund:fundReducer,
-virtualfund:virtualfundReducer
+virtualfund:virtualfundReducer,
+coldispute:coldisputeReducer
 
 
     },

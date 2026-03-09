@@ -19,8 +19,8 @@ import { DateRange } from "react-date-range";
 
 
 import {
-    update_Txn_data,getall_txn_data,getPkgMasters,createPkgMaster,deletePkgMaster,create_Pkg_cms_Master,getPkg_cms_Masters,update_Pkg_cms_Master,delete_Pkg_cms_Master
-
+    update_Txn_data,getall_txn_data,getPkgMasters,createPkgMaster,deletePkgMaster,create_Pkg_cms_Master_packageid,update_Pkg_cms_Master,delete_Pkg_cms_Master
+,getPkg_cms_Masters_packageid
 } from "../redux/action";
 
 const Commercial = () => {
@@ -43,6 +43,8 @@ const Commercial = () => {
 
 
   const { pkgid,serviceid} = useParams();
+  console.log("ser",serviceid);
+  console.log("pkg",pkgid);
  
 
 
@@ -199,7 +201,7 @@ const submitCommercials = () => {
   }
 
  
-  dispatch(create_Pkg_cms_Master(finalRanges, service_id, pkg_id))
+  dispatch(create_Pkg_cms_Master_packageid(finalRanges, pkgid,serviceid ))
     .then(() => {
       resetCommercialForm(); // ⬅ reset everything here
     });
@@ -244,7 +246,18 @@ const submitCommercials = () => {
 
   useEffect(() => {
    
-      dispatch(getPkg_cms_Masters(searchTerm,page,perPage,searchStatus));
+      // dispatch(getPkg_cms_Masters(searchTerm,page,perPage,searchStatus));
+      dispatch(
+        getPkg_cms_Masters_packageid(
+          searchTerm,
+          page,
+          perPage,
+          searchStatus,
+          false,        // ✅ downloadexcl
+          pkgid,        // ✅ pkg_id
+          serviceid     // ✅ service_id
+        )
+      );
 
        
     
@@ -304,7 +317,7 @@ const handelUpdate =()=>{
         mch: mch,
         type: pkgType
     };
-    dispatch(update_Pkg_cms_Master(currentcomid,updatedFormdata))
+    dispatch(update_Pkg_cms_Master(currentcomid,updatedFormdata,service_id,pkg_id))
   } catch (error) {
     console.log(error);
   } finally{
@@ -333,8 +346,9 @@ const handelUpdate =()=>{
    
 
 const handelcomDelete =(com)=>{
+  console.log(349,com);
 
-  dispatch(delete_Pkg_cms_Master(com.id))
+  dispatch(delete_Pkg_cms_Master(com.id,com.service_id,com.pkg_id))
 
 }
 
@@ -346,7 +360,8 @@ const handleDownload = async () => {
 
     await dispatch(
       
-      getPkg_cms_Masters(searchTerm,page,perPage,searchStatus, true)
+      getPkg_cms_Masters_packageid(searchTerm,page,perPage,searchStatus, true, pkgid,        
+      serviceid )
     );
     
     
@@ -473,7 +488,7 @@ const handleDownload = async () => {
                     />
                   </div>
                 )}
-{Array.isArray(pkgcmsData)&&pkgcmsData.length===0&&<button onClick={()=>{setCreatemodelopen(true)}} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Create Commercial</button>}
+{Array.isArray(pkgcmsData)&&pkgcmsData.length===0&&<button onClick={()=>{setCreatemodelopen(true)}} className=" rounded-[5px] text-[12px] py-2 w-[120px] text-white bg-amber-500">Create Commercial</button>}
                 {/* 📋 Status Dropdown */}
                 <select onChange={(e) => { setSearchStatus(e.target.value) }}
                   value={searchStatus}
@@ -666,7 +681,7 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
 
 
 
-<table className="w-full text-sm text-left border border-gray-200 overflow-hidden rounded-2xl shadow-xl bg-white">
+<table className="w-full text-sm text-left border border-gray-200 overflow-hidden shadow-xl bg-white">
 
 {/* TABLE HEADER */}
 <thead className="text-[12px] text-gray-700 uppercase bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">

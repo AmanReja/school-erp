@@ -18,7 +18,7 @@ import { DateRange } from "react-date-range";
 
 
 import {
-    update_Txn_data, getall_txn_data, getPkgMasters,getPkg_cms_Masters
+    update_Txn_data, getall_txn_data, getPkgMasters,getPkg_cms_Masters_packageid
 
 } from "../redux/action";
 
@@ -161,7 +161,7 @@ const Packagemaster = () => {
             dateRange.endDate));
 
         dispatch(getPkgMasters())
-        dispatch(getPkg_cms_Masters())
+        // dispatch(getPkg_cms_Masters())
 
 
     }, [merchantId, searchTerm, searchStatus, dispatch, page, perPage, dateRange.startDate,

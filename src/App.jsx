@@ -12,12 +12,22 @@ import Dashbord from "./Components/Dashbord";
 import Navbar from "./Components/Navbar";
 import { ToastContainer, toast } from "react-toastify";
 import Titlecontroller from "./Components/Titlecontroller";
+import { Toaster } from "sonner";
 
 const App = () => {
   Titlecontroller()
   return (
     <>
-      <ToastContainer></ToastContainer>
+<Toaster
+  position="top-right"
+  expand
+  closeButton
+  theme="light"
+  toastOptions={{
+    className:
+      "rounded-xl shadow-2xl text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+  }}
+/>
       <Outlet></Outlet>
     </>
   );

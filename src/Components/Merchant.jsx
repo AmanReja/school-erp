@@ -316,7 +316,11 @@ const totaldata = useSelector(
   `;
 
   return (
-    <div
+
+
+
+   <>
+       <div
       className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${
         theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"
       }`}
@@ -341,6 +345,19 @@ const totaldata = useSelector(
       >
         Close
       </button>
+      <button
+  onClick={() => { navigate(`/dashboard/dispute/${corpidforfund}`) }}
+  className="
+    bg-gradient-to-r from-indigo-500  to-pink-500
+    hover:from-indigo-600  hover:to-pink-600
+    text-white px-4 py-2 rounded-lg
+    shadow-md hover:shadow-lg
+    transition-all duration-300
+    mb-4
+  "
+>
+  Disputes
+</button>
       {!isdeletedentopen?<button
         onClick={() => {setIsdeletedentopen(true)}}
         className="bg-red-400 px-3 py-1 text-white rounded mb-4"
@@ -441,138 +458,7 @@ const totaldata = useSelector(
       </tbody>
     )}
   </table>
-  {totalpage > 0 ? (
-                <div
-                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${
-                    theme === "dark"
-                      ? "bg-gray-900 text-gray-300 border-gray-700"
-                      : "bg-white text-gray-600 border-gray-200"
-                  }`}
-                >
-                  <div>
-                    Show{" "}
-                    <select
-                      className={`rounded border outline-none px-[5px] py-[5px] ${
-                        theme === "dark"
-                          ? "bg-gray-800 text-gray-200 border-gray-600"
-                          : "bg-white text-gray-700 border-gray-300"
-                      }`}
-                      value={perPage}
-                      onChange={(e) => {
-                        setPerPage(Number(e.target.value));
-                        setPage(1);
-                      }}
-                    >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={30}>30</option>
-                    </select>{" "}
-                    per page
-                  </div>
 
-                  <div className="flex items-center space-x-2">
-  {/* Showing range */}
-  <p>
-    {(page - 1) * perPage + 1}-{Math.min(page * perPage, totaldata)} of {totaldata}
-  </p>
-
-  {/* Prev Button */}
-  <button
-  
-    onClick={() => setPage(page - 1)}
-    disabled={page === 1}
-    className={`px-3 py-1 rounded-md ${
-      page === 1
-        ? "opacity-50 cursor-not-allowed"
-        : theme === "dark"
-        ? "hover:bg-gray-700"
-        : "hover:bg-gray-200"
-    }`}
-  >
-  <ChevronLeft/>
-  </button>
-
-  {/* First Page */}
-  <button
-    onClick={() => setPage(1)}
-    className={`px-3 py-1 rounded-md ${
-      page === 1
-        ? theme === "dark"
-          ? "bg-gray-700 font-semibold"
-          : "bg-gray-200 font-semibold"
-        : theme === "dark"
-        ? "hover:bg-gray-800"
-        : "hover:bg-gray-100"
-    }`}
-  >
-    1
-  </button>
-
-  {/* Dots before current group */}
-  {page > 3 && <span className="px-2">...</span>}
-
-  {/* Nearby page numbers */}
-  {Array.from({ length: 3 }, (_, i) => page - 1 + i)
-    .filter((num) => num > 1 && num < totalpage)
-    .map((num) => (
-      <button
-        key={num}
-        onClick={() => setPage(num)}
-        className={`px-3 py-1 rounded-md ${
-          num === page
-            ? theme === "dark"
-              ? "bg-gray-700 font-semibold"
-              : "bg-gray-200 font-semibold"
-            : theme === "dark"
-            ? "hover:bg-gray-800"
-            : "hover:bg-gray-100"
-        }`}
-      >
-        {num}
-      </button>
-    ))}
-
-  {/* Dots after current group */}
-  {page < totalpage - 2 && <span className="px-2">...</span>}
-
-  {/* Last Page */}
-  {totalpage > 1 && (
-    <button
-      onClick={() => setPage(totalpage)}
-      className={`px-3 py-1 rounded-md ${
-        page === totalpage
-          ? theme === "dark"
-            ? "bg-gray-700 font-semibold"
-            : "bg-gray-200 font-semibold"
-          : theme === "dark"
-          ? "hover:bg-gray-800"
-          : "hover:bg-gray-100"
-      }`}
-    >
-      {totalpage}
-    </button>
-  )}
-
-  {/* Next Button */}
-  <button
-    onClick={() => setPage(page + 1)}
-    disabled={page === totalpage}
-    className={`px-3 py-1 rounded-md ${
-      page === totalpage
-        ? "opacity-50 cursor-not-allowed"
-        : theme === "dark"
-        ? "hover:bg-gray-700"
-        : "hover:bg-gray-200"
-    }`}
-  >
-   <ChevronRight/>
-  </button>
-</div>
-
-                </div>
-              ) : (
-                ""
-              )}
 </div>
 
 
@@ -986,6 +872,10 @@ Transactions
         </div>
       )}
     </div>
+   
+   </>
+
+
   );
 };
 

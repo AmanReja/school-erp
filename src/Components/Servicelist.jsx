@@ -105,6 +105,13 @@ const Servicelist = () => {
 
 
 
+    const reset=()=>{
+        setServicestatus("");
+        setServiceid("")
+        setIspkgserEditing(false)
+    
+    }
+
 
 
 
@@ -153,6 +160,7 @@ const Servicelist = () => {
             setServicestatus(""),
             SetCurrentsrvid("")
             setIspkgserEditing(false)
+            setCreatemodelopen(false)
         }
        
 
@@ -184,6 +192,7 @@ const Servicelist = () => {
           setServiceid("")
           setServicename("")
           setServicestatus("")
+          setCreatemodelopen(false)
         }
 
 
@@ -222,6 +231,7 @@ const Servicelist = () => {
         } finally {
             setPkgname("")
             setPkgstatus("")
+            
         }
 
 
@@ -511,9 +521,38 @@ const Servicelist = () => {
                                 )}
 
 
-                                {isPkgopen ? <button onClick={() => { setCreatemodelopenpkg(true) }} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Create Package</button> : <button onClick={() => { setCreatemodelopen(true) }} className=" rounded-[5px] text-[13px] p-1 w-[120px] text-white bg-amber-500">Create Services</button>}
+{isPkgopen ? (
+  <button
+    onClick={() => setCreatemodelopenpkg(true)}
+    className="flex items-center justify-center gap-2
+               w-[140px] h-[34px]
+               text-xs font-medium text-white
+               bg-amber-500 hover:bg-amber-600
+               active:scale-95
+               rounded-lg shadow-md hover:shadow-lg
+               transition-all duration-200"
+  >
+    <i className="fa-solid fa-plus text-[11px]"></i>
+    Create Package
+  </button>
+) : (
+  <button
+    onClick={() => setCreatemodelopen(true)}
+    className="flex items-center justify-center gap-2
+               w-[140px] h-[34px]
+               text-xs font-medium text-white
+               bg-amber-500 hover:bg-amber-600
+               active:scale-95
+               rounded-lg shadow-md hover:shadow-lg
+               transition-all duration-200"
+  >
+    <i className="fa-solid fa-plus text-[11px]"></i>
+    Create Service
+  </button>
+)}
 
-                                {isPkgopen ? <button onClick={(e) => { setIsPkgopen(false) }} className="bg-black rounded-2xl text-white flex p-2"><ArrowLeft />Back</button> : ""}
+
+                                {isPkgopen ? <button onClick={(e) => { setIsPkgopen(false) }} className="bg-black rounded-[5px] text-white flex p-2"><ArrowLeft />Back</button> : ""}
 
 
                                 {/* 📋 Status Dropdown */}
@@ -558,177 +597,205 @@ const Servicelist = () => {
 
 
 
-                            {createmodelopenpkg && (
-                                <div
-                                    className="fixed inset-0 flex justify-center items-center z-50"
-                                >
-                                    <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
-                                        {/* Header */}
-                                        <div className="px-5 py-3 border-b flex justify-between items-center">
-                                            <h2 className="text-lg font-semibold text-gray-800">
-                                               {ispkgedit?"Edit Package":"Create Package"} 
-                                            </h2>
-                                            <button
-                                                onClick={() => {setCreatemodelopenpkg(false),setIspkgedit(false)}}
-                                                className="text-gray-500 hover:text-red-500 text-lg font-bold"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
+                        {createmodelopenpkg && (
+  <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/20">
+    
+    <div className="bg-white w-[420px] rounded-xl shadow-2xl animate-fadeIn">
+      
+      {/* Header */}
+      <div className="px-5 py-3 flex justify-between items-center shadow-sm">
+        <h2 className="text-sm font-semibold text-gray-800">
+          {ispkgedit ? "Edit Package" : "Create Package"}
+        </h2>
 
-                                        {/* Body */}
-                                        <form
-                                            onSubmit={(e) => { ispkgedit? handelpkgUpdate(e) :handelpkgcreate(e) }}
-                                            className="px-5 py-4 space-y-4"
-                                        >
-                                            {/* Package Name */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                    Package Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="pkg_name"
-                                                    value={pkgname}
-                                                    onChange={(e) => { setPkgname(e.target.value) }}
-                                                    placeholder="Enter package name"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                                />
-                                            </div>
+        <button
+          onClick={() => {
+            setCreatemodelopenpkg(false);
+            setIspkgedit(false);
+            setPkgstatus("")
+            setPkgname("")
+          }}
+          className="text-gray-400 hover:text-red-500 text-sm"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Body */}
+      <form
+        onSubmit={(e) =>
+          ispkgedit ? handelpkgUpdate(e) : handelpkgcreate(e)
+        }
+        className="px-5 py-4 space-y-3"
+      >
+        {/* Package Name */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">
+            Package Name
+          </label>
+          <input
+            type="text"
+            value={pkgname}
+            onChange={(e) => setPkgname(e.target.value)}
+            placeholder="Enter package name"
+            className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
+                       shadow-sm focus:ring-2 focus:ring-blue-200
+                       focus:outline-none"
+          />
+        </div>
+
+        {/* Status */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">
+            Status
+          </label>
+          <select
+            value={pkgstatus}
+            onChange={(e) => setPkgstatus(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
+                       shadow-sm focus:ring-2 focus:ring-blue-200
+                       focus:outline-none"
+          >
+            <option value="">Select Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => setModelopen(false)}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700
+                       text-xs px-4 py-2 rounded-lg shadow-sm"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white
+                       text-xs px-4 py-2 rounded-lg shadow"
+          >
+            {ispkgedit ? "Edit Package" : "Create Package"}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
 
 
+{createmodelopen && (
+  <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/20">
+    
+    <div className="bg-white w-[420px] rounded-xl shadow-2xl animate-fadeIn">
+      
+      {/* Header */}
+      <div className="px-5 py-3 flex justify-between items-center shadow-sm">
+        <h2 className="text-sm font-semibold text-gray-800">
+          {ispkgserEditing ? "Edit Services" : "Create Services"}
+        </h2>
 
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                    Status
-                                                </label>
-                                                <select
-                                                    name="status"
-                                                    value={pkgstatus}
-                                                    onChange={(e) => { setPkgstatus(e.target.value) }}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                                >
+        <button
+          onClick={() => {
+            setCreatemodelopen(false);
+            setServicename("");
+            setServiceid("");
+            setServicestatus("");
+            setIspkgserEditing(false);
+          }}
+          className="text-gray-400 hover:text-red-500 text-sm"
+        >
+          ✕
+        </button>
+      </div>
 
-                                                    <option selected value="">Select Status</option>
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
-                                                </select>
-                                            </div>
+      {/* Body */}
+      <form
+        onSubmit={(e) =>
+          ispkgserEditing ? handelsrvUpdate(e) : handelsrvcreate(e)
+        }
+        className="px-5 py-4 space-y-3"
+      >
+        {/* Service Name */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">
+            Service Name
+          </label>
+          <input
+            type="text"
+            value={servicename}
+            onChange={(e) => setServicename(e.target.value)}
+            placeholder="Enter service name"
+            className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
+                       shadow-sm focus:ring-2 focus:ring-blue-200
+                       focus:outline-none"
+          />
+        </div>
 
+        {/* Service ID */}
+        {!ispkgserEditing && (
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Service ID
+            </label>
+            <input
+              readOnly={ispkgserEditing}
+              type="text"
+              value={serviceid}
+              onChange={(e) => setServiceid(e.target.value)}
+              placeholder="Enter Service ID"
+              className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
+                         shadow-sm focus:ring-2 focus:ring-blue-200
+                         focus:outline-none"
+            />
+          </div>
+        )}
 
-                                            <div className="flex justify-end gap-3 pt-3">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setModelopen(false)}
-                                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-md transition"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    type="submit"
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition"
-                                                >
-                                                    {ispkgedit?"Edit Package":"Create Package"} 
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            )}
+        {/* Status */}
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">
+            Service Status
+          </label>
+          <select
+            value={servicestatus}
+            onChange={(e) => setServicestatus(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
+                       shadow-sm focus:ring-2 focus:ring-blue-200
+                       focus:outline-none"
+          >
+            <option value="">Select Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
 
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => setModelopen(false)}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700
+                       text-xs px-4 py-2 rounded-lg shadow-sm"
+          >
+            Cancel
+          </button>
 
-                            {createmodelopen && (
-                                <div
-                                    className="fixed inset-0 flex justify-center items-center z-50"
-                                >
-                                    <div className="bg-white w-[420px] rounded-lg shadow-xl border border-gray-200 animate-fadeIn">
-                                        {/* Header */}
-                                        <div className="px-5 py-3 border-b flex justify-between items-center">
-                                            <h2 className="text-lg font-semibold text-gray-800">
-                                              {ispkgserEditing?"Edit Services":"Create Services"}  
-                                            </h2>
-                                            <button
-                                                onClick={() => {setCreatemodelopen(false),setServicename(""),setServiceid(""),setServicestatus("")}}
-                                                className="text-gray-500 hover:text-red-500 text-lg font-bold"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white
+                       text-xs px-4 py-2 rounded-lg shadow"
+          >
+            {ispkgserEditing ? "Edit Services" : "Create Services"}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
 
-                                        {/* Body */}
-                                        <form
-                                            onSubmit={(e) => { ispkgserEditing?handelsrvUpdate(e): handelsrvcreate(e) }}
-                                            className="px-5 py-4 space-y-4"
-                                        >
-                                            {/* Package Name */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                    Service Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    name="pkg_name"
-                                                    value={servicename}
-                                                    onChange={(e) => { setServicename(e.target.value) }}
-                                                    placeholder="Enter package name"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                                />
-                                            </div>
-
-                                            {/* Description */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                    Service Id
-                                                </label>
-                                                <input
-
-                                                readOnly={ispkgserEditing}
-                                                    type="text"
-                                                    name="Service Id"
-                                                    value={serviceid}
-                                                    onChange={(e) => { setServiceid(e.target.value) }}
-                                                    placeholder="Enter Your Service Id"
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                                />
-                                            </div>
-
-                                            {/* Status */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                                    Service Status
-                                                </label>
-                                                <select
-                                                    name="status"
-                                                    value={servicestatus}
-                                                    onChange={(e) => {setServicestatus(e.target.value) }}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                                >
-                                                    <option value="">Select Status</option>
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
-                                                </select>
-                                            </div>
-
-                                            {/* Actions */}
-                                            <div className="flex justify-end gap-3 pt-3">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setModelopen(false)}
-                                                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium px-4 py-2 rounded-md transition"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    type="submit"
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition"
-                                                >
-                                                   {ispkgserEditing?"Edit Services":"Create Services"}
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            )}
 
 
 
@@ -861,7 +928,7 @@ const Servicelist = () => {
                                                         <td className="px-4 py-3 flex gap-2 items-center">
                                                             <button
                                                                 onClick={() => { setIsPkgopen(true),SetSelectedserviceid(pkg.service_id) }}
-                                                                className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
+                                                                className="bg-violet-400 hover:bg-violet-500 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
                                                             >
                                                                 <FaEdit size={12} />
                                                                 Set Package
@@ -878,7 +945,7 @@ const Servicelist = () => {
                                                                 className="bg-red-500 hover:bg-red-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
                                                             >
                                                                 <FaTrashAlt size={12} />
-                                                                Delete
+                                                             
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -887,7 +954,7 @@ const Servicelist = () => {
                                                 <tr>
                                                     <td colSpan="5" className="py-10">
                                                         <div className="flex justify-center items-center w-full">
-                                                            <div>No Package Master data found</div>
+                                                            <div>No Services data found</div>
                                                         </div>
                                                     </td>
                                                 </tr>
