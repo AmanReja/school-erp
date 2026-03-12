@@ -4,8 +4,9 @@ import { Outlet, Navigate } from "react-router-dom";
 // import.meta.env.VITE_LOCAL_URL;
 
 
-// const baseurl = import.meta.env.VITE_LOCAL_URL;
-const baseurl = "http://192.168.1.45:3000"
+
+const baseurl = import.meta.env.VITE_LOCAL_URL;
+console.log(baseurl);
 const Protectedroutes = () => {
   const [authenticated, setAuthenticated] = useState(true);
 

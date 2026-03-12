@@ -381,8 +381,8 @@ const handleDownload = async () => {
   // const handelMultipulesubmit =()=>{
 
   // }
-
-
+const [typeopen,setTypeopen] =useState(false);
+const type = ["CHARGE", "COMMISSION"];
 
 
   return (
@@ -585,25 +585,48 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
         </div>
 
         {/* MCH */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">MCH</label>
-          <input
-            type="text"
-            value={mch}
-            onChange={(e) => setMch(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
-          />
+   <div className="relative">
+      <label className="block text-sm font-semibold text-gray-700 mb-1">
+        Type
+      </label>
+
+      {/* Dropdown Button */}
+      <div
+        onClick={() => setTypeopen(!typeopen)}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm cursor-pointer flex justify-between items-center"
+      >
+        <span>{pkgType || "Select Type"}</span>
+        <span>▼</span>
+      </div>
+
+      {/* Dropdown List */}
+      {typeopen && (
+        <div className="absolute w-full bg-white border border-gray-300 rounded-lg mt-1 shadow-lg z-10">
+          {type.map((item, index) => (
+            <div
+              key={index}
+              onClick={() => {
+                setPkgType(item);
+                setTypeopen(false);
+              }}
+              className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
+            >
+              {item}
+            </div>
+          ))}
         </div>
+      )}
+    </div>
 
         {/* TYPE */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Type</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">MCH</label>
           <select
-            value={pkgType}
-            onChange={(e) => setPkgType(e.target.value)}
+            value={mch}
+            onChange={(e) => setMch(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-400 outline-none"
           >
-            <option value="Select Type">Select Type</option>
+            <option value="Select MCH">Select MCH</option>
             <option value="FLAT">FLAT</option>
             <option value="PERCENTAGE">PERCENTAGE</option>
           </select>

@@ -1,881 +1,454 @@
-import React, { useState, useContext,useEffect } from "react";
-import Hdfc from "../assets/images/HDFC.png";
-import { Link,useNavigate,useLocation } from "react-router-dom";
+import React, { useState, useContext, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Theme } from "../Contexts/Theme";
-import { useDispatch,useSelector } from "react-redux";
-import { createMerchant ,getDetails,updateMerchant, deleteMerchant,getmarchentent_by_companyid,delete_entity,getmarchentent_by_companyid_deleted} from "../redux/action";
-import { X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { LoadDetails } from "../Contexts/LoadDetails";
-import "../App.css"
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createMerchant, getDetails, updateMerchant, deleteMerchant,
+  getmarchentent_by_companyid, delete_entity, getmarchentent_by_companyid_deleted
+} from "../redux/action";
+import {
+  X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
+  Search, Plus, Users, BadgeCheck, Pencil, Trash2, Info,
+  Landmark, Wallet, FileText, ReceiptText, ArrowUpRight
+} from "lucide-react";
+
+// ─── Sub-components defined OUTSIDE to prevent remount on re-render ───────────
+
+const KycBadge = ({ status }) => {
+  const s = status?.toLowerCase();
+  const map = {
+    completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    pending:   "bg-amber-50  text-amber-700  border-amber-200",
+    rejected:  "bg-red-50    text-red-600    border-red-200",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${map[s] || "bg-gray-50 text-gray-600 border-gray-200"}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${s === "completed" ? "bg-emerald-500" : s === "pending" ? "bg-amber-400" : "bg-red-500"}`} />
+      {status || "—"}
+    </span>
+  );
+};
+
+const StatusBadge = ({ status }) => {
+  const s = status?.toLowerCase();
+  const map = {
+    active:   "bg-emerald-50 text-emerald-700 border-emerald-200",
+    inactive: "bg-amber-50  text-amber-700  border-amber-200",
+    deleted:  "bg-red-50    text-red-600    border-red-200",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${map[s] || "bg-gray-50 text-gray-500 border-gray-200"}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${s === "active" ? "bg-emerald-500" : s === "deleted" ? "bg-red-500" : "bg-amber-400"}`} />
+      {status || "—"}
+    </span>
+  );
+};
+
+const FormField = ({ label, children }) => (
+  <div className="flex flex-col gap-1">
+    <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">{label}</label>
+    {children}
+  </div>
+);
+
+const inputCls = (dark) =>
+  `w-full px-3 py-2 rounded-lg border text-sm outline-none transition-all
+  ${dark
+    ? "bg-gray-700 border-gray-600 text-white focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+    : "bg-gray-50 border-gray-200 text-gray-800 focus:border-violet-400 focus:ring-2 focus:ring-violet-100"}`;
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const Merchant = () => {
   const { theme } = useContext(Theme);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const location = useLocation()
-
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
-
+  const isDark = theme === "dark";
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [step, setStep] = useState(1);
-  const navigate =useNavigate()
-  const [marchentid,setMarchentid] =useState ("")
-  const [corpidforinfo,setCorpidforinfo] =useState ("")
+  const location = useLocation();
 
- const [searchTerm, setSearchTerm] = useState("");
-//  const {loadD,setLoadD} =useContext(LoadDetails)
-
- const [load,setLoad] =useState(false);
- const [isdeletedentopen,setIsdeletedentopen]= useState(false);
-
-
-
-
- console.log(isdeletedentopen);
-
- 
- 
-
-  
-
-
-  
-
-  // ✅ Individual state hooks for each field
-  const [name, setName] = useState("");
-  // const [org_id, setOrgId] = useState("");
-  // const [program_id, setProgramId] = useState("");
-  const [wallet_id, setWalletId] = useState("");
- 
-  const [user_id, setUserId] = useState("");
-  const [user_pass, setUserPass] = useState("");
-  const [address, setAddress] = useState("");
-  const [pan, setPan] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobile_number, setMobileNumber] = useState("");
-  const [gst, setGst] = useState("");
-  const [kyc_status, setKyc_status] = useState("");
-
+  const [load, setLoad] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const [openInfo, setOpenInfo] = useState(false);
-  
+  const [corpidforinfo, setCorpidforinfo] = useState("");
+  const [corpidforfund, setCorpidforfund] = useState("");
+  const [isdeletedentopen, setIsdeletedentopen] = useState(false);
 
-
-
-
-//////commercial/////
-// const [openModal, setOpenModal] = useState(false);
-
-// console.log(58,openModal);
-
-
-
-// const [company_id, setCompany_id] = useState("");
-// const [service_id, setService_id] = useState("");
-// const [pkg_id, setPkg_id] = useState("");
-
-
-  
-  // State for update modal
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedMerchant, setSelectedMerchant] = useState(null);
   const [updateFormData, setUpdateFormData] = useState({
-    name: "",
-    // org_id: "",
-    // program_id: "",
-    wallet_id: "",
-    userid: "",
-    user_pass: "",
-    address: "",
-    pan: "",
-    email: "",
-    mobile_number: "",
-    gst: "",
-    kyc_status: ""
+    name: "", wallet_id: "", userid: "", user_pass: "",
+    address: "", pan: "", email: "", mobile_number: "", gst: "", kyc_status: ""
   });
 
-
-   // Pagination functions
-   const handlePageChange = (page) => {
-    setCurrentPage(page);
-    // You can dispatch getDetails with page parameter if your API supports pagination
-    // dispatch(getDetails(page, itemsPerPage));
-  };
-
-  const handleItemsPerPageChange = (e) => {
-    const newItemsPerPage = parseInt(e.target.value);
-    setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1);
-    // You can dispatch getDetails with new items per page if your API supports it
-    // dispatch(getDetails(1, newItemsPerPage));
-  };
-
+  // ── Selectors ──
   const merchantsResponse = useSelector((state) => state.merchants?.merchants || {});
-  console.log(52,merchantsResponse);
-  
-  // Extract merchants data
-  const merchantsData = merchantsResponse.data || [];
-  const totalRecords = merchantsResponse.total || 0;
-  const totalPages = merchantsResponse.totalPages || 1;
-  const currentLimit = merchantsResponse.limit || itemsPerPage;
+  const merchantsData     = merchantsResponse.data        || [];
+  const totalRecords      = merchantsResponse.total       || 0;
+  const totalPages        = merchantsResponse.totalPages  || 1;
+  const startIndex        = (currentPage - 1) * itemsPerPage;
+  const endIndex          = startIndex + itemsPerPage;
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = merchantsData.slice(startIndex, endIndex);
-  const [corpidforfund,setCorpidforfund]=useState("")
+  const entdata = useSelector((state) => state.entity.entity?.data);
 
-  // Generate page numbers
+  // ── Page numbers ──
   const getPageNumbers = () => {
+    const max = 5;
+    let start = Math.max(1, currentPage - Math.floor(max / 2));
+    let end   = Math.min(totalPages, start + max - 1);
+    if (end - start + 1 < max) start = Math.max(1, end - max + 1);
     const pages = [];
-    const maxVisiblePages = 5;
-    
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    
+    for (let i = start; i <= end; i++) pages.push(i);
     return pages;
   };
-  
-  
-  
-  
 
+  // ── Effects ──
   useEffect(() => {
-    const generatePassword = () => {
-      const chars =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-      let pass = "";
-      for (let i = 0; i < 10; i++) {
-        pass += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return pass;
-    };
-    setUserPass(generatePassword());
-  }, []);
-
-  
-  useEffect(() => {
-
-   async function fetchData(){
-    setLoad(true)
-     await dispatch(getDetails(currentPage, itemsPerPage,searchTerm));
-    //  await dispatch(getmarchentent_by_companyid());
-     setLoad(false)
+    async function fetch() {
+      setLoad(true);
+      await dispatch(getDetails(currentPage, itemsPerPage, searchTerm));
+      setLoad(false);
     }
-    fetchData()
-  }, [dispatch, currentPage, itemsPerPage,searchTerm]);
-  
+    fetch();
+  }, [dispatch, currentPage, itemsPerPage, searchTerm]);
 
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
+  useEffect(() => {
+    if (!corpidforinfo) return;
+    isdeletedentopen
+      ? dispatch(getmarchentent_by_companyid_deleted(corpidforinfo))
+      : dispatch(getmarchentent_by_companyid(corpidforinfo));
+  }, [corpidforinfo, isdeletedentopen, dispatch]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-  
-    const formData = {
-      name,
-      // org_id,
-      // program_id,
-      wallet_id,
-      userid: user_id,     
-      user_pass,
-      address,
-      pan,
-      email,
-      mobile_number,
-      gst,
-      kyc_status: kyc_status 
-    };
-  
-    console.log("Payload:", formData); // debug
-    dispatch(createMerchant(formData,setStep));
+  // ── Handlers ──
+  const handelInfo = (merchant) => {
+    setOpenInfo(true);
+    setCorpidforinfo(merchant.corp_id);
+    setCorpidforfund(merchant.corp_id);
   };
 
-
-
-
-
-  // Handle Edit - Open update modal with merchant data
   const handleEdit = (merchant) => {
     setSelectedMerchant(merchant);
     setUpdateFormData({
-      name: merchant.name || "",
-      // org_id: merchant.org_id || "",
-      // program_id: merchant.program_id || "",
-      wallet_id: merchant.wallet_id || "",
-      userid: merchant.userid || "",
-      user_pass: merchant.user_pass || "",
-      address: merchant.address || "",
-      pan: merchant.pan || "",
-      email: merchant.email || "",
-      mobile_number: merchant.mobile_number || "",
-      gst: merchant.gst || "",
-      kyc_status: merchant.kyc_status || ""
+      name: merchant.name || "", wallet_id: merchant.wallet_id || "",
+      userid: merchant.userid || "", user_pass: merchant.user_pass || "",
+      address: merchant.address || "", pan: merchant.pan || "",
+      email: merchant.email || "", mobile_number: merchant.mobile_number || "",
+      gst: merchant.gst || "", kyc_status: merchant.kyc_status || ""
     });
     setIsUpdateModalOpen(true);
   };
 
-  // Handle Update - Submit updated data
   const handleUpdate = async () => {
     if (selectedMerchant) {
       await dispatch(updateMerchant(selectedMerchant.corp_id, updateFormData));
-      // Fetch updated list
       dispatch(getDetails());
-  
       setIsUpdateModalOpen(false);
       setSelectedMerchant(null);
     }
   };
 
-  // Handle input change in update form
   const handleUpdateInputChange = (e) => {
     const { name, value } = e.target;
-    setUpdateFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setUpdateFormData(prev => ({ ...prev, [name]: value }));
   };
 
-
-
-  const entdata =useSelector((state)=>state.entity.entity?.data)
-  console.log(240,entdata);
-  const ent =useSelector((state)=>state.entity.entity)
-  console.log(250,ent);
-
-
-
-  const totalpage = useSelector(
-    (state) => state.entity.entity.pagination
-    ?.total_pages
-
-);
-console.log(41, totalpage);
-
-
-const totaldata = useSelector(
-    (state) => state.entity.entity.pagination?.total_records
-
-);
-
-
-
-
-
-  const handelInfo =(merchant)=>{
-
-    setOpenInfo(true);
-    
-   
-    setCorpidforinfo(merchant.corp_id)
-    setCorpidforfund(merchant.corp_id)
-    
-
-  }
-  
-  useEffect(() => {
-   if (isdeletedentopen) {
-    dispatch (getmarchentent_by_companyid_deleted(corpidforinfo))
-   } else{
-
-    dispatch(getmarchentent_by_companyid(corpidforinfo));
-
-   }
-    
-   
-  }, [corpidforinfo, isdeletedentopen, dispatch]);
-  
-
-    const handelEntdelete =(ent)=>{
-      // console.log(ent);
-   
-      dispatch(delete_entity(ent.corp_id,ent.status))
-          
-    }
-
-  const handleDelete = async(merchant) => {
+  const handleDelete = async (merchant) => {
     if (window.confirm("Are you sure you want to delete this merchant?")) {
-      await dispatch(deleteMerchant(merchant.corp_id))
+      await dispatch(deleteMerchant(merchant.corp_id));
     }
   };
 
-  const steps = ["Basic Info", "Organization", "User Details", "Financial", "Status"];
-
-  const formCardStyle = `
-    w-full sm:w-[30%] min-w-[350px] flex flex-col gap-6 rounded-2xl border p-6 shadow-md
-    ${theme === "dark" ? "bg-gray-800 border-gray-700 text-gray-200" : "bg-white border-gray-200 text-gray-800"}
-  `;
+  const handelEntdelete = (ent) => dispatch(delete_entity(ent.corp_id, ent.status));
 
   return (
+    <div className={`w-full min-h-full flex flex-col ${isDark ? "bg-gray-950 text-gray-200" : "bg-slate-50 text-gray-800"}`}>
 
-
-
-   <>
-       <div
-      className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${
-        theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"
-      }`}
-    >
-      <main className="w-full h-full flex flex-col overflow-y-scroll">
-
-
-    
-
+      {/* ── Entity Info Modal ── */}
       {openInfo && (
-  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(10,15,30,0.55)", backdropFilter: "blur(3px)" }}>
+          <div className={`w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden border ${isDark ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}`}>
 
-    <div className={` ${theme==="dark"?"bg-gray-800 text-white":"bg-white text-black"}  w-full max-w-3xl rounded-2xl shadow-xl p-6
-                    transform transition-all duration-300 scale-100 animate-fadeIn`}>
-
-      {/* Close */}
-      <div className="flex gap-[50px]  justify-between w-full">
-        <div className="flex w-[50%]  gap-[12px]">
-        <button
-        onClick={() => setOpenInfo(false)}
-        className="bg-gray-400 px-3 py-1 text-white rounded mb-4"
-      >
-        Close
-      </button>
-      <button
-  onClick={() => { navigate(`/dashboard/dispute/${corpidforfund}`) }}
-  className="
-    bg-gradient-to-r from-indigo-500  to-pink-500
-    hover:from-indigo-600  hover:to-pink-600
-    text-white px-4 py-2 rounded-lg
-    shadow-md hover:shadow-lg
-    transition-all duration-300
-    mb-4
-  "
->
-  Disputes
-</button>
-      {!isdeletedentopen?<button
-        onClick={() => {setIsdeletedentopen(true)}}
-        className="bg-red-400 px-3 py-1 text-white rounded mb-4"
-      >
-        Deleted Entity
-      </button>:  <button
-        onClick={() => {setIsdeletedentopen(false)}}
-        className="bg-red-400 px-3 py-1 text-white rounded mb-4"
-      >
-        <i class="fa-solid fa-x"></i>
-      </button>}
-      
-        </div>
-     
-
-
-
-
-       <div className="flex gap-[10px] w-[50%] justify-end">
-       <button
-        onClick={() => {navigate(`/dashboard/fundbycorp/${corpidforfund}`)}}
-        className="bg-violet-400 px-3 text-white py-1 z-30 rounded mb-4"
-      >
-       Manual Funds
-      </button>
-      <button
-        onClick={() => {navigate(`/dashboard/Virfundbycorpid/${corpidforfund}`)}}
-        className="bg-cyan-700 px-3 text-white py-1 z-30 rounded mb-4"
-      >
-       Virtual Funds
-      </button>
-       </div>
-     
-      </div>
-     
-
-      {/* Header */}
-      <h2 className="text-xl font-semibold dark:text-white mb-4">
-       {isdeletedentopen?"Deleted Entity Information":"Entity Information"} 
-      </h2>
-
-      {/* Table */}
-      <div className="overflow-auto max-h-[400px]">
-      <table className="min-w-full border-collapse">
-    <thead className="sticky top-0 bg-gradient-to-r from-gray-100 to-gray-200">
-      <tr className="text-left text-gray-600 uppercase text-[12px] tracking-wide">
-        <th className="p-3 border-b">Corp ID</th>
-        <th className="p-3 border-b">Status</th>
-        <th className="p-3 border-b">Callback URL</th>
-        <th className="p-3 border-b">Callback Event</th>
-        <th className="p-3 border-b">Created On</th>
-      </tr>
-    </thead>
-
-    {Array.isArray(entdata) && entdata.length === 0 ? (
-      <tbody>
-        <tr>
-          <td
-            colSpan={8}
-            className="text-center py-6 text-gray-500 italic"
-          >
-            No data found
-          </td>
-        </tr>
-      </tbody>
-    ) : (
-      <tbody className="text-sm text-gray-700">
-        {entdata?.map((row, idx) => (
-          <tr
-            key={idx}
-            className={`transition-all hover:bg-gray-100 
-              ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-            `}
-          >
-            <td className="p-3 ">{row?.corp_id}</td>
-            <td className="p-3 ">
-  <span
-    className={`px-3 py-1 rounded-full text-xs font-semibold border 
-      ${
-        row.status?.toLowerCase() === "active"
-          ? "bg-green-100 text-green-700 border-green-300"
-          : row.status?.toLowerCase() === "inactive"
-          ? "bg-amber-100 text-amber-700 border-amber-300"
-          : row.status?.toLowerCase() === "deleted"
-          ? "bg-red-100 text-red-700 border-red-300"
-          : "bg-gray-100 text-gray-700 border-gray-300"
-      }
-    `}
-  >
-    {row.status}
-  </span>
-</td>
-            <td className="p-3  break-all">{row?.callback_url}</td>
-            <td className="p-3 ">{row?.callback_event_name}</td>
-            <td className="p-3 ">{row?.create_on}</td>
-          </tr>
-        ))}
-      </tbody>
-    )}
-  </table>
-
-</div>
-
-
-    </div>
-
-  </div>
-)}
-
-
-
-        <section className="w-full flex flex-col sm:flex-row gap-[20px]  mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[10px]">
-          {/* Single Payout Form */}
-       
-
-          {/* Transactions Table */}
-          <div
-            className={`flex sm:w-[100%] w-full h-full flex-col rounded-xl overflow-y-auto border ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-gray-300"
-                : "bg-white border-gray-100 text-gray-800"
-            }`}
-          >
-            <div className="flex justify-between items-center p-4 h-[60px] w-full">
-              <h2 className="text-[16px] font-semibold">Merchant List</h2>  <div className="flex items-center gap-4">
-  {/* 🔍 Search Input */}
-  <div className="relative w-[220px]">
-    <input
-      type="text"
-      value={searchTerm}
-      onChange={(e)=>{setSearchTerm(e.target.value)}}
-      placeholder="Search settlements..."
-      className="w-full border outline-none border-gray-200 rounded-[10px] pl-10 pr-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 transition-all duration-300 ease-in-out shadow-sm"
-    />
-   
-  </div>
-
-  {/* 📋 Status Dropdown */}
-  <button 
-  
-
-  onClick={()=>{navigate("/dashboard/createmerchants")}}
-    className="p-2 bg-violet-400 text-white px-[20px] rounded-2xl"
-   
-  > Create Merchants
-    
-  </button>
-</div>
-             
-            </div>
-
-            <table className="w-full text-sm text-left">
-  <thead
-    className={`text-[11px] uppercase border-b border-t ${
-      theme === "dark"
-        ? "text-gray-400 border-gray-600 bg-gray-700"
-        : "text-gray-400 border-gray-300 bg-[#fcfcfc]"
-    }`}
-  >
-    <tr>
-      <th className="px-4 py-4">Name</th>
-      
-      <th className="px-4 py-4">Corp ID</th>
-      <th className="px-4 py-4">Wallet ID</th>
-      <th className="px-4 py-4">Email</th>
-      <th className="px-4 py-4">Mobile</th>
-      <th className="px-4 py-4">KYC Status</th>
-      <th className="px-4 py-4 pl-[200px]">Actions</th>
-    </tr>
-  </thead>
-
-
-{load?(
-   <tr>
-   <td colSpan="9" className="py-10">
-     <div className="flex justify-center items-center w-full">
-       <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-     </div>
-   </td>
- </tr>
-):(  <tbody className="text-[12px] font-semibold">
-{merchantsData? (
-  merchantsData?.map((merchant, i) => (
-    <tr key={i} className={`border-b hover:bg-gray-50 ${theme === "dark" ? "border-gray-700 hover:bg-gray-700" : "border-gray-100 hover:bg-gray-50"}`}>
-      <td className="px-4 py-2">{merchant.name}</td>
-      <td className="px-4 py-2">{merchant.corp_id}</td>
-      
-      <td className="px-4 py-2">{merchant.wallet_id}</td>
-      <td className="px-4 py-2">{merchant.email}</td>
-      <td className="px-4 py-2">{merchant.mobile_number}</td>
-      <td className="px-4 py-2 uppercase">{merchant.kyc_status}</td>
-      <td className="px-4 py-2 flex gap-2">
-
-
-
-        <button onClick={()=>{navigate(`/dashboard/getcommercial/${merchant.corp_id}`)}} className="button-87">Commercial</button>
-      <button
-onClick={() => {navigate(`/dashboard/transactionmaster/${merchant.corp_id}`),localStorage.setItem("corpid",merchant.corp_id);
-
-}}  
-className="button-88"
->
-Transactions
-</button>
-<button onClick={() => handelInfo(merchant)} className="bg-lime-500 hover:bg-red-600 text-white px-2 py-[5px] rounded text-[10px]">Info</button>
-        <button onClick={() => handleEdit(merchant)} className="bg-gray-900 hover:bg-gray-500 text-white px-3 py-1 rounded text-[10px]">Edit</button>
-        <button onClick={() => handleDelete(merchant)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-[10px]">Delete</button>
-        
-      </td>
-    </tr>
-  ))
-) : (
-  <tr>
-    <td colSpan={8} className="text-center py-4 text-gray-400">
-      No merchants found.
-    </td>
-  </tr>
-)}
-</tbody>)}
-
-
-</table>
-
-
-
-
-<div className={`flex flex-col sm:flex-row justify-between items-center p-4 border-t ${
-              theme === "dark" ? "border-gray-700" : "border-gray-200"
-            }`}>
-              <div className="text-sm text-gray-500 mb-2 sm:mb-0">
-                Showing {startIndex + 1} to {Math.min(endIndex, totalRecords)} of {totalRecords} entries
+            {/* Header */}
+            <div className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-100 bg-gray-50"}`}>
+              <div>
+                <h2 className="text-sm font-bold text-gray-800 dark:text-white">
+                  {isdeletedentopen ? "Deleted Entities" : "Entity Information"}
+                </h2>
+                <p className="text-[11px] text-gray-400 mt-0.5">Corp ID: {corpidforinfo}</p>
               </div>
-              
-              <div className="flex items-center gap-1">
-                {/* First Page */}
-                <button
-                  onClick={() => handlePageChange(1)}
-                  disabled={currentPage === 1}
-                  className={`p-2 rounded ${
-                    currentPage === 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : theme === "dark"
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <ChevronsLeft size={16} />
-                </button>
-
-                {/* Previous Page */}
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`p-2 rounded ${
-                    currentPage === 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : theme === "dark"
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <ChevronLeft size={16} />
-                </button>
-
-                {/* Page Numbers */}
-                {getPageNumbers().map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`min-w-[32px] h-8 rounded text-sm font-medium ${
-                      currentPage === page
-                        ? "bg-violet-600 text-white"
-                        : theme === "dark"
-                        ? "text-gray-300 hover:bg-gray-700"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                {/* Next Page */}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`p-2 rounded ${
-                    currentPage === totalPages
-                      ? "text-gray-400 cursor-not-allowed"
-                      : theme === "dark"
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <ChevronRight size={16} />
-                </button>
-
-                {/* Last Page */}
-                <button
-                  onClick={() => handlePageChange(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className={`p-2 rounded ${
-                    currentPage === totalPages
-                      ? "text-gray-400 cursor-not-allowed"
-                      : theme === "dark"
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <ChevronsRight size={16} />
-                </button>
-              </div>
-            </div>
-
-
-          </div>
-        </section>
-      </main>
-
-      {/* Update Merchant Modal */}
-      {isUpdateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-2xl border shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto ${
-            theme === "dark" 
-              ? "bg-gray-800 border-gray-700 text-gray-200" 
-              : "bg-white border-gray-200 text-gray-800"
-          }`}>
-            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold">Update Merchant</h2>
-              <button 
-                onClick={() => setIsUpdateModalOpen(false)}
-                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"
-              >
-                <X size={20} />
+              <button onClick={() => setOpenInfo(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-all">
+                <X size={14} />
               </button>
             </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={updateFormData.name}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                {/* <div>
-                  <label className="block text-sm font-medium mb-2">Organization ID</label>
-                  <input
-                    type="text"
-                    name="org_id"
-                    value={updateFormData.org_id}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div> */}
-           {/* 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Program ID</label>
-                  <input
-                    type="text"
-                    name="program_id"
-                    value={updateFormData.program_id}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div> */}
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Wallet ID</label>
-                  <input
-                    type="text"
-                    name="wallet_id"
-                    value={updateFormData.wallet_id}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={updateFormData.email}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Mobile Number</label>
-                  <input
-                    type="tel"
-                    name="mobile_number"
-                    value={updateFormData.mobile_number}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">PAN</label>
-                  <input
-                    type="text"
-                    name="pan"
-                    value={updateFormData.pan}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">GST</label>
-                  <input
-                    type="text"
-                    name="gst"
-                    value={updateFormData.gst}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-2">Address</label>
-                  <textarea
-                    name="address"
-                    value={updateFormData.address}
-                    onChange={handleUpdateInputChange}
-                    rows="3"
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-2">KYC Status</label>
-                  <select
-                    name="kyc_status"
-                    value={updateFormData.kyc_status}
-                    onChange={handleUpdateInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg ${
-                      theme === "dark" 
-                        ? "bg-gray-700 border-gray-600 text-white" 
-                        : "bg-white border-gray-300 text-gray-800"
-                    }`}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
+            {/* Action bar */}
+            <div className={`flex flex-wrap items-center gap-2 px-6 py-3 border-b ${isDark ? "border-gray-700 bg-gray-800/60" : "border-gray-100 bg-gray-50/60"}`}>
+              <button onClick={() => navigate(`/dashboard/dispute/${corpidforfund}`)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all">
+                <ReceiptText size={11} /> Disputes
+              </button>
+              <button onClick={() => navigate(`/dashboard/fundbycorp/${corpidforfund}`)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-lg transition-all">
+                <Wallet size={11} /> Manual Funds
+              </button>
+              <button onClick={() => navigate(`/dashboard/Virfundbycorpid/${corpidforfund}`)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 rounded-lg transition-all">
+                <Landmark size={11} /> Virtual Funds
+              </button>
+              <div className="ml-auto">
+                {!isdeletedentopen ? (
+                  <button onClick={() => setIsdeletedentopen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all">
+                    <Trash2 size={11} /> Show Deleted
+                  </button>
+                ) : (
+                  <button onClick={() => setIsdeletedentopen(false)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-all">
+                    <X size={11} /> Show Active
+                  </button>
+                )}
               </div>
+            </div>
 
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => setIsUpdateModalOpen(false)}
-                  className={`px-4 py-2 rounded-lg border ${
-                    theme === "dark"
-                      ? "bg-gray-700 border-gray-600 hover:bg-gray-600"
-                      : "bg-gray-200 border-gray-300 hover:bg-gray-300"
-                  }`}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpdate}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Update Merchant
-                </button>
-              </div>
+            {/* Table */}
+            <div className="overflow-auto max-h-[360px]">
+              <table className="w-full text-sm">
+                <thead className={`sticky top-0 text-[10px] uppercase tracking-widest font-semibold ${isDark ? "bg-gray-800 text-gray-400" : "bg-gray-50 text-gray-400"} border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
+                  <tr>
+                    {["Corp ID", "Status", "Callback URL", "Callback Event", "Created On"].map(h => (
+                      <th key={h} className="px-5 py-3 text-left">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${isDark ? "divide-gray-800" : "divide-gray-100"}`}>
+                  {Array.isArray(entdata) && entdata.length > 0 ? entdata.map((row, idx) => (
+                    <tr key={idx} className={`transition-colors ${isDark ? "hover:bg-gray-800/60" : "hover:bg-slate-50"}`}>
+                      <td className={`px-5 py-3 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>{row?.corp_id}</td>
+                      <td className="px-5 py-3"><StatusBadge status={row?.status} /></td>
+                      <td className={`px-5 py-3 text-xs break-all max-w-[160px] ${isDark ? "text-gray-300" : "text-gray-600"}`}>{row?.callback_url}</td>
+                      <td className={`px-5 py-3 text-xs ${isDark ? "text-gray-300" : "text-gray-600"}`}>{row?.callback_event_name}</td>
+                      <td className={`px-5 py-3 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>{row?.create_on}</td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan={5} className="py-12 text-center text-sm text-gray-400">No data found</td></tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       )}
+
+      {/* ── Update Merchant Modal ── */}
+      {isUpdateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,15,30,0.55)", backdropFilter: "blur(3px)" }}>
+          <div className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border ${isDark ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"}`}>
+
+            <div className={`flex items-center justify-between px-6 py-4 border-b ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-100 bg-gray-50"}`}>
+              <div>
+                <h2 className="text-sm font-bold text-gray-800 dark:text-white">Update Merchant</h2>
+                <p className="text-[11px] text-gray-400 mt-0.5">{selectedMerchant?.name}</p>
+              </div>
+              <button onClick={() => setIsUpdateModalOpen(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-200 hover:text-gray-700 transition-all">
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { label: "Name",          name: "name",          type: "text" },
+                { label: "Wallet ID",     name: "wallet_id",     type: "text" },
+                { label: "Email",         name: "email",         type: "email" },
+                { label: "Mobile Number", name: "mobile_number", type: "tel" },
+                { label: "PAN",           name: "pan",           type: "text" },
+                { label: "GST",           name: "gst",           type: "text" },
+              ].map(({ label, name, type }) => (
+                <FormField key={name} label={label}>
+                  <input type={type} name={name} value={updateFormData[name]}
+                    onChange={handleUpdateInputChange} className={inputCls(isDark)} />
+                </FormField>
+              ))}
+
+              <div className="md:col-span-2">
+                <FormField label="Address">
+                  <textarea name="address" value={updateFormData.address}
+                    onChange={handleUpdateInputChange} rows={3} className={inputCls(isDark)} />
+                </FormField>
+              </div>
+
+              <div className="md:col-span-2">
+                <FormField label="KYC Status">
+                  <select name="kyc_status" value={updateFormData.kyc_status}
+                    onChange={handleUpdateInputChange} className={inputCls(isDark)}>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </FormField>
+              </div>
+            </div>
+
+            <div className={`flex justify-end gap-3 px-6 py-4 border-t ${isDark ? "border-gray-700 bg-gray-800/60" : "border-gray-100 bg-gray-50"}`}>
+              <button onClick={() => setIsUpdateModalOpen(false)}
+                className="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all">
+                Cancel
+              </button>
+              <button onClick={handleUpdate}
+                className="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-all">
+                Update Merchant
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Main Content ── */}
+      <main className="flex-1 flex flex-col p-6 gap-5">
+
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center">
+              <Users size={18} className="text-violet-600" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Merchant List</h1>
+              <p className="text-[11px] text-gray-400">Manage all registered merchants</p>
+            </div>
+          </div>
+          <button onClick={() => navigate("/dashboard/createmerchants")}
+            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-700 active:scale-95 rounded-lg shadow-sm transition-all">
+            <Plus size={13} /> Create Merchant
+          </button>
+        </div>
+
+        {/* Table Card */}
+        <div className={`flex-1 flex flex-col rounded-2xl border overflow-hidden shadow-sm ${isDark ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}`}>
+
+          {/* Toolbar */}
+          <div className={`flex items-center gap-3 px-5 py-3.5 border-b ${isDark ? "border-gray-800 bg-gray-900" : "border-gray-100 bg-gray-50/80"}`}>
+            <div className="relative flex-1 min-w-[200px] max-w-xs">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search merchants…"
+                className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg border outline-none transition-all
+                  ${isDark
+                    ? "bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-500 focus:border-violet-500"
+                    : "bg-white border-gray-200 text-gray-700 placeholder:text-gray-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-100"}`} />
+            </div>
+            <div className="ml-auto text-xs text-gray-400">{totalRecords} merchants total</div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className={`text-[10px] uppercase tracking-widest font-semibold border-b
+                  ${isDark ? "bg-gray-800/60 text-gray-400 border-gray-800" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
+                  {["Name", "Corp ID", "Wallet ID", "Email", "Mobile", "KYC Status", "Actions"].map(h => (
+                    <th key={h} className="px-5 py-3 text-left whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+
+              {load ? (
+                <tbody>
+                  <tr><td colSpan={7} className="py-16 text-center">
+                    <div className="flex justify-center">
+                      <div className="w-6 h-6 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  </td></tr>
+                </tbody>
+              ) : (
+                <tbody className={`divide-y ${isDark ? "divide-gray-800" : "divide-gray-100"}`}>
+                  {merchantsData.length > 0 ? merchantsData.map((merchant, i) => (
+                    <tr key={i} className={`transition-colors ${isDark ? "hover:bg-gray-800/50" : "hover:bg-slate-50/80"}`}>
+                      <td className={`px-5 py-3.5 font-medium text-sm ${isDark ? "text-gray-200" : "text-gray-800"}`}>{merchant.name}</td>
+                      <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>{merchant.corp_id}</td>
+                      <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>{merchant.wallet_id}</td>
+                      <td className={`px-5 py-3.5 text-xs ${isDark ? "text-gray-300" : "text-gray-600"}`}>{merchant.email}</td>
+                      <td className={`px-5 py-3.5 text-xs ${isDark ? "text-gray-300" : "text-gray-600"}`}>{merchant.mobile_number}</td>
+                      <td className="px-5 py-3.5"><KycBadge status={merchant.kyc_status} /></td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <button onClick={() => navigate(`/dashboard/getcommercial/${merchant.corp_id}`)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-all">
+                            <FileText size={10} /> Commercial
+                          </button>
+                          <button onClick={() => { navigate(`/dashboard/transactionmaster/${merchant.corp_id}`); localStorage.setItem("corpid", merchant.corp_id); }}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg transition-all">
+                            <ArrowUpRight size={10} /> Txns
+                          </button>
+                          <button onClick={() => handelInfo(merchant)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-all">
+                            <Info size={10} /> Info
+                          </button>
+                          <button onClick={() => handleEdit(merchant)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all">
+                            <Pencil size={10} /> Edit
+                          </button>
+                          <button onClick={() => handleDelete(merchant)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all">
+                            <Trash2 size={10} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan={7} className="py-16 text-center text-sm text-gray-400">No merchants found.</td></tr>
+                  )}
+                </tbody>
+              )}
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className={`flex flex-wrap items-center justify-between px-5 py-3 border-t text-xs gap-3
+            ${isDark ? "border-gray-800 bg-gray-900 text-gray-400" : "border-gray-100 bg-gray-50/80 text-gray-500"}`}>
+            <span>
+              Showing {startIndex + 1}–{Math.min(endIndex, totalRecords)} of {totalRecords}
+            </span>
+
+            <div className="flex items-center gap-1">
+              <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
+                  ${currentPage === 1 ? "opacity-40 cursor-not-allowed border-gray-200" : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white"}`}>
+                <ChevronsLeft size={13} />
+              </button>
+              <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
+                  ${currentPage === 1 ? "opacity-40 cursor-not-allowed border-gray-200" : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white"}`}>
+                <ChevronLeft size={13} />
+              </button>
+
+              {getPageNumbers().map((p) => (
+                <button key={p} onClick={() => setCurrentPage(p)}
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-medium border transition-all
+                    ${p === currentPage
+                      ? "bg-violet-600 text-white border-violet-600 shadow-sm"
+                      : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white"}`}>
+                  {p}
+                </button>
+              ))}
+
+              <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
+                  ${currentPage === totalPages ? "opacity-40 cursor-not-allowed border-gray-200" : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white"}`}>
+                <ChevronRight size={13} />
+              </button>
+              <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}
+                className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
+                  ${currentPage === totalPages ? "opacity-40 cursor-not-allowed border-gray-200" : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white"}`}>
+                <ChevronsRight size={13} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-   
-   </>
-
-
   );
 };
 

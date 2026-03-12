@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Theme } from "../Contexts/Theme";
-import { X, Undo2, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { X, Undo2, ChevronLeft, ChevronRight, ArrowLeft, Plus, Package, Layers, Search, Calendar, ChevronDown } from "lucide-react";
 import { FaTrashAlt, FaEdit } from "react-icons/fa";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -10,62 +10,61 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { DateRange } from "react-date-range";
 
-
-
-
-
-
-
-
-
 import {
-    getServiceList, createService, getPkgMasters, createPkgMaster, deleteService,deletePkgMaster,updateService,updatePkgMaster
-
+    getServiceList, createService, getPkgMasters, createPkgMaster, deleteService, deletePkgMaster, updateService, updatePkgMaster
 } from "../redux/action";
 
+// ✅ Defined OUTSIDE component so they don't remount on every render
+const Modal = ({ open, onClose, title, children }) => {
+    if (!open) return null;
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(15,23,42,0.45)', backdropFilter: 'blur(2px)' }}>
+            <div className="bg-white rounded-2xl shadow-2xl w-[440px] overflow-hidden border border-gray-100">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-sm font-semibold text-gray-800 tracking-wide">{title}</h2>
+                    <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-all">
+                        <X size={14} />
+                    </button>
+                </div>
+                <div className="px-6 py-5">{children}</div>
+            </div>
+        </div>
+    );
+};
+
+const FormField = ({ label, children }) => (
+    <div className="space-y-1">
+        <label className="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider">{label}</label>
+        {children}
+    </div>
+);
+
+const inputCls = "w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition-all placeholder:text-gray-400";
+const selectCls = "w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 transition-all";
+
+const StatusBadge = ({ status }) => (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full tracking-widest uppercase
+        ${status?.toLowerCase() === "active"
+            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+            : "bg-red-50 text-red-600 border border-red-200"}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${status?.toLowerCase() === "active" ? "bg-emerald-500" : "bg-red-500"}`}></span>
+        {status}
+    </span>
+);
+
 const Servicelist = () => {
-
-
-
     const [load, setLoad] = useState(false)
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [dateRange, setDateRange] = useState({
-        startDate: "",
-        endDate: "",
-    });
-
-
-
-
-
-
-
-
-
-
-
+    const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
 
     const { theme } = useContext(Theme);
-
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-
-
-
-
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
-
-
-
-
     const [searchTerm, setSearchTerm] = useState("");
     const [searchStatus, setSearchStatus] = useState("");
-
-
-
-
     const [isDownloading, setIsDownloading] = useState(false);
     const [open, setOpen] = useState(false);
     const [upadtedstatus, setUpadtedstatus] = useState("");
@@ -77,1001 +76,452 @@ const Servicelist = () => {
     const [modelopen, setModelopen] = useState(false);
     const [createmodelopen, setCreatemodelopen] = useState(false);
     const [createmodelopenpkg, setCreatemodelopenpkg] = useState(false);
-
-
-    const [ispkgserEditing,setIspkgserEditing] = useState(false);
-
-
-
-    const [selectedpkgname,SetSelectedpkgname] =useState("")
-    const [selectedserviceid,SetSelectedserviceid] =useState("")
-
-
-
+    const [ispkgserEditing, setIspkgserEditing] = useState(false);
+    const [selectedpkgname, SetSelectedpkgname] = useState("")
+    const [selectedserviceid, SetSelectedserviceid] = useState("")
     const [servicestatus, setServicestatus] = useState("")
     const [servicename, setServicename] = useState("")
     const [serviceid, setServiceid] = useState("")
     const [isPkgopen, setIsPkgopen] = useState(false)
-    const [currentsrvid,SetCurrentsrvid] = useState("")
-
-
-
+    const [currentsrvid, SetCurrentsrvid] = useState("")
     const [pkgstatus, setPkgstatus] = useState("")
     const [pkgname, setPkgname] = useState("")
     const [ispkgedit, setIspkgedit] = useState(false)
-    const[currentpkgid,setCurrentpkgid] = useState("")
+    const [currentpkgid, setCurrentpkgid] = useState("")
 
+    const isDark = theme === "dark";
 
-
-
-
-    const reset=()=>{
+    const reset = () => {
         setServicestatus("");
         setServiceid("")
         setIspkgserEditing(false)
-    
     }
 
+    const handelsrvEdit = (pkg) => {
+        setServicename(pkg.service_name)
+        setServicestatus(pkg.status)
+        SetCurrentsrvid(pkg.service_id)
+        setServiceid(pkg.service_id)
+    }
 
-
-
-    console.log(servicestatus, servicename, serviceid);
-
-
-
-
-
-
-
-
-
-
-     const handelsrvEdit = (pkg)=>{
-         setServicename(pkg.service_name)
-         setServicestatus(pkg.status
-            )
-            SetCurrentsrvid(pkg.service_id)
-            setServiceid(pkg.service_id
-                )
-          
-
-     }
-
-
-     const handelsrvUpdate = (e)=>{
-
+    const handelsrvUpdate = (e) => {
         try {
             e.preventDefault()
-
-            const updatedsrvdata ={
+            const updatedsrvdata = {
                 service_name: servicename,
-                // service_id: serviceid,
                 status: servicestatus,
-            
-            
-                 }
-    
-                 dispatch(updateService(currentsrvid,updatedsrvdata))
+            }
+            dispatch(updateService(currentsrvid, updatedsrvdata))
         } catch (error) {
             console.log(error);
-        } finally{
-            setServiceid(""),
-            setServicename(""),
-            setServicestatus(""),
-            SetCurrentsrvid("")
+        } finally {
+            setServiceid(""), setServicename(""), setServicestatus(""), SetCurrentsrvid("")
             setIspkgserEditing(false)
             setCreatemodelopen(false)
         }
-       
-
-
-     }
-
-
-
-
+    }
 
     const handelsrvcreate = (e) => {
-
         e.preventDefault()
-
         try {
-            const formdata = {
-                service_name: servicename,
-                service_id: serviceid,
-                status: servicestatus,
-
-            }
-
+            const formdata = { service_name: servicename, service_id: serviceid, status: servicestatus }
             dispatch(createService(formdata, setCreatemodelopen))
-
-
         } catch (error) {
             console.log(error);
         } finally {
-          setServiceid("")
-          setServicename("")
-          setServicestatus("")
-          setCreatemodelopen(false)
+            setServiceid(""); setServicename(""); setServicestatus(""); setCreatemodelopen(false)
         }
-
-
-
-
-
-
-
     }
 
- const handelserviceDelete =(service_id)=>{
-    dispatch(deleteService(service_id))
- }
-
-
-
-
-
-
+    const handelserviceDelete = (service_id) => { dispatch(deleteService(service_id)) }
 
     const handelpkgcreate = (e) => {
-
         e.preventDefault()
-
         try {
-            const formdata = {
-                pkg_name: pkgname,
-                status: pkgstatus
-            }
-
+            const formdata = { pkg_name: pkgname, status: pkgstatus }
             dispatch(createPkgMaster(formdata, setCreatemodelopen))
-
-
         } catch (error) {
             console.log(error);
         } finally {
-            setPkgname("")
-            setPkgstatus("")
-            
+            setPkgname(""); setPkgstatus("")
         }
-
-
-
-
-
-
-
     }
 
-    const handelpkgDelete =(pkg_id)=>{
-        dispatch(deletePkgMaster(pkg_id))
-     }
+    const handelpkgDelete = (pkg_id) => { dispatch(deletePkgMaster(pkg_id)) }
 
-
-     
-   const handelEditpkg =(pkg)=>{
-
-
-    setCreatemodelopenpkg(true)
-    setPkgstatus(pkg.status)
-    setPkgname(pkg.pkg_name)
-    setIspkgedit(true)
-    setCurrentpkgid(pkg.id)
-
-   }
-
-
-
-   const handelpkgUpdate = (e)=>{
-    e.preventDefault()
-
-    try {
-        const updatedpkgdata = {
-            pkg_name: pkgname,
-            status: pkgstatus
-        }
-
-        dispatch(updatePkgMaster(currentpkgid,updatedpkgdata))
-
-
-    } catch (error) {
-        console.log(error);
-    } finally {
-
-        setPkgname("")
-        setPkgstatus("")
-        setIspkgedit(false)
-        setCreatemodelopenpkg(false)
+    const handelEditpkg = (pkg) => {
+        setCreatemodelopenpkg(true)
+        setPkgstatus(pkg.status)
+        setPkgname(pkg.pkg_name)
+        setIspkgedit(true)
+        setCurrentpkgid(pkg.id)
     }
 
-
-
-
-
-
-    
-   }
-
-
-
-
-
-
-
-
-
-
-
-    // const totalRecords = transactionData?.pagination?.totalRecords
-    // ;
-
-
-
-
-
-    // const totalPages = transactionData?.pagination?.totalPages;
-
-
-    const serviceList = useSelector((state) => state.services.services?.data
-
-    )
-    const srvTotalpages = useSelector((state) => state.services.services?.totalPages
-
-    )
-    const srvCurrentpage = useSelector((state) => state.services.services?.page
-
-    )
-    const srvTotalrecord = useSelector((state) => state.services.services?.total
-
-    )
-
-
-    console.log(182, serviceList);
-
-
-
-
-
-    const Masters = useSelector((state) => state.pkgMasters.pkgMasters
-
-    )
-
-
-
-
-
-    const handleDownload = async () => {
+    const handelpkgUpdate = (e) => {
+        e.preventDefault()
         try {
-            setIsDownloading(true)
-
-            await dispatch(
-
-            );
-
-            setIsDownloading(false)
-
-
+            const updatedpkgdata = { pkg_name: pkgname, status: pkgstatus }
+            dispatch(updatePkgMaster(currentpkgid, updatedpkgdata))
         } catch (error) {
-            console.log("Download error:", error);
-
-        };
+            console.log(error);
+        } finally {
+            setPkgname(""); setPkgstatus(""); setIspkgedit(false); setCreatemodelopenpkg(false)
+        }
     }
 
+    const serviceList = useSelector((state) => state.services.services?.data)
+    const srvTotalpages = useSelector((state) => state.services.services?.totalPages)
+    const srvCurrentpage = useSelector((state) => state.services.services?.page)
+    const srvTotalrecord = useSelector((state) => state.services.services?.total)
+    const Masters = useSelector((state) => state.pkgMasters.pkgMasters)
 
-    //   useEffect(() => {
-    //     setPage(1);
-    //   }, [searchTerm, searchStatus, dateRange.startDate,
-    //     dateRange.endDate]);
     useEffect(() => {
-        dispatch(getServiceList(searchTerm,page,perPage,searchStatus))
-        dispatch(getPkgMasters(searchTerm,page,perPage,searchStatus,dateRange.startDate,dateRange.endDate))
-    }, [
-        dispatch,searchTerm,page,perPage,searchStatus,dateRange.startDate,dateRange.endDate]);
-
-
-
-
-
-    // const handleDelete =(pkgid)=>{
-
-    // dispatch(deletePkgMaster(pkgid))
-
-
-
-
-    // }
-
-
-
-
-
-
-
+        dispatch(getServiceList(searchTerm, page, perPage, searchStatus))
+        dispatch(getPkgMasters(searchTerm, page, perPage, searchStatus, dateRange.startDate, dateRange.endDate))
+    }, [dispatch, searchTerm, page, perPage, searchStatus, dateRange.startDate, dateRange.endDate]);
 
 
 
     return (
-        <div
-            className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"
-                }`}
-        >
+        <div className={`w-full min-h-full flex flex-col font-[system-ui] ${isDark ? "bg-gray-950 text-gray-200" : "bg-slate-50 text-gray-800"}`}>
 
+            {/* — Package Modal — */}
+            <Modal
+                open={createmodelopenpkg}
+                onClose={() => { setCreatemodelopenpkg(false); setIspkgedit(false); setPkgstatus(""); setPkgname(""); }}
+                title={ispkgedit ? "Edit Package" : "Create New Package"}
+            >
+                <form onSubmit={(e) => ispkgedit ? handelpkgUpdate(e) : handelpkgcreate(e)} className="space-y-4">
+                    <FormField label="Package Name">
+                        <input type="text" value={pkgname} onChange={(e) => setPkgname(e.target.value)} placeholder="Enter package name" className={inputCls} />
+                    </FormField>
+                    <FormField label="Status">
+                        <select value={pkgstatus} onChange={(e) => setPkgstatus(e.target.value)} className={selectCls}>
+                            <option value="">Select Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </FormField>
+                    <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                        <button type="button" onClick={() => { setCreatemodelopenpkg(false); setIspkgedit(false); setPkgstatus(""); setPkgname(""); }}
+                            className="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all shadow-sm">
+                            {ispkgedit ? "Update Package" : "Create Package"}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
-            <main className="w-full h-full flex flex-col overflow-y-scroll">
+            {/* — Service Modal — */}
+            <Modal
+                open={createmodelopen}
+                onClose={() => { setCreatemodelopen(false); setServicename(""); setServiceid(""); setServicestatus(""); setIspkgserEditing(false); }}
+                title={ispkgserEditing ? "Edit Service" : "Create New Service"}
+            >
+                <form onSubmit={(e) => ispkgserEditing ? handelsrvUpdate(e) : handelsrvcreate(e)} className="space-y-4">
+                    <FormField label="Service Name">
+                        <input type="text" value={servicename} onChange={(e) => setServicename(e.target.value)} placeholder="Enter service name" className={inputCls} />
+                    </FormField>
+                    {!ispkgserEditing && (
+                        <FormField label="Service ID">
+                            <input type="text" value={serviceid} onChange={(e) => setServiceid(e.target.value)} placeholder="Enter service ID" className={inputCls} />
+                        </FormField>
+                    )}
+                    <FormField label="Status">
+                        <select value={servicestatus} onChange={(e) => setServicestatus(e.target.value)} className={selectCls}>
+                            <option value="">Select Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </FormField>
+                    <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                        <button type="button" onClick={() => { setCreatemodelopen(false); setServicename(""); setServiceid(""); setServicestatus(""); setIspkgserEditing(false); }}
+                            className="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all shadow-sm">
+                            {ispkgserEditing ? "Update Service" : "Create Service"}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
-                <section className="w-full p-2 py-4 px-6 h-[200px]">
-                    <div className="mx-auto max-w-7xl">
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {/* {statusCard.map((card, idx) => (
-        <div
-          key={idx}
-          className={`overflow-hidden rounded-2xl bg-gradient-to-r ${card.gradient} text-white transition-transform duration-300 hover:-translate-y-2`}
-        >
-          <div className="p-4">
-            <div className="mb-2 flex items-start justify-between">
-              <div>
-                <h3 className="text-xl font-bold">{card.title}</h3>
-                <p className="opacity-90">{card.credit}</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
-                {card.icon}
-              </div>
-            </div>
-          
-          </div>
-        </div>
-      ))} */}
+            <main className="flex-1 flex flex-col p-6 gap-5">
+
+                {/* Page Header */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        {isPkgopen && (
+                            <button onClick={() => setIsPkgopen(false)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-500 hover:text-gray-800 hover:border-gray-300 transition-all shadow-sm">
+                                <ArrowLeft size={15} />
+                            </button>
+                        )}
+                        <div className="flex items-center gap-2.5">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isPkgopen ? "bg-amber-100" : "bg-indigo-100"}`}>
+                                {isPkgopen ? <Package size={16} className="text-amber-600" /> : <Layers size={16} className="text-indigo-600" />}
+                            </div>
+                            <div>
+                                <h1 className="text-base font-bold text-gray-900 leading-tight">{isPkgopen ? "Package List" : "Service List"}</h1>
+                                <p className="text-[11px] text-gray-400">{isPkgopen ? "Manage your packages" : "Manage your services"}</p>
+                            </div>
                         </div>
                     </div>
-                </section>
 
-                <section className="w-full flex flex-col sm:flex-col gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
-                    {/* Settlements Table */}
-
-
-                    <div
-                        className={`flex sm:w-[100%] w-full h-full flex-col rounded-xl overflow-y-auto  ${theme === "dark"
-                            ? "bg-gray-800 border-gray-700 text-gray-300"
-                            : "bg-white border-gray-100 text-gray-800"
-                            }`}
+                    <button
+                        onClick={() => isPkgopen ? setCreatemodelopenpkg(true) : setCreatemodelopen(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 rounded-lg shadow-sm transition-all"
                     >
-                        <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md  border border-gray-100">
-                            
-                            <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
-                {isPkgopen?"Package List":"Service List"}
-              </h2>
+                        <Plus size={13} />
+                        {isPkgopen ? "New Package" : "New Service"}
+                    </button>
+                </div>
 
-                            {/* Search Input */}
-                            <div className="flex items-center gap-4">
-                                {/* 🔍 Search Input */}
-                                <div className="relative w-[220px]">
-                                    <input
-                                        type="text"
-                                        value={searchTerm}
-                                        onChange={(e) => { setSearchTerm(e.target.value) }}
-                                        placeholder= {isPkgopen?"Search Packages...":"Search services..."}
-                                        className="w-full border outline-none border-gray-200 rounded-[10px] pl-10 pr-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 transition-all duration-300 ease-in-out shadow-sm"
-                                    />
+                {/* Table Card */}
+                <div className={`flex-1 flex flex-col rounded-2xl border overflow-hidden shadow-sm
+                    ${isDark ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}`}>
 
-                                </div>
-                              
-                              {isPkgopen?
-     <button
-     className="px-3 py-2 text-sm bg-indigo-500 text-white rounded-md"
-     onClick={() => setShowDatePicker(!showDatePicker)}
- >
-     {dateRange.startDate && dateRange.endDate
-         ? `${dateRange.startDate} → ${dateRange.endDate}`
-         : "Filter by Date"}
- </button>:""
-
-                              }
-                              
-                           
-
-                               {isPkgopen?dateRange.
-                                    startDate !== null || !"" &&
-                                    dateRange.endDate !== null || !"" ?
-                                    <button
-                                        className="px-3 py-2 text-sm bg-indigo-500 text-white rounded-md"
-
-                                        onClick={() => {
-                                            setDateRange({
-                                                startDate: null,
-                                                endDate: null,
-                                            })
-                                        }}
-
-                                    >
-                                        <Undo2></Undo2>
-                                    </button> : "":""} 
-
-
-                                {showDatePicker && (
-                                    <div className="absolute top-[40%]  right-[23%] z-50 bg-white  shadow-lg rounded-md">
-                                        <DateRange
-                                            ranges={[
-                                                {
-                                                    startDate: dateRange.startDate
-                                                        ? new Date(dateRange.startDate)
-                                                        : new Date(),
-                                                    endDate: dateRange.endDate
-                                                        ? new Date(dateRange.endDate)
-                                                        : new Date(),
-                                                    key: "selection",
-                                                },
-                                            ]}
-                                            moveRangeOnFirstSelection={false}
-                                            onChange={(ranges) => {
-                                                const start = ranges.selection.startDate
-                                                    .toLocaleDateString("en-CA");
-                                                const end = ranges.selection.endDate
-                                                    .toLocaleDateString("en-CA");
-
-                                                setDateRange({
-                                                    startDate: start,
-                                                    endDate: end,
-                                                });
-                                                setShowDatePicker(false);
-                                                setPage(1);
-                                            }}
-                                        />
-                                    </div>
-
-
-                                )}
-
-
-{isPkgopen ? (
-  <button
-    onClick={() => setCreatemodelopenpkg(true)}
-    className="flex items-center justify-center gap-2
-               w-[140px] h-[34px]
-               text-xs font-medium text-white
-               bg-amber-500 hover:bg-amber-600
-               active:scale-95
-               rounded-lg shadow-md hover:shadow-lg
-               transition-all duration-200"
-  >
-    <i className="fa-solid fa-plus text-[11px]"></i>
-    Create Package
-  </button>
-) : (
-  <button
-    onClick={() => setCreatemodelopen(true)}
-    className="flex items-center justify-center gap-2
-               w-[140px] h-[34px]
-               text-xs font-medium text-white
-               bg-amber-500 hover:bg-amber-600
-               active:scale-95
-               rounded-lg shadow-md hover:shadow-lg
-               transition-all duration-200"
-  >
-    <i className="fa-solid fa-plus text-[11px]"></i>
-    Create Service
-  </button>
-)}
-
-
-                                {isPkgopen ? <button onClick={(e) => { setIsPkgopen(false) }} className="bg-black rounded-[5px] text-white flex p-2"><ArrowLeft />Back</button> : ""}
-
-
-                                {/* 📋 Status Dropdown */}
-                                <select onChange={(e) => { setSearchStatus(e.target.value) }}
-                                    value={searchStatus}
-                                    className="border border-gray-200 rounded-[5px] px-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 outline-none transition-all duration-300 ease-in-out shadow-sm cursor-pointer"
-                                    defaultValue=""
-                                >
-                                    <option selected value="">ALL</option>
-                                    <option value="ACTIVE">ACTIVE</option>
-
-                                    <option value="INACTIVE">INACTIVE</option>
-                                    
-                                </select>
-                            </div>
-
-
-                            {/* <button
-                                onClick={handleDownload}
-
-                                className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                            >
-                                {isDownloading ? <div className=" w-full px-4 py-2"><div role="status">
-                                    <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-                                    </svg>
-                                    <span class="sr-only">Loading...</span>
-                                </div><div />
-                                </div> : "Download Exel"}
-                            </button> */}
-
-
-
+                    {/* Toolbar */}
+                    <div className={`flex flex-wrap items-center gap-3 px-5 py-3.5 border-b ${isDark ? "border-gray-800 bg-gray-900" : "border-gray-100 bg-gray-50/80"}`}>
+                        {/* Search */}
+                        <div className="relative flex-1 min-w-[200px] max-w-xs">
+                            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder={isPkgopen ? "Search packages…" : "Search services…"}
+                                className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg border outline-none transition-all
+                                    ${isDark
+                                        ? "bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-500 focus:border-indigo-500"
+                                        : "bg-white border-gray-200 text-gray-700 placeholder:text-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"}`}
+                            />
                         </div>
 
+                        {/* Status Filter */}
+                        <div className="relative">
+                            <select
+                                onChange={(e) => setSearchStatus(e.target.value)}
+                                value={searchStatus}
+                                className={`appearance-none pl-3 pr-7 py-2 text-xs rounded-lg border outline-none transition-all cursor-pointer
+                                    ${isDark
+                                        ? "bg-gray-800 border-gray-700 text-gray-200"
+                                        : "bg-white border-gray-200 text-gray-700 focus:border-indigo-400"}`}
+                            >
+                                <option value="">All Status</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="INACTIVE">Inactive</option>
+                            </select>
+                            <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        </div>
 
+                        {/* Date Filter (pkg only) */}
+                        {isPkgopen && (
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setShowDatePicker(!showDatePicker)}
+                                    className={`flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg border transition-all
+                                        ${dateRange.startDate
+                                            ? "bg-indigo-50 border-indigo-200 text-indigo-700 font-medium"
+                                            : isDark ? "bg-gray-800 border-gray-700 text-gray-300" : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"}`}
+                                >
+                                    <Calendar size={12} />
+                                    {dateRange.startDate && dateRange.endDate
+                                        ? `${dateRange.startDate} → ${dateRange.endDate}`
+                                        : "Date Range"}
+                                </button>
+                                {(dateRange.startDate || dateRange.endDate) && (
+                                    <button
+                                        onClick={() => setDateRange({ startDate: null, endDate: null })}
+                                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-all bg-white"
+                                    >
+                                        <Undo2 size={12} />
+                                    </button>
+                                )}
+                            </div>
+                        )}
 
-                        <div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
+                        {showDatePicker && (
+                            <div className="absolute top-[160px] right-[5%] z-50 bg-white shadow-xl rounded-xl border border-gray-200 overflow-hidden">
+                                <DateRange
+                                    ranges={[{
+                                        startDate: dateRange.startDate ? new Date(dateRange.startDate) : new Date(),
+                                        endDate: dateRange.endDate ? new Date(dateRange.endDate) : new Date(),
+                                        key: "selection",
+                                    }]}
+                                    moveRangeOnFirstSelection={false}
+                                    onChange={(ranges) => {
+                                        const start = ranges.selection.startDate.toLocaleDateString("en-CA");
+                                        const end = ranges.selection.endDate.toLocaleDateString("en-CA");
+                                        setDateRange({ startDate: start, endDate: end });
+                                        setShowDatePicker(false);
+                                        setPage(1);
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
 
-                        
-
-
-
-                        {createmodelopenpkg && (
-  <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/20">
-    
-    <div className="bg-white w-[420px] rounded-xl shadow-2xl animate-fadeIn">
-      
-      {/* Header */}
-      <div className="px-5 py-3 flex justify-between items-center shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-800">
-          {ispkgedit ? "Edit Package" : "Create Package"}
-        </h2>
-
-        <button
-          onClick={() => {
-            setCreatemodelopenpkg(false);
-            setIspkgedit(false);
-            setPkgstatus("")
-            setPkgname("")
-          }}
-          className="text-gray-400 hover:text-red-500 text-sm"
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* Body */}
-      <form
-        onSubmit={(e) =>
-          ispkgedit ? handelpkgUpdate(e) : handelpkgcreate(e)
-        }
-        className="px-5 py-4 space-y-3"
-      >
-        {/* Package Name */}
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Package Name
-          </label>
-          <input
-            type="text"
-            value={pkgname}
-            onChange={(e) => setPkgname(e.target.value)}
-            placeholder="Enter package name"
-            className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
-                       shadow-sm focus:ring-2 focus:ring-blue-200
-                       focus:outline-none"
-          />
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Status
-          </label>
-          <select
-            value={pkgstatus}
-            onChange={(e) => setPkgstatus(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
-                       shadow-sm focus:ring-2 focus:ring-blue-200
-                       focus:outline-none"
-          >
-            <option value="">Select Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={() => setModelopen(false)}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700
-                       text-xs px-4 py-2 rounded-lg shadow-sm"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white
-                       text-xs px-4 py-2 rounded-lg shadow"
-          >
-            {ispkgedit ? "Edit Package" : "Create Package"}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
-
-{createmodelopen && (
-  <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/20">
-    
-    <div className="bg-white w-[420px] rounded-xl shadow-2xl animate-fadeIn">
-      
-      {/* Header */}
-      <div className="px-5 py-3 flex justify-between items-center shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-800">
-          {ispkgserEditing ? "Edit Services" : "Create Services"}
-        </h2>
-
-        <button
-          onClick={() => {
-            setCreatemodelopen(false);
-            setServicename("");
-            setServiceid("");
-            setServicestatus("");
-            setIspkgserEditing(false);
-          }}
-          className="text-gray-400 hover:text-red-500 text-sm"
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* Body */}
-      <form
-        onSubmit={(e) =>
-          ispkgserEditing ? handelsrvUpdate(e) : handelsrvcreate(e)
-        }
-        className="px-5 py-4 space-y-3"
-      >
-        {/* Service Name */}
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Service Name
-          </label>
-          <input
-            type="text"
-            value={servicename}
-            onChange={(e) => setServicename(e.target.value)}
-            placeholder="Enter service name"
-            className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
-                       shadow-sm focus:ring-2 focus:ring-blue-200
-                       focus:outline-none"
-          />
-        </div>
-
-        {/* Service ID */}
-        {!ispkgserEditing && (
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              Service ID
-            </label>
-            <input
-              readOnly={ispkgserEditing}
-              type="text"
-              value={serviceid}
-              onChange={(e) => setServiceid(e.target.value)}
-              placeholder="Enter Service ID"
-              className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
-                         shadow-sm focus:ring-2 focus:ring-blue-200
-                         focus:outline-none"
-            />
-          </div>
-        )}
-
-        {/* Status */}
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Service Status
-          </label>
-          <select
-            value={servicestatus}
-            onChange={(e) => setServicestatus(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-50 rounded-lg text-xs
-                       shadow-sm focus:ring-2 focus:ring-blue-200
-                       focus:outline-none"
-          >
-            <option value="">Select Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={() => setModelopen(false)}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700
-                       text-xs px-4 py-2 rounded-lg shadow-sm"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white
-                       text-xs px-4 py-2 rounded-lg shadow"
-          >
-            {ispkgserEditing ? "Edit Services" : "Create Services"}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
-
-
-
-
-
-
-                            {isPkgopen ? <table className="w-full text-sm text-left text-gray-600 border border-gray-200 overflow-hidden">
-                                <thead className="text-[11px] text-gray-500 uppercase bg-[#f9f9f9] border-b border-gray-300">
-                                    <tr>
-                                        <th className="py-2 px-3 text-left">ID</th>
-                                        <th className="py-2 px-3 text-left">Package Name</th>
-                                        <th className="py-2 px-3 text-left">Status</th>
-                                        <th className="py-2 px-3 text-left">Created On</th>
-                                        <th className="py-2 px-3 text-left">Action</th>
+                    {/* Table */}
+                    <div className="overflow-x-auto flex-1">
+                        {isPkgopen ? (
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className={`text-[10px] uppercase tracking-widest font-semibold ${isDark ? "bg-gray-800/60 text-gray-400" : "bg-gray-50 text-gray-400"} border-b ${isDark ? "border-gray-800" : "border-gray-100"}`}>
+                                        <th className="px-5 py-3 text-left">ID</th>
+                                        <th className="px-5 py-3 text-left">Package Name</th>
+                                        <th className="px-5 py-3 text-left">Status</th>
+                                        <th className="px-5 py-3 text-left">Created On</th>
+                                        <th className="px-5 py-3 text-left">Actions</th>
                                     </tr>
                                 </thead>
-
                                 {load ? (
-                                    <tbody>
-                                        <tr>
-                                            <td colSpan="5" className="py-10">
-                                                <div className="flex justify-center items-center w-full">
-                                                    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
+                                    <tbody><tr><td colSpan="5" className="py-16 text-center">
+                                        <div className="flex justify-center"><div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div></div>
+                                    </td></tr></tbody>
                                 ) : (
-                                    <tbody className="text-[13px] font-medium">
-                                        {Array.isArray(Masters) && Masters.length > 0 ? (
-                                            Masters.map((pkg, i) => (
-                                                <tr
-                                                    key={i}
-                                                    className="hover:bg-gray-50 transition-colors text-[13px] border-b border-gray-100"
-                                                >
-                                                    <td className="px-4 py-3 text-gray-800">{pkg.id}</td>
-                                                    <td className="px-4 py-3 text-gray-700">{pkg.pkg_name}</td>
-                                                    <td className="px-4 py-3">
-                                                        <span
-                                                            className={`text-[11px] font-bold px-[6px] py-[3px] rounded-[6px] text-center tracking-wide ${pkg.status?.toLowerCase() === "active"
-                                                                    ? "bg-green-400 text-white border border-green-300"
-                                                                    : "bg-red-400 text-white border border-red-300"
-                                                                }`}
-                                                        >
-                                                            {pkg.status?.toUpperCase()}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-600">{pkg.create_on}</td>
-                                                    <td className="px-4 py-3 flex gap-2 items-center">
-                                                        <button
-                                                            onClick={() => { setIsPkgopen(true),navigate(`/dashboard/commercial/${pkg.id}/${selectedserviceid}`) }}
-                                                            className="bg-orange-500 hover:bg-amber-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                                                        >
-                                                            <FaEdit size={12} />
-                                                            Set Commercial
+                                    <tbody className="divide-y divide-gray-100">
+                                        {Array.isArray(Masters) && Masters.length > 0 ? Masters.map((pkg, i) => (
+                                            <tr key={i} className={`transition-colors ${isDark ? "hover:bg-gray-800/50" : "hover:bg-slate-50/80"}`}>
+                                                <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-400"}`}>{pkg.id}</td>
+                                                <td className={`px-5 py-3.5 text-sm font-medium ${isDark ? "text-gray-200" : "text-gray-800"}`}>{pkg.pkg_name}</td>
+                                                <td className="px-5 py-3.5"><StatusBadge status={pkg.status} /></td>
+                                                <td className={`px-5 py-3.5 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>{pkg.create_on}</td>
+                                                <td className="px-5 py-3.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <button onClick={() => { setIsPkgopen(true); navigate(`/dashboard/commercial/${pkg.id}/${selectedserviceid}`) }}
+                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-all">
+                                                            <FaEdit size={10} /> Set Commercial
                                                         </button>
-                                                        <button
-                                                            onClick={() => {handelEditpkg(pkg)}}
-                                                            className="bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                                                        >
-                                                            <FaEdit size={12} />
-                                                            Edit
+                                                        <button onClick={() => handelEditpkg(pkg)}
+                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all">
+                                                            <FaEdit size={10} /> Edit
                                                         </button>
-                                                        <button
-                                                            onClick={() => handelpkgDelete(pkg.id)}
-                                                            className="bg-red-500 hover:bg-red-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                                                        >
-                                                            <FaTrashAlt size={12} />
-                                                            Delete
+                                                        <button onClick={() => handelpkgDelete(pkg.id)}
+                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all">
+                                                            <FaTrashAlt size={10} /> Delete
                                                         </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="5" className="py-10">
-                                                    <div className="flex justify-center items-center w-full">
-                                                        <div>No Package data found</div>
                                                     </div>
                                                 </td>
                                             </tr>
+                                        )) : (
+                                            <tr><td colSpan="5" className="py-16 text-center text-sm text-gray-400">No packages found</td></tr>
                                         )}
                                     </tbody>
                                 )}
-                            </table> :
-
-                                <table className="w-full text-sm text-left text-gray-600 border border-gray-200 overflow-hidden">
-                                    <thead className="text-[11px] text-gray-500 uppercase bg-[#f9f9f9] border-b border-gray-300">
-                                        <tr>
-                                            <th className="py-2 px-3 text-left">ID</th>
-                                            <th className="py-2 px-3 text-left">Service Name</th>
-                                            <th className="py-2 px-3 text-left">Status</th>
-                                            <th className="py-2 px-3 text-left">Service Id</th>
-                                            <th className="py-2 px-3 text-left">Action</th>
-                                        </tr>
-                                    </thead>
-
-                                    {load ? (
-                                        <tbody>
-                                            <tr>
-                                                <td colSpan="5" className="py-10">
-                                                    <div className="flex justify-center items-center w-full">
-                                                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                            </table>
+                        ) : (
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className={`text-[10px] uppercase tracking-widest font-semibold ${isDark ? "bg-gray-800/60 text-gray-400" : "bg-gray-50 text-gray-400"} border-b ${isDark ? "border-gray-800" : "border-gray-100"}`}>
+                                        <th className="px-5 py-3 text-left">#</th>
+                                        <th className="px-5 py-3 text-left">Service Name</th>
+                                        <th className="px-5 py-3 text-left">Service ID</th>
+                                        <th className="px-5 py-3 text-left">Status</th>
+                                        <th className="px-5 py-3 text-left">Actions</th>
+                                    </tr>
+                                </thead>
+                                {load ? (
+                                    <tbody><tr><td colSpan="5" className="py-16 text-center">
+                                        <div className="flex justify-center"><div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div></div>
+                                    </td></tr></tbody>
+                                ) : (
+                                    <tbody className="divide-y divide-gray-100">
+                                        {Array.isArray(serviceList) && serviceList.length > 0 ? serviceList.map((pkg, i) => (
+                                            <tr key={i} className={`transition-colors ${isDark ? "hover:bg-gray-800/50" : "hover:bg-slate-50/80"}`}>
+                                                <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-400"}`}>{i + 1}</td>
+                                                <td className={`px-5 py-3.5 text-sm font-medium ${isDark ? "text-gray-200" : "text-gray-800"}`}>{pkg.service_name}</td>
+                                                <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>{pkg.service_id}</td>
+                                                <td className="px-5 py-3.5"><StatusBadge status={pkg.status} /></td>
+                                                <td className="px-5 py-3.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <button onClick={() => { setIsPkgopen(true); SetSelectedserviceid(pkg.service_id) }}
+                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 rounded-lg transition-all">
+                                                            <Package size={10} /> Set Package
+                                                        </button>
+                                                        <button onClick={() => { setIspkgserEditing(true); setCreatemodelopen(true); handelsrvEdit(pkg) }}
+                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all">
+                                                            <FaEdit size={10} /> Edit
+                                                        </button>
+                                                        <button onClick={() => handelserviceDelete(pkg.service_id)}
+                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all">
+                                                            <FaTrashAlt size={10} />
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
-                                        </tbody>
-                                    ) : (
-                                        <tbody className="text-[13px] font-medium">
-                                            {Array.isArray(serviceList) && serviceList.length > 0 ? (
-                                                serviceList.map((pkg, i) => (
-                                                    <tr
-                                                        key={i}
-                                                        className="hover:bg-gray-50 transition-colors text-[13px] border-b border-gray-100"
-                                                    >
-                                                        <td className="px-4 py-3 text-gray-800">{i + 1}</td>
-                                                        <td className="px-4 py-3 text-gray-700">{pkg.service_name}</td>
-                                                        <td className="px-4 py-3">
-                                                            <span
-                                                                className={`text-[11px] font-bold px-[6px] py-[3px] rounded-[6px] text-center tracking-wide ${pkg.status?.toLowerCase() === "active"
-                                                                        ? "bg-green-400 text-white border border-green-300"
-                                                                        : "bg-red-400 text-white border border-red-300"
-                                                                    }`}
-                                                            >
-                                                                {pkg.status?.toUpperCase()}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-4 py-3 text-gray-600">{pkg.service_id
-                                                        }</td>
-                                                        <td className="px-4 py-3 flex gap-2 items-center">
-                                                            <button
-                                                                onClick={() => { setIsPkgopen(true),SetSelectedserviceid(pkg.service_id) }}
-                                                                className="bg-violet-400 hover:bg-violet-500 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                                                            >
-                                                                <FaEdit size={12} />
-                                                                Set Package
-                                                            </button>
-                                                            <button
-                                                                onClick={() => {setIspkgserEditing(true),setCreatemodelopen(true),handelsrvEdit(pkg)}}
-                                                                className="bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                                                            >
-                                                                <FaEdit size={12} />
-                                                                Edit
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handelserviceDelete(pkg.service_id)}
-                                                                className="bg-red-500 hover:bg-red-600 text-white text-[12px] font-medium px-3 py-[5px] rounded-md transition-all shadow-sm flex items-center gap-1"
-                                                            >
-                                                                <FaTrashAlt size={12} />
-                                                             
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan="5" className="py-10">
-                                                        <div className="flex justify-center items-center w-full">
-                                                            <div>No Services data found</div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                                     
-                                        </tbody>
-                                        
-                                        
-                                    )}
-                              
-                                </table>
-                                
-                                
-                              
-                                 
-                      
-                                
-                            }{srvTotalpages > 0 ? (
-                                <div
-                                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"
-                                    ? "bg-gray-900 text-gray-300 border-gray-700"
-                                    : "bg-white text-gray-600 border-gray-200"
-                                    }`}
-                                >
-                                  <div>
-                                    Show{" "}
-                                    <select
-                                      className={`rounded border outline-none px-[5px] py-[5px] ${theme === "dark"
-                                        ? "bg-gray-800 text-gray-200 border-gray-600"
-                                        : "bg-white text-gray-700 border-gray-300"
-                                        }`}
-                                      value={perPage}
-                                      onChange={(e) => {
-                                        setPerPage(Number(e.target.value));
-                                        setPage(1);
-                                      }}
-                                    >
-                                      <option value={10}>10</option>
-                                      <option value={20}>20</option>
-                                      <option value={30}>30</option>
-                                    </select>{" "}
-                                    per page
-                                  </div>
-                  
-                                  <div className="flex items-center space-x-2">
-                                    {/* Showing range */}
-                                    <p>
-                                      {(page - 1) * perPage + 1}-
-                                      {Math.min(page * perPage, srvTotalrecord)} of {srvTotalrecord}
-                                    </p>
-                  
-                  
-                                    <button
-                                      onClick={() => setPage(page - 1)}
-                                      disabled={page === 1}
-                                      className={`px-3 py-1  rounded-md ${page === 1
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : theme === "dark"
-                                          ? "hover:bg-gray-700"
-                                          : "hover:bg-gray-200"
-                                        }`}
-                                    >
-                                      <i className="fa-solid fa-arrow-left"></i>
-                                    </button>
-                  
-                  
-                                    {Array.from({ length: 3 }, (_, i) => page + i).map((num) => (
-                                      num <= srvTotalpages && (
-                                        <button
-                                          key={num}
-                                          onClick={() => setPage(num)}
-                                          className={`px-3 py-1  rounded-md ${num === page
-                                              ? theme === "dark"
-                                                ? "bg-gray-700 font-semibold"
-                                                : "bg-gray-200 font-semibold"
-                                              : theme === "dark"
-                                                ? "hover:bg-gray-800"
-                                                : "hover:bg-gray-100"
-                                            }`}
-                                        >
-                                          {num}
-                                        </button>
-                                      )
-                                    ))}
-                  
-                  
-                  
-                                    <button
-                                      onClick={() => setPage(page + 1)}
-                                      disabled={page === srvTotalpages}
-                                      className={`px-3 py-1  rounded-md ${page === srvTotalpages
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : theme === "dark"
-                                          ? "hover:bg-gray-700"
-                                          : "hover:bg-gray-200"
-                                        }`}
-                                    >
-                                      <i className="fa-solid fa-arrow-right"></i>
-                                    </button>
-                                  </div>
-                  
-                                </div>
-                              ) : (
-                                ""
-                              )}
-
-
-
-
-                        </div>
-
-
+                                        )) : (
+                                            <tr><td colSpan="5" className="py-16 text-center text-sm text-gray-400">No services found</td></tr>
+                                        )}
+                                    </tbody>
+                                )}
+                            </table>
+                        )}
                     </div>
-                </section>
+
+                    {/* Pagination */}
+                    {srvTotalpages > 0 && (
+                        <div className={`flex items-center justify-between px-5 py-3 border-t text-xs
+                            ${isDark ? "border-gray-800 bg-gray-900 text-gray-400" : "border-gray-100 bg-gray-50/80 text-gray-500"}`}>
+                            <div className="flex items-center gap-2">
+                                <span>Rows per page:</span>
+                                <select
+                                    value={perPage}
+                                    onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+                                    className={`rounded-md border px-2 py-1 text-xs outline-none transition-all
+                                        ${isDark ? "bg-gray-800 border-gray-700 text-gray-200" : "bg-white border-gray-200 text-gray-700"}`}
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={30}>30</option>
+                                </select>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <span className="text-gray-400">
+                                    {(page - 1) * perPage + 1}–{Math.min(page * perPage, srvTotalrecord)} of {srvTotalrecord}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={() => setPage(page - 1)}
+                                        disabled={page === 1}
+                                        className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
+                                            ${page === 1
+                                                ? "opacity-40 cursor-not-allowed border-gray-200"
+                                                : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white hover:border-gray-300"}`}
+                                    >
+                                        <ChevronLeft size={13} />
+                                    </button>
+                                    {Array.from({ length: 3 }, (_, i) => page + i).map((num) =>
+                                        num <= srvTotalpages && (
+                                            <button key={num} onClick={() => setPage(num)}
+                                                className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-medium transition-all border
+                                                    ${num === page
+                                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                                                        : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white"}`}
+                                            >{num}</button>
+                                        )
+                                    )}
+                                    <button
+                                        onClick={() => setPage(page + 1)}
+                                        disabled={page === srvTotalpages}
+                                        className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
+                                            ${page === srvTotalpages
+                                                ? "opacity-40 cursor-not-allowed border-gray-200"
+                                                : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white hover:border-gray-300"}`}
+                                    >
+                                        <ChevronRight size={13} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </main>
-
-
         </div>
     );
 };

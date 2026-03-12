@@ -101,7 +101,9 @@ export const GET_VIRTUALFUNDS = "GET_VIRTUALFUNDS";
 
 
 
-const baseUrl = "http://192.168.1.45:3000";
+const baseUrl = import.meta.env.VITE_LOCAL_URL;
+console.log(baseUrl);
+
 
 export const login = (admin,setLoading,navigate) => async (dispatch) => {
   try {
@@ -146,7 +148,7 @@ export const login = (admin,setLoading,navigate) => async (dispatch) => {
     dispatch({ type: LOGIN, payload: data });
   } catch (error) {
     console.error("Login error:", error);
-    alert("An unexpected error occurred. Please try again.");
+    toast.error("An unexpected error occurred. Please try again.");
   } finally {
     setLoading(false);
   }
