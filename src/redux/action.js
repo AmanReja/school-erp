@@ -51,6 +51,7 @@ export const PKG_CMS_MASTER_DELETE = "PKG_CMS_MASTER_DELETE";
 
 
 export const DISPUTE_CREATE = "DISPUTE_CREATE";
+export const DISPUTE_UPDATE = "DISPUTE_UPDATE";
 export const DISPUTE_GET = "DISPUTE_GET";
 export const DISPUTE_GET_BY_CORPID = "DISPUTE_GET_BY_CORPID";
 
@@ -101,7 +102,7 @@ export const GET_VIRTUALFUNDS = "GET_VIRTUALFUNDS";
 
 
 
-const baseUrl = import.meta.env.VITE_LOCAL_URL;
+const baseUrl = import.meta.env.VITE_PROD_URL;
 console.log(baseUrl);
 
 
@@ -2003,48 +2004,7 @@ export const getvirtualfund_by_corpid = (corp_id,page,perpage,search,fundstatus,
 
 
 
-export const dispute_creacte=(txnId,disputedata)=>async (dispatch) =>{
-  
-
-  const token = localStorage.getItem("token") || {};
-  const res = await fetch(`${baseUrl}/v1/user/dispute/${txnId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body:JSON.stringify(disputedata)
-  });
-
-  // if (res.status === 401) {
-  //   localStorage.removeItem("token");
-  //   window.location.href = "/";
-  //   return;
-  // }
-
-  if (res.status===201) {
-    
-    const disputetype =
-  disputedata.dispute_type.charAt(0).toUpperCase() +
-  disputedata.dispute_type.slice(1);
-
-  toast.success(`${disputetype} dispute has been raised`)
-  // alert("Collection Dispute has been raised")
-
-  }
-
-  if (res.status === 405) {
-    toast.error("Dispute has already raised")
-  }
-
-
-   
-
-  const data = await res.json();
-
-  dispatch({type:DISPUTE_CREATE,payload:data})
-}
-// export const payout_dispute_creacte=(txnId,disputedata)=>async (dispatch) =>{
+// export const dispute_creacte=(txnId,disputedata)=>async (dispatch) =>{
   
 
 //   const token = localStorage.getItem("token") || {};
@@ -2057,144 +2017,76 @@ export const dispute_creacte=(txnId,disputedata)=>async (dispatch) =>{
 //     body:JSON.stringify(disputedata)
 //   });
 
-//   if (res.status === 401) {
-//     localStorage.removeItem("token");
-//     window.location.href = "/";
-//     return;
-//   }
+//   // if (res.status === 401) {
+//   //   localStorage.removeItem("token");
+//   //   window.location.href = "/";
+//   //   return;
+//   // }
 
 //   if (res.status===201) {
     
+//     const disputetype =
+//   disputedata.dispute_type.charAt(0).toUpperCase() +
+//   disputedata.dispute_type.slice(1);
 
-//   toast.success("Payout dispute has been raised")
+//   toast.success(`${disputetype} dispute has been raised`)
+//   // alert("Collection Dispute has been raised")
 
 //   }
+
+//   if (res.status === 405) {
+//     toast.error("Dispute has already raised")
+//   }
+
+
    
 
 //   const data = await res.json();
 
-//   dispatch({type:PAYOUT_DISPUTE_CREATE,payload:data})
+//   dispatch({type:DISPUTE_CREATE,payload:data})
 // }
+export const dispute_update=(txnId,updatedata,corpid)=>async (dispatch) =>{
+  
 
+  const token = localStorage.getItem("token") || {};
+  const res = await fetch(`${baseUrl}/v1/admin/dispute/update/${txnId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body:JSON.stringify(updatedata)
+  });
 
+  // if (res.status === 401) {
+  //   localStorage.removeItem("token");
+  //   window.location.href = "/";
+  //   return;
+  // }
 
-// export const collection_dispute_delete=()=>async (dispatch) =>{
-//   const token = localStorage.getItem("token") || {};
-//   const res = await fetch(`${baseUrl}/v1/user/fund-requests`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body:JSON.stringify(addmoneydata)
-//   });
-
-//   if (res.status === 401) {
-//     localStorage.removeItem("token");
-//     window.location.href = "/";
-//     return;
-//   }
-
-//   if (res.status===201) {
+  if (res.status===200) {
     
-//   }
    
 
-//   const data = await res.json();
+  toast.success(`Dispute has been updated`)
+  // alert("Collection Dispute has been raised")
 
-//   dispatch({type:COLLECTION_DISPUTE_CREATE,payload:""})
-// }
+  dispatch(dispute_get_by_corpid(corpid))
+
+  }
+
+  // if (res.status === 405) {
+  //   toast.error("Dispute has already raised")
+  // }
 
 
-// export const collection_dispute_update=()=>async (dispatch) =>{
-//   const token = localStorage.getItem("token") || {};
-//   const res = await fetch(`${baseUrl}/v1/user/fund-requests`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body:JSON.stringify(addmoneydata)
-//   });
-
-//   if (res.status === 401) {
-//     localStorage.removeItem("token");
-//     window.location.href = "/";
-//     return;
-//   }
-
-//   if (res.status===201) {
-    
-//   }
    
 
-//   const data = await res.json();
+  const data = await res.json();
 
-//   dispatch({type:COLLECTION_DISPUTE_CREATE,payload:""})
-// }
+  dispatch({type:DISPUTE_UPDATE,payload:data})
+}
 
-
-// export const all_dispute_get=(searchtr,trstatus,disputetype,searchdate_start,searchdate_end,page,pagelimit,downloadexcl=false)=>async (dispatch) =>{
-
-//   console.log(618,trstatus);
-//   console.log(619,disputetype);
-//   console.log(619,searchdate_start);
-//   console.log(619,searchdate_end);
- 
-//   const params = new URLSearchParams();
-//   if (searchtr) params.append("search", searchtr);
-//   if (trstatus?.toLowerCase() !== "all" && trstatus) {
-//     params.append("status", trstatus);
-//   }
-//   if (disputetype) params.append("dispute_type", disputetype);
-//   if (searchdate_start) params.append("start_date", searchdate_start);
-//   if (searchdate_end) params.append("end_date", searchdate_end);
-//   // if (downloadexcl) params.append("download", "excel");
-//   if (page) params.append("page", page);
-//   if (pagelimit) params.append("limit", pagelimit);
-
-
-
-
-//   const token = localStorage.getItem("token") || {};
-//   const decoded = jwtDecode(token);
-//   const res = await fetch(`${baseUrl}/v1/user/disputes?${params.toString()}`, {
-//     method: "GET",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-    
-//   });
-
-//   if (res.status === 401) {
-//     localStorage.removeItem("token");
-//     window.location.href = "/";
-//     return;
-//   }
-
-
-//   if (downloadexcl == true) {
-//     const blob = await res.blob();
-//     const fileURL = window.URL.createObjectURL(blob);
-//     const link = document.createElement("a");
-//     link.href = fileURL;
-//     link.setAttribute(
-//       "download",
-//       `${decoded.corpID}_${searchdate_start}-${searchdate_end}_dispute.xlsx`
-//     );
-//     document.body.appendChild(link);
-//     link.click();
-//     link.remove();
-//     return;
-//   }
-   
-
-//   const data = await res.json();
-//   console.log(642,data);
-
-//   dispatch({type:DISPUTE_GET,payload:data})
-// }
 export const dispute_get_by_corpid =
 (
   corpid,

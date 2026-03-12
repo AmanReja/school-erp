@@ -1,438 +1,285 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Theme } from "../Contexts/Theme";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, ChevronDown, Landmark, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { getallSettlements } from "../redux/action";
 
+// ── Defined OUTSIDE to prevent remount ───────────────────────────────────────
 
-import debounce from "debounce";
+const StatusBadge = ({ status }) => {
+  const s = status?.toLowerCase();
+  const map = {
+    active:    "bg-emerald-50 text-emerald-700 border-emerald-200",
+    inactive:  "bg-gray-100   text-gray-600    border-gray-200",
+    suspended: "bg-red-50     text-red-600     border-red-200",
+  };
+  const dot = {
+    active: "bg-emerald-500", inactive: "bg-gray-400", suspended: "bg-red-500",
+  };
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${map[s] || "bg-gray-100 text-gray-500 border-gray-200"}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${dot[s] || "bg-gray-400"}`} />
+      {status}
+    </span>
+  );
+};
 
-import {
-  getallSettlements,
-  
- 
-} from "../redux/action";
+const ValidatedBadge = ({ val }) => {
+  const isValid = val === "1";
+  return (
+    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider
+      ${isValid
+        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+        : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+      {isValid
+        ? <CheckCircle2 size={10} className="text-emerald-500" />
+        : <AlertTriangle size={10} className="text-amber-500" />}
+      {isValid ? "Validated" : "Pending"}
+    </span>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const Getallsettlements = () => {
   const { merchantId } = useParams();
-  console.log(19, merchantId);
-  
   const { theme } = useContext(Theme);
-  const [step, setStep] = useState(1);
-  const navigate = useNavigate();
+  const isDark = theme === "dark";
   const dispatch = useDispatch();
-  const [openform, setOpenform] = useState(false);
-  console.log(26, openform);
 
-  const handelopen = () => {
-    setOpenform((prev) => !prev);
-  };
   const [page, setPage] = useState(1);
-  const [perPage , setPerPage] = useState(10);
-
-
-
-
-
-
-
-
-
+  const [perPage, setPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchStatus, setSearchStatus] = useState("");
-  console.log(41,searchStatus);
-  console.log(42,searchTerm);
 
+  // ── Selectors ──
+  const settlementsData     = useSelector((s) => s.settlements?.settlements || []);
+  const totalRecords        = settlementsData[0]?.pagination.totalRecords;
+  const totalPages          = settlementsData[0]?.pagination.totalPages;
+  const settlementRowsArray = settlementsData?.map((item) => item.data || []).flat();
 
-  
+  const activeCount    = settlementRowsArray.filter((i) => i.status === "active").length;
+  const inactiveCount  = settlementRowsArray.filter((i) => i.status === "inactive").length;
+  const suspendedCount = settlementRowsArray.filter((i) => i.status === "suspended").length;
 
+  const statCards = [
+    {
+      label: "Active",
+      count: activeCount,
+      icon: <CheckCircle2 size={18} className="text-emerald-600" />,
+      bg: "bg-emerald-50",
+      border: "border-emerald-100",
+      countColor: "text-emerald-700",
+    },
+    {
+      label: "Inactive",
+      count: inactiveCount,
+      icon: <XCircle size={18} className="text-gray-500" />,
+      bg: "bg-gray-50",
+      border: "border-gray-100",
+      countColor: "text-gray-700",
+    },
+    {
+      label: "Suspended",
+      count: suspendedCount,
+      icon: <AlertTriangle size={18} className="text-red-500" />,
+      bg: "bg-red-50",
+      border: "border-red-100",
+      countColor: "text-red-700",
+    },
+  ];
 
-  
-
- 
-  const settlementsData = useSelector((state) => state.settlements?.settlements || []);
-  console.log(60,settlementsData);
-
-
-
-  const totalRecords = settlementsData[0]?.pagination.totalRecords;
-  console.log(73,totalRecords);
-
-
-
-
-  const totalPages =  settlementsData[0]?.pagination.totalPages;
-  console.log(79,totalPages);
-
-
-
-
-  
-  const settlementRowsArray = settlementsData
-    ?.map(item => item.data || [])
-    .flat();
-
-  console.log(66, settlementRowsArray);
-
-  const activeStatus = settlementRowsArray.filter((item)=>(item.status=="active"))
-  console.log(77,activeStatus);
-  const inactiveStatus = settlementRowsArray.filter((item)=>(item.status=="inactive"))
-  console.log(77,inactiveStatus);
-  const suspended = settlementRowsArray.filter((item)=>(item.status=="suspended"))
-  console.log(77,suspended);
-
- 
-
-
-
-
-
+  // ── Effects ──
+  useEffect(() => { setPage(1); }, [searchTerm, searchStatus]);
   useEffect(() => {
-    setPage(1);
-  }, [searchTerm, searchStatus]);
-
-
-
-
-
-
-  useEffect(()=>{
-    dispatch(getallSettlements(searchTerm,searchStatus,page,perPage))
-  },[searchStatus,searchTerm,page,perPage])
-
-
-const statusCard = [
-  {
-    title: "Active Accounts",
-    credit: activeStatus.length,
-    description: "Accounts currently active and in use",
-    gradient: "from-[#374151] to-[#6B7280]", 
-    textColor: "text-white",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-    ),
-  },
-  {
-    title: "Inactive Accounts",
-    credit: inactiveStatus.length,
-    description: "Accounts currently inactive or dormant",
-    gradient: "from-[#544151] to-[#6B7280]",
-    textColor: "text-white",
-    icon: (
-      <svg height={50} width={50} fill="#ffffff" viewBox="0 0 24 24" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M12,2A10,10,0,1,0,22,12,10.01146,10.01146,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8.00917,8.00917,0,0,1,12,20Zm1-8.251V7a1,1,0,0,0-2,0v5a1.00586,1.00586,0,0,0,.11816.47217l1.5,2.79883a1.00029,1.00029,0,0,0,1.76368-.94434Z"></path></g></svg>
-    ),
-  },
-  {
-    title: "Suspended Accounts",
-    credit: suspended.length,
-    description: "Accounts suspended due to policy violations",
-    gradient: "from-[#214151] to-[#6B7280]", 
-    textColor: "text-white",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728" />
-      </svg>
-    ),
-  },
-];
-
-  
-
-
-
-
+    dispatch(getallSettlements(searchTerm, searchStatus, page, perPage));
+  }, [searchStatus, searchTerm, page, perPage]);
 
   return (
-    <div
-      className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${
-        theme === "dark" ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"
-      }`}
-    >
-    
-
+    <div className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${isDark ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"}`}>
       <main className="w-full h-full flex flex-col overflow-y-scroll">
+      <div className="flex flex-col p-6 gap-5">
 
-      <section className="w-full p-2 py-4 px-6 h-[200px]">
-  <div className="mx-auto max-w-7xl">
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {statusCard.map((card, idx) => (
-        <div
-          key={idx}
-          className={`overflow-hidden rounded-2xl bg-gradient-to-r ${card.gradient} text-white transition-transform duration-300 hover:-translate-y-2`}
-        >
-          <div className="p-4">
-            <div className="mb-2 flex items-start justify-between">
-              <div>
-                <h3 className="text-xl font-bold">{card.title}</h3>
-                <p className="opacity-90">{card.credit}</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
-                {card.icon}
-              </div>
-            </div>
-          
+        {/* ── Page Header ── */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center">
+            <Landmark size={17} className="text-indigo-600" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Settlements</h1>
+            <p className="text-[11px] text-gray-400">All settlement accounts</p>
           </div>
         </div>
-      ))}
-    </div>
-  </div>
-</section>
 
-        <section className="w-full flex flex-col sm:flex-col gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
-          {/* Settlements Table */}
-         
-          <div
-            className={`flex sm:w-[100%]   w-full h-auto flex-col rounded-xl overflow-y-auto border ${
-              theme === "dark"
-                ? "bg-gray-800 border-gray-700 text-gray-300"
-                : "bg-white border-gray-100 text-gray-800"
-            }`}
-          >
-          <div className="flex justify-between items-center px-6 py-4 h-16 w-full bg-gradient-to-r from-white to-gray-50 shadow-md  border border-gray-100">
-  {/* Title */}
-  <h2 className="text-xl font-semibold text-gray-800 tracking-wide">
-    Settlements List
-  </h2>
+        {/* ── Stat Cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {statCards.map(({ label, count, icon, bg, border, countColor }) => (
+            <div key={label}
+              className={`flex items-center gap-4 rounded-2xl border px-5 py-4 ${bg} ${border}
+                ${isDark ? "bg-gray-800/60 border-gray-700" : ""}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-gray-700" : "bg-white"} shadow-sm border ${border}`}>
+                {icon}
+              </div>
+              <div>
+                <p className={`text-2xl font-bold leading-none ${isDark ? "text-white" : countColor}`}>{count}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5 uppercase tracking-widest font-semibold">{label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
-  {/* Search Input */}
-  <div className="flex items-center gap-4">
-  {/* 🔍 Search Input */}
-  <div className="relative w-[220px]">
-    <input
-      type="text"
-      value={searchTerm}
-      onChange={(e)=>{setSearchTerm(e.target.value)}}
-      placeholder="Search settlements..."
-      className="w-full border outline-none border-gray-200 rounded-[10px] pl-10 pr-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 transition-all duration-300 ease-in-out shadow-sm"
-    />
-   
-  </div>
+        {/* ── Table Card ── */}
+        <div className={`flex-1 flex flex-col rounded-2xl border overflow-hidden shadow-sm
+          ${isDark ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}`}>
 
-  {/* 📋 Status Dropdown */}
-  <select onChange={(e)=>{setSearchStatus(e.target.value)}}
-  value={searchStatus}
-    className="border border-gray-200 rounded-[5px] px-4 py-2 text-sm text-gray-700 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-2 focus:ring-violet-400 outline-none transition-all duration-300 ease-in-out shadow-sm cursor-pointer"
-    defaultValue=""
-  >
-    <option selected value="">ALL</option>
-    <option value="active">ACTIVE</option>
-    
-    <option value="inactive">INACTIVE</option>
-    <option value="suspended">SUSPENDED</option>
-  </select>
-</div>
+          {/* Toolbar */}
+          <div className={`flex flex-wrap items-center gap-3 px-5 py-3.5 border-b
+            ${isDark ? "border-gray-800 bg-gray-900" : "border-gray-100 bg-gray-50/80"}`}>
 
+            {/* Search */}
+            <div className="relative flex-1 min-w-[180px] max-w-xs">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search settlements…"
+                className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg border outline-none transition-all
+                  ${isDark
+                    ? "bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-500 focus:border-indigo-500"
+                    : "bg-white border-gray-200 text-gray-700 placeholder:text-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"}`}
+              />
+            </div>
 
-  {/* Button */}
-  {/* <button
-    onClick={handelopen}
-    className="bg-violet-600 hover:bg-violet-700 active:bg-violet-800 text-white font-medium py-2.5 px-5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex items-center gap-2"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-5 w-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-    </svg>
-    Open Settlement
-  </button> */}
-</div>
+            {/* Status filter */}
+            <div className="relative">
+              <select
+                onChange={(e) => setSearchStatus(e.target.value)}
+                value={searchStatus}
+                className={`appearance-none pl-3 pr-7 py-2 text-xs rounded-lg border outline-none cursor-pointer transition-all
+                  ${isDark ? "bg-gray-800 border-gray-700 text-gray-200" : "bg-white border-gray-200 text-gray-700 focus:border-indigo-400"}`}>
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+              </select>
+              <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
 
-
-
-<div className={`overflow-x-auto bg-white rounded-lg shadow ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
-<table className="w-full table-auto text-[12px]">
-  {/* HEADER */}
-  <thead
-    className={`uppercase font-semibold ${
-      theme === "dark"
-        ? "bg-gray-800 text-gray-300 border-b border-gray-700"
-        : "bg-gray-100 text-gray-600 border-b border-gray-200"
-    }`}
-  >
-    <tr>
-      <th className="py-3 px-5 text-left">Account Name</th>
-      <th className="py-3 px-5 text-left">Corp Id</th>
-      <th className="py-3 px-5 text-left">Account Number</th>
-      <th className="py-3 px-5 text-left">IFSC Code</th>
-      <th className="py-3 px-5 text-left">Validated</th>
-      <th className="py-3 px-5 text-left">Status</th>
-    </tr>
-  </thead>
-
-  {/* BODY */}
-  <tbody
-    className={`${
-      theme === "dark" ? "text-gray-300" : "text-gray-700"
-    }`}
-  >
-    {Array.isArray(settlementRowsArray) && settlementRowsArray.length > 0 ? (
-      settlementRowsArray.map((settlement, i) => (
-        <tr
-          key={i}
-          className={`transition-all ${
-            theme === "dark"
-              ? "border-b border-gray-700 hover:bg-gray-700/60"
-              : "border-b border-gray-200 hover:bg-gray-50"
-          }`}
-        >
-          {/* Account Name */}
-          <td className="py-2.5 px-5">{settlement.account_name}</td>
-
-          {/* Corp ID */}
-          <td className="py-2.5 px-5">{settlement.company_id}</td>
-
-          {/* Account Number */}
-          <td className="py-2.5 px-5">{settlement.account_number}</td>
-
-          {/* IFSC */}
-          <td className="py-2.5 px-5">{settlement.ifsc_code}</td>
-
-          {/* VALIDATION BADGE */}
-          <td className="py-2.5 px-5">
-            <span
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium shadow-sm ${
-                settlement.is_validated === "1"
-                  ? "bg-green-500 text-white"
-                  : "bg-yellow-500 text-white"
-              }`}
-            >
-              {settlement.is_validated === "1"
-                ? "Validated"
-                : "Not Validated"}
-            </span>
-          </td>
-
-          {/* STATUS BADGE */}
-          <td className="py-2.5 px-5">
-            <span
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium shadow-sm ${
-                settlement.status.toLowerCase() === "active"
-                  ? "bg-green-500 text-white"
-                  : settlement.status.toLowerCase() === "inactive"
-                  ? "bg-gray-500 text-white"
-                  : "bg-red-500 text-white"
-              }`}
-            >
-              {settlement?.status
-                .charAt(0)
-                .toUpperCase() + settlement.status.slice(1).toLowerCase()}
-            </span>
-          </td>
-        </tr>
-      ))
-    ) : (
-      <tr>
-        <td colSpan={6} className="text-center py-3 text-gray-400">
-          No settlements found.
-        </td>
-      </tr>
-    )}
-  </tbody>
-</table>
-
-  {totalPages > 0 ? (
-                <div
-                  className={`flex items-center justify-between px-4 py-3 border-t text-sm ${theme === "dark"
-                      ? "bg-gray-900 text-gray-300 border-gray-700"
-                      : "bg-white text-gray-600 border-gray-200"
-                    }`}
-                >
-                  <div>
-                    Show{" "}
-                    <select
-                      className={`rounded border outline-none px-[5px] py-[5px] ${theme === "dark"
-                          ? "bg-gray-800 text-gray-200 border-gray-600"
-                          : "bg-white text-gray-700 border-gray-300"
-                        }`}
-                      value={perPage}
-                      onChange={(e) => {
-                        setPerPage(Number(e.target.value));
-                        setPage(1);
-                      }}
-                    >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={30}>30</option>
-                    </select>{" "}
-                    per page
-                  </div>
-  
-                  <div className="flex items-center space-x-2">
-                    {/* Showing range */}
-                    <p>
-                      {(page - 1) * perPage + 1}-
-                      {Math.min(page * perPage, totalRecords)} of {totalRecords}
-                    </p>
-  
-             
-                    <button
-                      onClick={() => setPage(page - 1)}
-                      disabled={page === 1}
-                      className={`px-3 py-1  rounded-md ${page === 1
-                          ? "opacity-50 cursor-not-allowed"
-                          : theme === "dark"
-                            ? "hover:bg-gray-700"
-                            : "hover:bg-gray-200"
-                        }`}
-                    >
-                      <i className="fa-solid fa-arrow-left"></i>
-                    </button>
-  
-                   
-                    {Array.from({ length: 3 }, (_, i) => page + i).map((num) => (
-    num <= totalPages && ( 
-      <button
-        key={num}
-        onClick={() => setPage(num)}
-        className={`px-3 py-1  rounded-md ${
-          num === page
-            ? theme === "dark"
-              ? "bg-gray-700 font-semibold"
-              : "bg-gray-200 font-semibold"
-            : theme === "dark"
-            ? "hover:bg-gray-800"
-            : "hover:bg-gray-100"
-        }`}
-      >
-        {num}
-      </button>
-    )
-  ))}
-  
-  
-                   
-                    <button
-                      onClick={() => setPage(page + 1)}
-                      disabled={page === totalPages}
-                      className={`px-3 py-1  rounded-md ${page === totalPages
-                          ? "opacity-50 cursor-not-allowed"
-                          : theme === "dark"
-                            ? "hover:bg-gray-700"
-                            : "hover:bg-gray-200"
-                        }`}
-                    >
-                      <i className="fa-solid fa-arrow-right"></i>
-                    </button>
-                  </div>
-  
-                </div>
-              ) : (
-               ""
-              )}
-</div>
-
+            <div className="ml-auto text-xs text-gray-400">{totalRecords ?? 0} records</div>
           </div>
-        </section>
-      </main>
 
-    
+          {/* Table */}
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className={`text-[10px] uppercase tracking-widest font-semibold border-b
+                  ${isDark ? "bg-gray-800/60 text-gray-400 border-gray-800" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
+                  {["Account Name", "Corp ID", "Account Number", "IFSC Code", "Validated", "Status"].map((h) => (
+                    <th key={h} className="px-5 py-3 text-left whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className={`divide-y ${isDark ? "divide-gray-800" : "divide-gray-100"}`}>
+                {Array.isArray(settlementRowsArray) && settlementRowsArray.length > 0 ? (
+                  settlementRowsArray.map((s, i) => (
+                    <tr key={i} className={`transition-colors ${isDark ? "hover:bg-gray-800/50" : "hover:bg-slate-50/80"}`}>
+                      <td className={`px-5 py-3.5 text-sm font-medium ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+                        {s.account_name}
+                      </td>
+                      <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        {s.company_id}
+                      </td>
+                      <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        {s.account_number}
+                      </td>
+                      <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        {s.ifsc_code}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <ValidatedBadge val={s.is_validated} />
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <StatusBadge status={s.status} />
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="py-16 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                          <Landmark size={20} className="text-gray-400" />
+                        </div>
+                        <p className="text-sm text-gray-400">No settlements found</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 0 && (
+            <div className={`flex flex-wrap items-center justify-between px-5 py-3 border-t text-xs gap-3
+              ${isDark ? "border-gray-800 bg-gray-900 text-gray-400" : "border-gray-100 bg-gray-50/80 text-gray-500"}`}>
+              <div className="flex items-center gap-2">
+                <span>Rows:</span>
+                <select
+                  value={perPage}
+                  onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
+                  className={`rounded-md border px-2 py-1 text-xs outline-none transition-all
+                    ${isDark ? "bg-gray-800 border-gray-700 text-gray-200" : "bg-white border-gray-200 text-gray-700"}`}>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={30}>30</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <span className="text-gray-400 mr-2">
+                  {(page - 1) * perPage + 1}–{Math.min(page * perPage, totalRecords)} of {totalRecords}
+                </span>
+
+                <button
+                  onClick={() => setPage(page - 1)}
+                  disabled={page === 1}
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
+                    ${page === 1
+                      ? "opacity-40 cursor-not-allowed border-gray-200"
+                      : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white hover:border-gray-300"}`}>
+                  <ChevronLeft size={13} />
+                </button>
+
+                {Array.from({ length: 3 }, (_, i) => page + i).map((num) =>
+                  num <= totalPages && (
+                    <button key={num} onClick={() => setPage(num)}
+                      className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-medium border transition-all
+                        ${num === page
+                          ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                          : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white"}`}>
+                      {num}
+                    </button>
+                  )
+                )}
+
+                <button
+                  onClick={() => setPage(page + 1)}
+                  disabled={page === totalPages}
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
+                    ${page === totalPages
+                      ? "opacity-40 cursor-not-allowed border-gray-200"
+                      : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white hover:border-gray-300"}`}>
+                  <ChevronRight size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+        </div>
+      </main>
     </div>
   );
 };

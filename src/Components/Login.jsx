@@ -52,8 +52,8 @@ export const Login = () => {
         {/* Logo */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
           className="relative z-10 flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg">
-            <Zap size={16} className="text-white" />
+          <div style={{ fontFamily: "Righteous, cursive" }} className="w-8 h-8 rounded-lg text-white bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg">
+            B
           </div>
           <span className="text-white text-xl font-bold tracking-tight"
             style={{ fontFamily: "Righteous, cursive" }}>

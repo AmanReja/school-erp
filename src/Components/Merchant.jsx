@@ -214,7 +214,7 @@ const Merchant = () => {
             </div>
 
             {/* Table */}
-            <div className="overflow-auto max-h-[360px]">
+            <div className="overflow-auto max-h-[300px] overflow-y-auto">
               <table className="w-full text-sm">
                 <thead className={`sticky top-0 text-[10px] uppercase tracking-widest font-semibold ${isDark ? "bg-gray-800 text-gray-400" : "bg-gray-50 text-gray-400"} border-b ${isDark ? "border-gray-700" : "border-gray-100"}`}>
                   <tr>
@@ -306,7 +306,7 @@ const Merchant = () => {
       )}
 
       {/* ── Main Content ── */}
-      <main className="flex-1 flex flex-col p-6 gap-5">
+      <main className="flex-1 flex flex-col p-6 gap-5 max-h-[calc(100vh-140px)] ">
 
         {/* Page Header */}
         <div className="flex items-center justify-between">
@@ -375,23 +375,23 @@ const Merchant = () => {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <button onClick={() => navigate(`/dashboard/getcommercial/${merchant.corp_id}`)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-all">
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-white bg-orange-500 hover:bg-orange-400 border border-orange-200 rounded-lg transition-all">
                             <FileText size={10} /> Commercial
                           </button>
                           <button onClick={() => { navigate(`/dashboard/transactionmaster/${merchant.corp_id}`); localStorage.setItem("corpid", merchant.corp_id); }}
-                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg transition-all">
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-white bg-sky-500 hover:bg-sky-600 border border-sky-200 rounded-lg transition-all">
                             <ArrowUpRight size={10} /> Txns
                           </button>
                           <button onClick={() => handelInfo(merchant)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-all">
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-white bg-emerald-500 hover:bg-emerald-600 border border-emerald-200 rounded-lg transition-all">
                             <Info size={10} /> Info
                           </button>
                           <button onClick={() => handleEdit(merchant)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all">
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-white bg-indigo-500 hover:bg-indigo-600 border border-indigo-200 rounded-lg transition-all">
                             <Pencil size={10} /> Edit
                           </button>
                           <button onClick={() => handleDelete(merchant)}
-                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-all">
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-white bg-red-500 hover:bg-red-600 border border-red-200 rounded-lg transition-all">
                             <Trash2 size={10} />
                           </button>
                         </div>

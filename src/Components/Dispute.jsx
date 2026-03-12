@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   
   
-   dispute_get_by_corpid, 
+   dispute_get_by_corpid, dispute_update
 } from "../redux/action";
 import "../App.css";
 import "flatpickr/dist/themes/airbnb.css";
@@ -37,9 +37,36 @@ const Dispute = () => {
 
   const [disputeopen,setDisputeopen] = useState(false);
   const [activedisputetxnid,setActivedisputetxnid] =useState(null);
+  const [isEditmoelopen,setIsEditmoelopen] =useState(false);
+  const[isEditing,setIsediting] =useState(false);
   const [showremarks, setShowremarks] = useState(null);
   const [selectedremarks, setSelectedremarks] = useState(null);
+  const [openStatus, setOpenStatus] = useState(false);
+  const [formdata, setFormdata] = useState({
+    dispute_remarks:"",
+    status:""
+    
+  })
   
+
+  const handeldisputeUpdate = () =>{
+
+    try {
+       dispatch(dispute_update(activedisputetxnid,formdata,corpid))
+    } catch (error) {
+      console.error("Error updating dispute:", error);
+    } finally{
+      setIsEditmoelopen(false);
+    setFormdata({
+      dispute_remarks: "",
+      status: ""
+    });
+    }
+
+ 
+
+
+}
 
 
 
@@ -108,6 +135,11 @@ const Dispute = () => {
 
   const disputesummary = useSelector ((state)=>state.coldispute.coldispute?.summary
   )
+
+
+console.log("Summer",disputesummary);
+
+
   const totalpage = useSelector(
     (state) => state.coldispute.coldispute.pagination?.totalPages
   );
@@ -659,7 +691,110 @@ const Dispute = () => {
 
                 </div>
               </div>
+{isEditmoelopen && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
 
+    <div className="w-[340px] bg-white rounded-xl shadow-2xl border border-gray-200 p-5">
+
+      {/* Header */}
+      <div className="mb-4">
+        <p className="text-xs text-gray-500">Transaction ID</p>
+        <p className="text-sm font-semibold text-gray-800 break-all">
+          {activedisputetxnid}
+        </p>
+      </div>
+
+      {/* Current Remarks */}
+      <div className="mb-4">
+        <label className="text-xs font-medium text-gray-600 block mb-1">
+          Current Remarks
+        </label>
+        <p className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-md p-2">
+          {showremarks || "No remarks available"}
+        </p>
+      </div>
+
+      {/* Update Remarks */}
+      <div className="mb-4">
+        <label className="text-xs font-medium text-gray-600 block mb-1">
+          Update Remarks
+        </label>
+        <textarea onChange={(e) => setFormdata((prev) => ({ ...prev, dispute_remarks: e.target.value }))}
+          placeholder="Enter updated remarks..."
+          className="w-full border border-gray-300 rounded-md p-2 text-sm
+                     focus:ring-2 focus:ring-blue-400
+                     focus:border-blue-400 outline-none resize-none"
+          rows={3}
+          value={formdata?.dispute_remarks}
+        />
+      </div>
+  
+
+<div className="mb-4 relative w-full">
+
+  {/* Selected Value */}
+  <div
+    onClick={() => setOpenStatus(!openStatus)}
+    className="border border-gray-200 p-2 bg-lime-500 text-white rounded-md cursor-pointer flex justify-between items-center"
+  >
+    <span className="capitalize">{formdata?.status || "Select Status"}</span>
+    {/* <span className="text-xs"></span> */}
+    <ChevronDown/>
+  </div>
+
+  {/* Dropdown Options */}
+  {openStatus && (
+    <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+
+      {[
+        { label: "Open", value: "open" },
+        { label: "Under Review", value: "under_review" },
+        { label: "Resolved", value: "resolved" },
+        { label: "Rejected", value: "rejected" },
+      ].map((item) => (
+        <div
+          key={item.value}
+          onClick={() => {
+            setFormdata((prev) => ({ ...prev, status: item.value }));
+            setOpenStatus(false);
+          }}
+          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        >
+          {item.label}
+        </div>
+      ))}
+
+    </div>
+  )}
+</div>
+
+      {/* Buttons */}
+      <div className="flex justify-end gap-2 mt-4">
+        <button
+          onClick={() => {
+           
+            setIsEditmoelopen(false);
+          }}
+          className="px-4 py-1.5 text-xs font-medium
+                     bg-gray-100 hover:bg-gray-200
+                     text-gray-700 rounded-md transition"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => {setActivedisputetxnid(null),handeldisputeUpdate()}}
+          className="px-4 py-1.5 text-xs font-medium
+                     bg-blue-600 hover:bg-blue-700
+                     text-white rounded-md transition shadow-sm"
+        >
+          Update
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
               <table
                 className={`w-full text-sm text-left ${
                   theme === "dark" ? "text-gray-300" : "text-gray-600"
@@ -761,8 +896,10 @@ const Dispute = () => {
         <td className="px-4 py-3">
           {`${item.dispute_remarks.slice(0,8)}...` || "-"}
         </td>
-        <td className="px-4 py-3 relative text-center align-middle">
-          {item.dispute_remarks.length>10&&        <button onClick={()=>{
+        {/* <td className="px-4 py-3 relative text-center align-middle">
+          {item.dispute_remarks.length>10&&   
+          
+          <button onClick={()=>{
           setShowremarks(showremarks===item.transaction_id?null:item.transaction_id),setSelectedremarks(item.dispute_remarks)
         }}
   className="px-4 py-2 text-[12px] font-medium
@@ -803,6 +940,24 @@ const Dispute = () => {
     </div>
   </div>
 )}
+
+</td> */}
+<td className="px-4 py-3 relative text-center align-middle">
+  <button onClick={()=>{
+    setActivedisputetxnid(item.transaction_id);
+    setIsEditmoelopen(true)
+    setShowremarks(item.dispute_remarks)
+    setFormdata((prev) => ({ ...prev, status: item.status }))
+  }} className="px-4 py-2 text-[12px] font-medium
+             bg-gradient-to-r from-blue-600 to-indigo-600
+             text-white rounded-md
+             shadow-md hover:shadow-lg
+             hover:from-blue-700 hover:to-indigo-700
+             transition-all duration-200">Update Status</button>
+
+
+
+
 
 </td>
 
