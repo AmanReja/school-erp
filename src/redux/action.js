@@ -54,6 +54,7 @@ export const DISPUTE_CREATE = "DISPUTE_CREATE";
 export const DISPUTE_UPDATE = "DISPUTE_UPDATE";
 export const DISPUTE_GET = "DISPUTE_GET";
 export const DISPUTE_GET_BY_CORPID = "DISPUTE_GET_BY_CORPID";
+export const GETALL_DISPUTE = "GETALL_DISPUTE";
 
 
 export const GET_CMS_ASSIGN = "GET_CMS_ASSIGN";
@@ -90,6 +91,16 @@ export const GET_VIRTUALFUNDS_BY_CORPID = "GET_VIRTUALFUNDS_BY_CORPID";
 export const GET_VIRTUALFUNDS = "GET_VIRTUALFUNDS";
 
 
+export const FUND_TRANSFER = "FUND_TRANSFER";
+
+export const GET_ENTITY_IP_DETAILS = "GET_ENTITY_IP_DETAILS";
+export const UPDATE_ENTITY_IP = "UPDATE_ENTITY_IP";
+export const GET_TOKEN_VALIDITY = "GET_TOKEN_VALIDITY";
+
+
+
+
+
 
 
 
@@ -102,7 +113,7 @@ export const GET_VIRTUALFUNDS = "GET_VIRTUALFUNDS";
 
 
 
-const baseUrl = import.meta.env.VITE_PROD_URL;
+const baseUrl = import.meta.env.VITE_LOCAL_URL;
 console.log(baseUrl);
 
 
@@ -305,11 +316,11 @@ export const deleteMerchant = (id) => async (dispatch) => {
         type: DELETE_MERCHANT, 
         payload: id // assuming you're using corp_id as identifier
       });
-      alert("Merchant deleted successfully");
+      toast.success("Merchant deleted successfully");
 
     } else {
       const data = await res.json();
-      alert(data.message || "Failed to delete merchant");
+      toast.error(data.message || "Failed to delete merchant");
     } 
  
   } catch (error) {
@@ -409,14 +420,14 @@ export const createSettlement = (formData,corp_id) => async (dispatch) => {
   });
   const data = await res.json();
   if(res.status===201){
-    alert("settlement created")
+    toast.success("Settlement Created")
     
   }
   if (res.status === 403) {
-    alert("Permission denied");
+    toast.error("Permission denied");
   }
   if (res.status===400) {
-    alert("settlement account is already exist")
+    toast.error("Settlement account is already exist")
     return
   }
   dispatch({ type: CREATE_SETTLEMENT, payload: data });
@@ -440,7 +451,7 @@ export const updateSettlement = (account_number,company_id, updatedData) => asyn
     
   }
   if (res.status === 403) {
-    alert("Permission denied");
+    toast.error("Permission denied");
   }
   if (!res.ok) {
     console.error("Error updating settlement:", data);
@@ -469,7 +480,7 @@ export const deleteSettlement = (account_number,company_id) => async (dispatch) 
     
   }
   if (res.status === 403) {
-    alert("Permission denied");
+    toast.error("Permission denied");
   }
   if (!res.ok) {
     const err = await res.json();
@@ -655,7 +666,7 @@ export const update_Txn_status = (company_id,txn_id,updateddata,setUpdateload) =
     
 
    
-   alert("updated")
+   toast.success("Status Updated")
   }
  
   const data = await res.json();
@@ -699,7 +710,7 @@ export const update_Txn_data = (txn_id,updateddata,setUpdateload) => async (disp
    
 
    
-   alert("updated")
+   toast.success("Status Updated")
   }
  
   const data = await res.json();
@@ -791,11 +802,11 @@ export const createPkgMaster = (formData) => async (dispatch) => {
 
 
     } else {
-      alert(data.message || "Failed to create package");
+      toast.error(data.message || "Failed to create package");
       
     }
   } catch (error) {
-    alert("Error creating package: " + error.message);
+    toast.error("Error creating package: " + error.message);
   }
 };
 export const deletePkgMaster = (pkgid) => async (dispatch) => {
@@ -1680,6 +1691,8 @@ export const verify_otp =
   };
 
 
+
+
   export const getmarchentent_by_companyid =(companyId,status)=> async (dispatch)=>{
     console.log("status",status);
 
@@ -1795,36 +1808,92 @@ export const verify_otp =
   };
 
 
+
   
-export const getall_fund = (page,perpage,search,fundstatus,searchdate_start,searchdate_end) => async (dispatch) => {
-  const token = localStorage.getItem("token") || {};
+  export const getall_fund = (
+  page,
+  perpage,
+  search,
+  fundstatus,
+  searchdate_start,
+  searchdate_end,
+  downloadexcl = false // Added parameter
+) => async (dispatch) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/";
+      return;
+    }
+
+    const params = new URLSearchParams();
+    if (page) params.append("page", page);
+    if (perpage) params.append("limit", perpage);
+    if (search) params.append("search", search);
+    
+    // Logic to handle "All" status similar to dispute function
+    if (fundstatus && fundstatus.toLowerCase() !== "all") {
+        params.append("status", fundstatus);
+    }
+    
+    if (searchdate_start) params.append("start_date", searchdate_start);
+    if (searchdate_end) params.append("end_date", searchdate_end);
+
+    if (downloadexcl) params.append("download", "excel");
+    
+    // Often APIs require an export flag to return a buffer instead of JSON
+   
+
+    const res = await fetch(`${baseUrl}/v1/admin/fund-requests?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+
+    // --- Excel Download Logic Start ---
 
 
-  const params =new URLSearchParams();
-  if (page) params.append("page", page);
-  if (perpage) params.append("limit", perpage);
-  if (search) params.append("search", search);
-  if (fundstatus) params.append("status", fundstatus);
-  if (searchdate_start) params.append("start_date", searchdate_start);
-  if (searchdate_end) params.append("end_date", searchdate_end);
 
-  const res = await fetch(`${baseUrl}/v1/admin/fund-requests?${params.toString()}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
 
-  if (res.status === 401) {
-    localStorage.removeItem("token");
-    window.location.href = "/";
-    return;
+
+    if (downloadexcl===true) {
+      const blob = await res.blob();
+      const fileURL = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.setAttribute(
+        "download",
+        `ManualFund_Report_${searchdate_start || "all"}-${searchdate_end || "all"}.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      return;
+    }
+    // --- Excel Download Logic End ---
+
+    const data = await res.json();
+    dispatch({ type: "GETALL_FUND", payload: data });
+
+  } catch (error) {
+    console.error("Fund Fetch Error:", error);
   }
-
-  const data = await res.json();
-  dispatch({ type: "GETALL_FUND", payload: data });
 };
+
+
+
+
+
 
 export const update_fund_status = (company_id,request_id, formData) => async (dispatch) => {
   const token = localStorage.getItem("token");
@@ -1901,7 +1970,7 @@ export const update_fund_status_by_corp = (company_id,request_id, formData) => a
 
 
 
-export const get_funds_by_Corpid = (corp_id,page,perpage,search,fundstatus,searchdate_start,searchdate_end) => async (dispatch) => {
+export const get_funds_by_Corpid = (corp_id,page,perpage,search,fundstatus,searchdate_start,searchdate_end,downloadexcl=false) => async (dispatch) => {
   const token = localStorage.getItem("token") || {};
 
 
@@ -1912,6 +1981,8 @@ export const get_funds_by_Corpid = (corp_id,page,perpage,search,fundstatus,searc
   if (fundstatus) params.append("status", fundstatus);
   if (searchdate_start) params.append("start_date", searchdate_start);
   if (searchdate_end) params.append("end_date", searchdate_end);
+  if (downloadexcl) params.append("download", "excel");
+
 
   const res = await fetch(`${baseUrl}/v1/admin/fund-requests/${corp_id}?${params.toString()}`, {
     method: "GET",
@@ -1926,6 +1997,34 @@ export const get_funds_by_Corpid = (corp_id,page,perpage,search,fundstatus,searc
     window.location.href = "/";
     return;
   }
+
+
+   if (downloadexcl===true) {
+      // res.blob() is critical here (equivalent to responseType: 'blob')
+      const blob = await res.blob();
+      
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      
+      // Set filename with Corp ID and Timestamp
+      link.setAttribute(
+        "download", 
+        `ManualFund_Report_${corp_id}_${new Date().getTime()}.xlsx`
+      );
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      return; // Stop here so we don't try to parse as JSON
+    }
+
+
+
+
 
   const data = await res.json();
   dispatch({ type: "GET_FUNDS_BY_CORPID", payload: data });
@@ -1966,34 +2065,90 @@ export const getvirtualfunds = (corp_id,page,perpage,search,fundstatus,searchdat
 
 
 
-export const getvirtualfund_by_corpid = (corp_id,page,perpage,search,fundstatus,searchdate_start,searchdate_end) => async (dispatch) => {
-  const token = localStorage.getItem("token") || {};
+export const getvirtualfund_by_corpid = (
+  corp_id,
+  page,
+  perpage,
+  search,
+  fundstatus,
+  searchdate_start,
+  searchdate_end,
+  downloadexcl = false 
+) => async (dispatch) => {
 
 
-  const params =new URLSearchParams();
-  if (page) params.append("page", page);
-  if (perpage) params.append("limit", perpage);
-  if (search) params.append("search", search);
-  if (fundstatus) params.append("status", fundstatus);
-  if (searchdate_start) params.append("start_date", searchdate_start);
-  if (searchdate_end) params.append("end_date", searchdate_end);
 
-  const res = await fetch(`${baseUrl}/v1/admin/va-fund/${corp_id}?${params.toString()}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
 
-  if (res.status === 401) {
-    localStorage.removeItem("token");
-    window.location.href = "/";
-    return;
+  try {
+    const token = localStorage.getItem("token") || "";
+
+
+console.log("downloadexcl",);
+
+
+    const params = new URLSearchParams();
+    if (page) params.append("page", page);
+    if (perpage) params.append("limit", perpage);
+    if (search) params.append("search", search);
+    
+    // Handle "All" status filter
+    if (fundstatus && fundstatus !== "All") {
+      params.append("status", fundstatus);
+    }
+    
+    if (searchdate_start) params.append("start_date", searchdate_start);
+    if (searchdate_end) params.append("end_date", searchdate_end);
+
+    // Append the download parameter for the Excel export
+    if (downloadexcl) {
+      params.append("download", "excel");
+    }
+
+    const res = await fetch(`${baseUrl}/v1/admin/va-fund/${corp_id}?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+
+    // --- Excel Download Handling ---
+    if (downloadexcl===true) {
+      // res.blob() is critical here (equivalent to responseType: 'blob')
+      const blob = await res.blob();
+      
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      
+      // Set filename with Corp ID and Timestamp
+      link.setAttribute(
+        "download", 
+        `VirtualFund_Report_${corp_id}_${new Date().getTime()}.xlsx`
+      );
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      return; // Stop here so we don't try to parse as JSON
+    }
+
+    // --- Normal JSON Data Handling ---
+    const data = await res.json();
+    dispatch({ type: "GET_VIRTUALFUNDS_BY_CORPID", payload: data });
+
+  } catch (error) {
+    console.error("Virtual Fund Fetch Error:", error);
   }
-
-  const data = await res.json();
-  dispatch({ type: "GET_VIRTUALFUNDS_BY_CORPID", payload: data });
 };
 
 
@@ -2169,5 +2324,255 @@ console.log(corpid);
 
   } catch (error) {
     console.error("Dispute Fetch Error:", error);
+  }
+};
+
+
+
+
+export const getall_dispute =
+(
+  corpid,
+  searchtr,
+  trstatus,
+  disputetype,
+  searchdate_start,
+  searchdate_end,
+  page,
+  pagelimit,
+  downloadexcl = false
+) => async (dispatch) => {
+  try {
+
+console.log(corpid);
+  
+
+
+    const params = new URLSearchParams();
+
+    if (searchtr) params.append("search", searchtr);
+    if (trstatus?.toLowerCase() !== "all" && trstatus)
+      params.append("status", trstatus);
+    if (disputetype) params.append("dispute_type", disputetype);
+    if (searchdate_start) params.append("start_date", searchdate_start);
+    if (searchdate_end) params.append("end_date", searchdate_end);
+
+    if (page !== undefined && page !== null)
+      params.append("page", page);
+
+    if (pagelimit !== undefined && pagelimit !== null)
+      params.append("limit", pagelimit);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/";
+      return;
+    }
+
+    const res = await fetch(
+      `${baseUrl}/v1/admin/disputes/${corpid}?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+
+    if (downloadexcl) {
+      const blob = await res.blob();
+      const fileURL = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.setAttribute(
+        "download",
+        `dispute_${searchdate_start || "all"}-${
+          searchdate_end || "all"
+        }.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      return;
+    }
+
+    const data = await res.json();
+
+    dispatch({
+      type: GETALL_DISPUTE,
+      payload: data,
+    });
+
+  } catch (error) {
+    console.error("Dispute Fetch Error:", error);
+  }
+};
+
+
+
+
+export const getEntityIpDetails = (corp_id, currentPage, itemsPerPage, searchTerm,searchStatus) => async (dispatch) => {
+
+console.log("corp",corp_id, currentPage, itemsPerPage, searchTerm);
+
+
+
+
+
+  const token = localStorage.getItem("token");
+ 
+  try {
+    // 1. Handle Query Parameters
+    const params = new URLSearchParams();
+    if (currentPage) params.append("page", currentPage);
+    if (itemsPerPage) params.append("limit", itemsPerPage);
+    if (searchTerm) params.append("search", searchTerm);
+    if (searchStatus) params.append("status", searchStatus);
+
+    // 2. Construct the URL with the corp_id and query params
+    // Note: Adjust the path "/v1/admin/marchent/entity-ip/" to match your actual backend structure
+    const url = `${baseUrl}/v1/admin/entity-ip/${corp_id}?${params.toString()}`;
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // 3. Handle Unauthorized Access
+
+
+    const data = await res.json();
+    console.log("ipdata",data);
+
+    // 4. Dispatch to Reducer
+    if (res.ok) {
+      dispatch({ 
+        type: GET_ENTITY_IP_DETAILS, 
+        payload: data 
+      });
+    } else {
+      alert(data.message || "Failed to fetch entity IP details");
+    }
+  } catch (error) {
+    console.error("Fetch Error:", error);
+    // alert("Error fetching entity IP details: " + error.message);
+  }
+};
+
+
+
+
+
+
+
+
+export const updateEntityIp = (corp_id, id, updateData) => async (dispatch) => {
+  const token = localStorage.getItem("token");
+
+  console.log("updateData",corp_id,id,updateData);
+  
+
+  try {
+    const res = await fetch(`${baseUrl}/v1/admin/entity-ip/${corp_id}/${id}`, {
+      method: "PATCH", 
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updateData),
+    });
+
+ 
+
+    const data = await res.json();
+    console.log("updateddata",data);
+    
+
+    if (res.status===200) {
+       toast.success("Updated successfully!");
+    }else{
+      toast.error(data.message)
+    }
+
+   
+
+dispatch(getEntityIpDetails(corp_id))
+
+  } catch (error) {
+    alert("Error updating: " + error.message);
+  }
+};
+
+
+
+
+
+
+export const getTokenValidity = (
+  corp_id, 
+  page, 
+  limit, 
+  search, 
+  status, 
+  setLoad
+) => async (dispatch) => {
+  if (setLoad) setLoad(true);
+
+  try {
+    const token = localStorage.getItem("token");
+
+    // Construct Query Parameters
+    const params = new URLSearchParams();
+    if (page) params.append("page", page);
+    if (limit) params.append("limit", limit);
+    if (search) params.append("search", search);
+    if (status && status !== "All") params.append("status", status);
+
+    const res = await fetch(
+      `${baseUrl}/v1/admin/token-validity/${corp_id}?${params.toString()}`, 
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (setLoad) setLoad(false);
+
+    // Handle session expiration
+    if (res.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      return;
+    }
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error("Token Validity Fetch Error:", errorData.message);
+      return;
+    }
+
+    const data = await res.json();
+
+    dispatch({
+      type: "GET_TOKEN_VALIDITY",
+      payload: data,
+    });
+
+  } catch (error) {
+    if (setLoad) setLoad(false);
+    console.error("Network Error (Token Validity):", error);
   }
 };

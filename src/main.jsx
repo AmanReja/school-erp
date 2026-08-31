@@ -38,6 +38,9 @@ import Fund from "./Components/Fund";
 import Fund_by_corp from "./Components/fund_by_corp";
 import Virfund_by_corpid from "./Components/Virfund_by_corpid";
 import Dispute from "./Components/Dispute";
+import Support from "./Components/Support.jsx";
+import EntityIpPage from "./Components/EntityIpPage.jsx";
+import TokenPage from "./Components/TokenPage.jsx";
 
 
 if(import.meta.env.PROD){
@@ -64,6 +67,8 @@ const router = createBrowserRouter(
       <Route element={<Protectedroutes />}>
       <Route path="/dashboard" element={<Dashbord />}>
         <Route path="createmerchants" element={<Createmerchants/>}/>
+        <Route path="entityIp/:corpid" element={<EntityIpPage/>}/>
+        <Route path="token/:corpid" element={<TokenPage/>}/>
         <Route path="updatepass" element={<Updatepass/>}/>
         <Route path="profile" element={<Profile />} />
         <Route path="getallsettlements" element={<Getallsettlements />} />
@@ -80,6 +85,7 @@ const router = createBrowserRouter(
         <Route path="notassigned" element={<Notassigned />} />
         <Route path="getcommercial/:compid" element={<Getcommercial />} />
         <Route path="packagemaster/:pkgId" element={<Packagemaster />} />
+        <Route path="support" element={<Support />} />
       </Route>
 
       </Route>

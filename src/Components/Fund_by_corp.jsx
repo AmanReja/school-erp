@@ -186,7 +186,7 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
 
   const downloadexcel = () => {
     dispatch(
-        get_funds_by_Corpid(corpid,searchtr, searchtr, formdatastr, formdataend, true)
+        get_funds_by_Corpid(corpid, page, perPage, searchtr, fstatus,formdatastr,formdataend, true)
     );
   };
   useEffect(() => {
@@ -633,7 +633,7 @@ updateform(),e.preventDefault()
                   </div>
 
                   {/* ⬇️ Download Button */}
-                  {/* <button
+                  <button
                     onClick={downloadexcel}
                     className={`text-sm font-medium hover:shadow-xl px-4 py-1 rounded-lg transition border ${
                       theme === "dark"
@@ -647,7 +647,7 @@ updateform(),e.preventDefault()
                       }`}
                     ></i>{" "}
                     Download
-                  </button> */}
+                  </button>
                 </div>
               </div>
 

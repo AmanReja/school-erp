@@ -86,6 +86,8 @@ const Merchant = () => {
   // ── Selectors ──
   const merchantsResponse = useSelector((state) => state.merchants?.merchants || {});
   const merchantsData     = merchantsResponse.data        || [];
+  console.log("merchantsData",merchantsData);
+  
   const totalRecords      = merchantsResponse.total       || 0;
   const totalPages        = merchantsResponse.totalPages  || 1;
   const startIndex        = (currentPage - 1) * itemsPerPage;
@@ -197,6 +199,10 @@ const Merchant = () => {
               <button onClick={() => navigate(`/dashboard/Virfundbycorpid/${corpidforfund}`)}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 rounded-lg transition-all">
                 <Landmark size={11} /> Virtual Funds
+              </button>
+              <button onClick={() => navigate(`/dashboard/entityIp/${corpidforfund}`)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-lime-700 bg-lime-50 hover:bg-lime-100 border border-lime-200 rounded-lg transition-all">
+                <Landmark size={11} /> Ip Request
               </button>
               <div className="ml-auto">
                 {!isdeletedentopen ? (
@@ -411,6 +417,29 @@ const Merchant = () => {
             <span>
               Showing {startIndex + 1}–{Math.min(endIndex, totalRecords)} of {totalRecords}
             </span>
+
+           <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-xl shadow-sm border w-fit">
+
+  {/* Label */}
+  <h1 className="text-sm font-semibold text-gray-700">
+    Navigation Shortcut
+  </h1>
+
+  {/* Input */}
+  <input
+    type="number"
+    value={currentPage}
+    onChange={(e) => setCurrentPage(Number(e.target.value))}
+    min="1"
+    placeholder="Page"
+    className="w-20 px-3 py-1.5 text-center text-sm font-medium 
+               bg-gray-50 border border-gray-300 rounded-lg 
+               focus:bg-white focus:outline-none 
+               focus:ring-2 focus:ring-black focus:border-black
+               transition-all duration-200"
+  />
+
+</div>
 
             <div className="flex items-center gap-1">
               <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}

@@ -11,7 +11,9 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   PKG_MASTER_CREATE,
   PKG_MASTER_UPDATE,
   PKG_MASTER_DELETE,PKG_CMS_MASTER_GET,PKG_CMS_MASTER_CREATE,PKG_CMS_MASTER_UPDATE,PKG_CMS_MASTER_DELETE,SERVICELIST_GET,SERVICELIST_CREATE,SERVICELIST_UPDATE,SERVICELIST_DELETE
-  ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS,ADMINDETAILS,GET_MERCHENT_ENTITY,GET_MERCHENT_ENTITY_DELETED, DELETE_ENTITY,GETALL_FUND,GET_FUNDS_BY_CORPID, GET_VIRTUALFUNDS, GET_VIRTUALFUNDS_BY_CORPID,PKG_CMS_MASTER_GET_BY_PKG_ID,PKG_CMS_MASTER_CREATE_BY_PKG_ID,DISPUTE_CREATE, DISPUTE_GET_BY_CORPID
+  ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS,ADMINDETAILS,GET_MERCHENT_ENTITY,GET_MERCHENT_ENTITY_DELETED, DELETE_ENTITY,GETALL_FUND,GET_FUNDS_BY_CORPID, GET_VIRTUALFUNDS, GET_VIRTUALFUNDS_BY_CORPID,PKG_CMS_MASTER_GET_BY_PKG_ID,PKG_CMS_MASTER_CREATE_BY_PKG_ID,DISPUTE_CREATE, DISPUTE_GET_BY_CORPID,
+  GETALL_DISPUTE,GET_ENTITY_IP_DETAILS,
+  GET_TOKEN_VALIDITY
 
 } from "../redux/action";
 
@@ -541,8 +543,45 @@ const initialSettlementState = {
         ...state,
         coldispute:action.payload
       };
-    } else {
+    } else if(action.type===GETALL_DISPUTE){
+      return {
+        ...state,
+        coldispute:action.payload
+      }
+    }
+      else{
       return state;
     }
   };
   
+
+
+
+  
+const entityIpInitialState = {
+  entityIps: [],
+  token:[]
+};
+
+export const entityIpReducer = (state = entityIpInitialState, action) => {
+  if (action.type === GET_ENTITY_IP_DETAILS) {
+    return {
+      ...state, 
+      entityIps:action.payload, 
+    };
+  } 
+
+
+  else if (action.type===GET_TOKEN_VALIDITY) {
+    
+  return{
+  ...state,
+  token:action.payload
+  }
+
+  }
+ 
+  else {
+    return state;
+  }
+};

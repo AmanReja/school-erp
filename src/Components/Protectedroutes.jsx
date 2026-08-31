@@ -5,7 +5,7 @@ import { Outlet, Navigate } from "react-router-dom";
 
 
 
-const baseurl = import.meta.env.VITE_PROD_URL;
+const baseurl = import.meta.env.VITE_LOCAL_URL;
 console.log(baseurl);
 const Protectedroutes = () => {
   const [authenticated, setAuthenticated] = useState(true);

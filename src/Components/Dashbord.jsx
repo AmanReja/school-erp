@@ -84,6 +84,13 @@ const Dashbord = () => {
       show: showp,
       setShow: setShowp,
     },
+    {
+      to: "/dashboard/support",
+      icon: "fa-solid fa-headset",       // Services / Commercial Master
+      label: "Support",
+      show: showp,
+      setShow: setShowp,
+    },
 
   ];
   
@@ -106,67 +113,78 @@ const Dashbord = () => {
   <div className="w-full flex-col h-screen pb-0 sm:pb-[100px] sm:flex-row flex p-2">
 
     {/* 🌈 Sidebar */}
+   <div
+  className={`flex sm:flex-col flex-row sm:h-full h-[70px] ${
+    !expend ? "sm:w-[220px]" : "sm:w-[90px]"
+  } w-full rounded-r-3xl sm:px-3 px-4 sm:py-6 py-2 items-center justify-between sm:justify-start sm:gap-6 gap-4 transition-all duration-500 ease-in-out `}
+>
+  {items.map(({ to, icon, label, show, setShow }) => (
     <div
-      className={`flex sm:flex-col flex-row sm:h-full h-[70px] ${
-        !expend ? "sm:w-[220px]" : "sm:w-[90px]"
-      } w-full bg-gray-200 rounded-r-3xl sm:px-3  px-4 sm:py-6 py-2 items-center justify-between sm:justify-start sm:gap-6 gap-4  transition-all duration-500 ease-in-out`}
+      key={to}
+      className={`relative flex items-center sm:flex-row flex-col sm:justify-start justify-center group transition-all duration-300 ${
+        !expend ? "sm:w-[190px]" : "sm:w-[60px]"
+      }`}
     >
-      {items.map(({ to, icon, label, show, setShow }) => (
-        <div
-          key={to}
-          className={`relative flex items-center sm:flex-row flex-col sm:justify-start justify-center group transition-all duration-300 ${
-            !expend ? "sm:w-[190px]" : "sm:w-[60px]"
+      {/* Icon */}
+      <NavLink
+        to={to}
+        end
+        onMouseOver={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        className={({ isActive }) =>
+          `flex justify-center items-center w-11 h-11 rounded-2xl transition-all duration-300 shadow-md ${
+            isActive
+              ? theme === "dark"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40 scale-110"
+                : "bg-white text-blue-600 scale-110 shadow-blue-300"
+              : theme === "dark"
+                ? "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+                : "bg-white/20 hover:bg-white/40 text-black hover:scale-105"
+          }`
+        }
+      >
+        <i className={`fa-solid ${icon} text-[14px]`}></i>
+      </NavLink>
+
+      {/* Expanded Label */}
+      {!expend && (
+        <span
+          className={`hidden sm:block ml-4 text-sm font-bold whitespace-nowrap transition-all duration-300 ${
+            theme === "dark" ? "text-gray-300" : "text-gray-800"
+          } ${
+            !expend ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
           }`}
         >
-          {/* Icon */}
-          <NavLink
-            to={to}
-            end
-            // onClick={() => setExpend((prev) => !prev)}yytg
-            onMouseOver={() => setShow(true)}
-            onMouseLeave={() => setShow(false)}
-            className={({ isActive }) =>
-              `flex justify-center items-center w-11 h-11 rounded-2xl transition-all duration-300 shadow-md ${
-                isActive
-                  ? "bg-white text-blue-600 scale-110 shadow-blue-300"
-                  : "bg-white/20 hover:bg-white/40 text-black hover:scale-105"
-              }`
-            }
-          >
-            <i className={`fa-solid ${icon} text-[12px]`}></i>
-          </NavLink>
+          {label}
+        </span>
+      )}
 
-          {/* Expanded Label */}
-          {!expend && (
-            <span
-              className={`hidden sm:block ml-3 text-sm font-semibold text-gray-800 whitespace-nowrap transition-all duration-300 ${
-                !expend ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
-              }`}
-            >
-              {label}
-            </span>
-          )}
-
-          {/* Tooltip when collapsed */}
-          {expend && (
-            <div
-              className={`absolute sm:block hidden left-[110%] top-1/2 -translate-y-1/2 px-3 py-1 text-xs rounded-md font-medium transition-all duration-200 bg-black/80 text-white shadow-md whitespace-nowrap ${
-                show
-                  ? "opacity-100 visible translate-x-1"
-                  : "opacity-0 invisible -translate-x-2"
-              }`}
-            >
-              {label}
-            </div>
-          )}
-
-          {/* Mobile label */}
-          <span className="sm:hidden text-[10px] text-white font-medium mt-1">
-            {label}
-          </span>
+      {/* Tooltip when collapsed */}
+      {expend && (
+        <div
+          className={`absolute sm:block hidden left-[110%] top-1/2 -translate-y-1/2 px-3 py-1.5 text-[10px] rounded-lg font-bold transition-all duration-200 shadow-xl whitespace-nowrap z-50 ${
+            theme === "dark" 
+              ? "bg-gray-800 text-white border border-gray-700" 
+              : "bg-black text-white"
+          } ${
+            show
+              ? "opacity-100 visible translate-x-2"
+              : "opacity-0 invisible -translate-x-2"
+          }`}
+        >
+          {label}
         </div>
-      ))}
+      )}
+
+      {/* Mobile label */}
+      <span className={`sm:hidden text-[10px] font-bold mt-1 ${
+        theme === "dark" ? "text-gray-400" : "text-gray-600"
+      }`}>
+        {label}
+      </span>
     </div>
+  ))}
+</div>
 
     {/* 🌤️ Main Section */}
     <div

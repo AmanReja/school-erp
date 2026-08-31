@@ -1,35 +1,98 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 
 import { useSelector, useDispatch } from "react-redux";
-import { getall_fund,update_fund_status } from "../redux/action";
+import {
+  
+  
+   dispute_get_by_corpid, dispute_update
+} from "../redux/action";
 import "../App.css";
 import "flatpickr/dist/themes/airbnb.css";
 import flatpickr from "flatpickr";
-import Contentloader from "../Components/Contentloader";
-import { Check, ChevronDown ,ChevronLeft,ChevronRight} from "lucide-react";
+import Contentloader from "./Contentloader";
+
 import { Theme } from "../Contexts/Theme";
+import { ChevronDown, Check,ChevronLeft ,ChevronRight } from "lucide-react";
 import { useParams } from "react-router-dom";
 
-const Fund = () => {
+const Support = () => {
+
+
+
+  const {corpid} =useParams()
+
+
+
   const { theme, setTheme } = useContext(Theme);
   const [load, setLoad] = useState(false);
   const [searchtr, setSearchtr] = useState("");
-  const [fstatus, setfstatus] = useState("");
+  const [trstatus, setTrstatus] = useState("All");
+  const [disputetype, setDisputetype] = useState("collection");
   const [formdatastr, setFormdatastr] = useState("");
   const [formdataend, setFormdataend] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [selected, setSelected] = useState("Today");
   const [open, setOpen] = useState(false);
-  const [isupdating, setIsupdating] = useState(false);
-  const [updatedstatus, setUpdatedstatus] = useState("");
-  const [updatedremarks, setUpdatedremarks] = useState("");
-  const [currentcorpid, setCurrentcorpid] = useState("");
-  const [currentrequestid, setCurrentrequestid] = useState("");
 
-
-  const {corpid} =useParams()
+  const [disputeopen,setDisputeopen] = useState(false);
+  const [activedisputetxnid,setActivedisputetxnid] =useState(null);
+  const [isEditmoelopen,setIsEditmoelopen] =useState(false);
+  const[isEditing,setIsediting] =useState(false);
+  const [showremarks, setShowremarks] = useState(null);
+  const [selectedremarks, setSelectedremarks] = useState(null);
+  const [openStatus, setOpenStatus] = useState(false);
+  const [formdata, setFormdata] = useState({
+    dispute_remarks:"",
+    status:""
+    
+  })
   
+
+  const handeldisputeUpdate = () =>{
+
+    try {
+       dispatch(dispute_update(activedisputetxnid,formdata,corpid))
+    } catch (error) {
+      console.error("Error updating dispute:", error);
+    } finally{
+      setIsEditmoelopen(false);
+    setFormdata({
+      dispute_remarks: "",
+      status: ""
+    });
+    }
+
+ 
+
+
+}
+
+
+
+
+
+
+
+
+  const [date, setDate] = useState({ startDate: null, endDate: null });
+
+  useEffect(() => {
+    const today = new Date();
+    setSelected("Today");
+    setDate({ startDate: today, endDate: today });
+    setFormdatastr(formatDate(today));
+    setFormdataend(formatDate(today));
+  }, []);
+
+  const formatDate = (date) => new Intl.DateTimeFormat("en-CA").format(date);
+
+  useEffect(() => {
+    if (date.startDate && date.endDate) {
+      setFormdatastr(formatDate(date.startDate));
+      setFormdataend(formatDate(date.endDate));
+    }
+  }, [date]);
 
   const options = [
     "Today",
@@ -41,24 +104,6 @@ const Fund = () => {
     "Custom Range",
   ];
 
-  const [date, setDate] = useState({ startDate: null, endDate: null });
-
-  const formatDate = (date) => new Intl.DateTimeFormat("en-CA").format(date);
-  useEffect(() => {
-    const today = new Date();
-    setSelected("Today");
-    setDate({ startDate: today, endDate: today });
-    setFormdatastr(formatDate(today));
-    setFormdataend(formatDate(today));
-  }, []);
-
-  useEffect(() => {
-    if (date.startDate && date.endDate) {
-      setFormdatastr(formatDate(date.startDate));
-      setFormdataend(formatDate(date.endDate));
-    }
-  }, [date]);
-
   const dateRangeRef = useRef(null);
 
   useEffect(() => {
@@ -66,7 +111,6 @@ const Fund = () => {
     flatpickr(dateRangeRef.current, {
       mode: "range",
       dateFormat: "d-m-y",
-
       defaultDate: [toady, toady],
       value: date,
       onChange: function (selectedDates) {
@@ -84,101 +128,118 @@ const Fund = () => {
 
   const dispatch = useDispatch();
 
-  const fundreport = useSelector(
-    (state) => state.fund.fund?.summary
-  );
-  console.log(81,fundreport);
-
-
-//   const payoutlogdata = useSelector((state) => state.payoutlog.payoutlog?.data);
-
-//   const totalpage = useSelector(
-//     (state) => state.payoutlog.payoutlog.pagination?.totalPages
-//   );
-
-//   const totaldata = useSelector(
-//     (state) => state.payoutlog.payoutlog.pagination?.totalRecords
-//   );
 
 
 
+  const disputedata = useSelector ((state)=>state.coldispute.coldispute?.data)
+
+  const disputesummary = useSelector ((state)=>state.coldispute.coldispute?.summary
+  )
 
 
-  const funddata = useSelector((state) => state.fund.fund?.data)
-  console.log(40, funddata);
+console.log("Summer",disputesummary);
+
 
   const totalpage = useSelector(
-      (state) => state.fund.fund.pagination?.totalPages
+    (state) => state.coldispute.coldispute.pagination?.totalPages
   );
-  // console.log(41, totalpage);
 
 
   const totaldata = useSelector(
-      (state) => state.fund.fund.pagination?.totalRecords
+    (state) => state.coldispute.coldispute.pagination?.totalRecords
   );
 
 
 
 
-    const handelupdate =(fund)=>{
-      setIsupdating(true)
-      setUpdatedstatus(fund.status)
-      setUpdatedremarks(fund.remark)
-      setCurrentcorpid(fund.company_id
-        )
-      setCurrentrequestid(fund.request_id)
-     
 
 
-      
-    }
 
-    const updateform =()=>{
-
-      try {
-        const payload ={
-          status:updatedstatus,
-          remark:updatedremarks
+ 
+ 
   
-    }
+
   
   
-  dispatch(update_fund_status(currentcorpid,currentrequestid,payload))
-      } catch (error) {
-        console.log(error);
-      }finally{
-        setIsupdating(false)
-      }
-     
-    
-
-    }
 
 
-
-  // console.log(96,payoutlogdata);
 
   useEffect(() => {
-    if (!formdatastr || !formdataend) return;
-    async function fetchdata() {
-      setLoad(true);
+    if (!corpid || !formdatastr || !formdataend) return;
+  
+    dispatch(
+      dispute_get_by_corpid(
+        corpid,
+        searchtr,
+        trstatus,
+        disputetype,
+        formdatastr,
+        formdataend,
+        page,
+        perPage,
+        false
+      )
+    );
+  }, [
+    corpid,
+    searchtr,
+    trstatus,
+    disputetype,
+    formdatastr,
+    formdataend,
+    page,
+    perPage,
+  ]);
 
-      await dispatch(
-        getall_fund(
-             page, perPage, searchtr, fstatus,formdatastr,formdataend
-        )
-      );
+  // console.log(111,disputedata);
+  
 
-      setLoad(false);
-    }
-    fetchdata();
-  }, [dispatch, page, perPage, searchtr, fstatus,formdatastr,formdataend]);
+
+
+
+
 
   const downloadexcel = () => {
     dispatch(
-        getall_fund(page,perPage, searchtr,fstatus, formdatastr, formdataend, true)
+      dispute_get_by_corpid(corpid,searchtr,trstatus,disputetype, formdatastr,formdataend,page,perPage,true)
     );
   };
+
+
+
+  const [disputeform,setDisputeform] =useState({
+    dispute_remarks:"",
+    dispute_amount: "",
+
+  
+  })
+
+  const [disputetxnid,setDisputetxnid] =useState(null);
+
+
+
+  //  const handeldisputeCreate = () =>{
+
+  //   console.log(151,disputeform);
+
+
+  //   try {
+  //     dispatch(dispute_creacte(disputetxnid,disputeform))
+  //   } catch (error) {
+  //     console.log(error);
+  //   } finally{
+  //     setDisputeform({
+  //       dispute_remarks:"",
+  //       dispute_amount: "",
+       
+  //     })
+  //     setActivedisputetxnid(null)
+  //   }
+   
+  //  }
+ 
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".dropdown-wrapper")) {
@@ -189,7 +250,7 @@ const Fund = () => {
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
-  
+
   return (
     <div
       className={`w-[100%]  2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${
@@ -201,30 +262,36 @@ const Fund = () => {
       <main className="w-full h-full flex flex-col overflow-y-scroll">
         <section className="w-full flex flex-col sm:flex-col gap-[20px] mt-[20px] sm:min-h-[600px] 2xl:h-[780px] sm:h-[600px] px-[2px] sm:px-[20px]">
           <div
-            className={`w-full h-auto min-h-[80px] flex flex-col sm:flex-row sm:items-center justify-between px-5 py-3 rounded-xl ${
+            className={`w-full h-[80px] flex items-center px-5 rounded-xl ${
               theme === "dark" ? "bg-gray-900" : "bg-white"
             }`}
           >
-            {/* Title */}
-            <div className="flex flex-col">
+            <div className="flex flex-col w-full mb-4">
+              {/* Title */}
               <h1
-                className={`text-xl font-semibold ${
+                className={`text-2xl font-semibold ${
                   theme === "dark" ? "text-gray-100" : "text-gray-800"
                 }`}
               >
-                Fund Report
+                Dispute Report
               </h1>
+
+              {/* Subtitle */}
               <p
-                className={`text-sm ${
-                  theme === "dark" ? "text-gray-400" : "text-gray-500"
+                className={`text-sm mt-1 ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-600"
                 }`}
               >
-                Overview of all fund transfers including status, amount,
-                and date.
+              Track and manage all disputed transactions with real-time status updates, amounts, and resolution details in one centralized view.
               </p>
-            </div>
 
-            {/* Info stats */}
+              {/* Decorative Divider */}
+              <div
+                className={`mt-3 h-[1px] w-full ${
+                  theme === "dark" ? "bg-gray-700" : "bg-gray-200"
+                }`}
+              />
+            </div>
           </div>
 
           <div
@@ -233,146 +300,79 @@ const Fund = () => {
             }`}
           >
             {" "}
-            {load
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`flex-1 min-h-[80px] animate-pulse flex flex-col items-center justify-center text-center rounded-lg p-4 shadow-sm hover:shadow-md transition ${
-                      theme === "dark"
-                        ? "bg-gray-800 text-white"
-                        : "bg-gray-200 text-gray-800"
-                    }`}
-                  >
-                    <div role="status">
-                      <svg
-                        aria-hidden="true"
-                        class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
-                        viewBox="0 0 100 101"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                          fill="currentColor"
-                        />
-                        <path
-                          d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                          fill="currentFill"
-                        />
-                      </svg>
-                      <span class="sr-only">Loading...</span>
-                    </div>
-                  </div>
-                ))
-              : [
-                  {
-                    label: "Fund Value",
-
-                    value:
-                      fundreport?.total_amount != null
-                        ? Number(
-                            fundreport.total_amount
-                          ).toLocaleString("en-US", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })
-                        : "0.00",
-                  },
-                  {
-                    label: "Success Amount",
-                    value: `${
-                      fundreport?.success_amount === undefined
-                        ? "00"
-                        : Number(
-                          fundreport.success_amount
-                        ).toLocaleString("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        }) 
-                    }`,
-                  },
-                  {
-                    label: "Pending Funds",
-
-                    value:
-                      fundreport?.pending_amount != null
-                        ? Number(fundreport.pending_amount).toLocaleString(
-                            "en-US",
-                            {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            }
-                          )
-                        : "0.00",
-                  },
-                  {
-                    label: "Failure",
-
-                    value:
-                      fundreport?.failed_amount != null
-                        ? Number(fundreport.failed_amount).toLocaleString(
-                            "en-US",
-                            {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            }
-                          )
-                        : "0.00",
-                  },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className={`flex-1 flex flex-col items-center justify-center text-center rounded-lg p-4 shadow-sm hover:shadow-md transition ${
-                      theme === "dark"
-                        ? "bg-gray-800 text-white"
-                        : "bg-white text-gray-800"
-                    }`}
-                  >
-                    <h1 className="text-2xl font-semibold">{item.value}</h1>
-                    <p
-                      className={`text-sm mt-1 ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
-                      {item.label}
-                    </p>
-                  </div>
-                ))}
+            {
+  load
+    ? Array.from({ length: 5 }).map((_, i) => (
+        <div
+          key={i}
+          className={`flex-1 min-h-[60px] animate-pulse rounded-lg p-3 ${
+            theme === "dark" ? "bg-gray-800" : "bg-gray-200"
+          }`}
+        />
+      ))
+    : [
+        {
+          label: "Total",
+          value: disputesummary?.total_disputes || 0,
+          desc: "All disputes raised",
+          color: "text-purple-500",
+        },
+        {
+          label: "Open",
+          value: disputesummary?.open || 0,
+          desc: "Awaiting action",
+          color: "text-amber-500",
+        },
+        {
+          label: "Review",
+          value: disputesummary?.under_review || 0,
+          desc: "Under verification",
+          color: "text-blue-500",
+        },
+        {
+          label: "Resolved",
+          value: disputesummary?.resolved || 0,
+          desc: "Successfully closed",
+          color: "text-emerald-600",
+        },
+        {
+          label: "Rejected",
+          value: disputesummary?.rejected || 0,
+          desc: "Declined cases",
+          color: "text-red-600",
+        },
+      ].map((item, index) => (
+        <div
+          key={index}
+          className={`flex-1 rounded-lg p-3 border transition hover:shadow-md ${
+            theme === "dark"
+              ? "bg-gray-800 border-gray-700 text-white"
+              : "bg-white border-gray-200 text-gray-800"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className={`text-xs font-medium ${item.color}`}>
+              {item.label}
+            </span>
+            <span className="text-lg font-bold">
+              {item.value}
+            </span>
           </div>
-          {isupdating&&
-         <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
-         <form onSubmit={(e)=>{
-updateform(),e.preventDefault()
-         }} className="w-[400px] h-[300px] bg-white rounded-xl shadow-xl p-6 flex flex-col gap-5 animate-pop">
-           
-           <div className="flex justify-between items-center">
-           <h2 className="text-lg font-semibold text-gray-800">Update Status</h2> <i onClick={()=>{setIsupdating(false)}} class="fa-solid fa-x"></i>
-           </div>
-           
-       
-           <select value={updatedstatus} onChange={(e)=>{setUpdatedstatus(e.target.value)}}
-             className="border border-gray-300 rounded-lg p-2 text-gray-700 outline-none focus:ring-2 focus:ring-blue-500"
-           >
-             <option selected value="">select status</option>
-             <option value="SUCCESS">success</option>
-             <option value="PENDING">pending</option>
-             <option value="FAILED">failed</option>
-           </select>
-           <textarea value={updatedremarks} onChange={(e)=>{setUpdatedremarks(e.target.value)}} className="border border-gray-300 rounded-lg p-2 text-gray-700 outline-none focus:ring-2 focus:ring-blue-500" name="" id="" cols="30" rows="10"></textarea>
-       
-           <button type="submit"
-             className="mt-auto bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-           >
-             Update
-           </button>
-       
-         </form>
-       </div>
-       
-            }
+
+          <p
+            className={`text-[11px] mt-1 ${
+              theme === "dark" ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            {item.desc}
+          </p>
+        </div>
+      ))
+}
+          </div>
           <div className="w-full px-[20px] mt-[20px]">
             <div
-              className={`flex w-full h-full flex-col rounded-xl overflow-y-auto border-[1px] ${
+              className={`flex w-full h-full flex-col rounded-xl overflow-y-auto border ${
                 theme === "dark"
                   ? "bg-gray-900 border-gray-700"
                   : "bg-white border-gray-300"
@@ -390,11 +390,10 @@ updateform(),e.preventDefault()
                     theme === "dark" ? "text-gray-100" : "text-gray-800"
                   }`}
                 >
-                  Fund Requests
+                  Disputes
                 </h2>
 
                 <div className="flex gap-3 flex-wrap items-center">
-                  {/* 📅 Calendar Input */}
                   <div
                     className={`pl-[5px] border-[1px] p-1 rounded flex justify-center items-center gap-2 ${
                       theme === "dark"
@@ -436,7 +435,7 @@ updateform(),e.preventDefault()
 
                     {open && (
                       <ul
-                        className={`fixed open top-[48%] w-[200px] left-[400px]  right-0 mt-2 rounded-lg shadow-lg border z-20 max-h-80 overflow-y-auto ${
+                        className={`fixed open top-[48%] w-[200px] left-[400px] right-0 mt-2 rounded-lg shadow-lg border z-20 max-h-80 overflow-y-auto ${
                           theme === "dark"
                             ? "bg-gray-800 border-gray-600 text-gray-100"
                             : "bg-white border-gray-200 text-gray-800"
@@ -558,7 +557,7 @@ updateform(),e.preventDefault()
                     <input
                       onChange={(e) => setSearchtr(e.target.value)}
                       type="text"
-                      placeholder="Search transaction"
+                      placeholder="Search Dispute..."
                       className={`pl-8 pr-2 outline-none text-sm bg-transparent ${
                         theme === "dark" ? "text-gray-200" : "text-gray-700"
                       }`}
@@ -574,12 +573,13 @@ updateform(),e.preventDefault()
                     }`}
                   >
                     <select
-                      onChange={(e) => setfstatus(e.target.value)}
+                    value={trstatus}
+                      onChange={(e) => setTrstatus(e.target.value)}
                       className={`text-sm bg-transparent outline-none ${
                         theme === "dark" ? "text-gray-200" : "text-gray-700"
                       }`}
                     >
-                      <option
+                      <option 
                         className={`${
                           theme === "dark"
                             ? "bg-gray-800 text-white"
@@ -587,7 +587,7 @@ updateform(),e.preventDefault()
                         }`}
                         value="All"
                       >
-                        All funds
+                        All Disputes
                       </option>
                       <option
                         className={`${
@@ -595,9 +595,9 @@ updateform(),e.preventDefault()
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-800"
                         }`}
-                        value="SUCCESS"
+                        value="open"
                       >
-                        Success
+                        Open
                       </option>
                       <option
                         className={`${
@@ -605,9 +605,9 @@ updateform(),e.preventDefault()
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-800"
                         }`}
-                        value="PENDING"
+                        value="under_review"
                       >
-                        Pending
+                        Under Review
                       </option>
                       <option
                         className={`${
@@ -615,15 +615,25 @@ updateform(),e.preventDefault()
                             ? "bg-gray-800 text-white"
                             : "bg-white text-gray-800"
                         }`}
-                        value="FAILURE"
+                        value="resolved"
                       >
-                        Failure
+                        resolved
+                      </option>
+                      <option
+                        className={`${
+                          theme === "dark"
+                            ? "bg-gray-800 text-white"
+                            : "bg-white text-gray-800"
+                        }`}
+                        value="rejected"
+                      >
+                        rejected
                       </option>
                     </select>
                   </div>
 
                   {/* ⬇️ Download Button */}
-                  <button
+                  {/* <button
                     onClick={downloadexcel}
                     className={`text-sm font-medium hover:shadow-xl px-4 py-1 rounded-lg transition border ${
                       theme === "dark"
@@ -637,112 +647,332 @@ updateform(),e.preventDefault()
                       }`}
                     ></i>{" "}
                     Download
-                  </button>
+                  </button> */}
+                  <div
+                    className={`px-4 py-1 rounded-lg border ${
+                      theme === "dark"
+                        ? "bg-gray-800 border-gray-600 text-gray-200"
+                        : "bg-white border-gray-300 text-gray-700"
+                    }`}
+                  >
+  <select
+                      onChange={(e) => setDisputetype(e.target.value)}
+                      value={disputetype}
+                      className={`text-sm bg-transparent outline-none ${
+                        theme === "dark" ? "text-gray-200" : "text-gray-700"
+                      }`}
+                    >
+                  
+                      <option
+                        className={`${
+                          theme === "dark"
+                            ? "bg-gray-800 text-white"
+                            : "bg-white text-gray-800"
+                        }`}
+                        value="payout"
+                      >
+                       Payout
+                      </option>
+                      <option
+                        className={`${
+                          theme === "dark"
+                            ? "bg-gray-800 text-white"
+                            : "bg-white text-gray-800"
+                        }`}
+                        value="collection"
+                      >
+                        Collection
+                      </option>
+                    
+                    </select>
+
+                  </div>
+                
+
                 </div>
               </div>
+{isEditmoelopen && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
 
-              <table className="w-full text-sm text-left">
-                            <thead
-                                className={`text-[11px] uppercase border-t border-b ${theme === "dark"
-                                    ? "bg-gray-700 text-gray-300 border-gray-600"
-                                    : "bg-[#fcfcfc] text-gray-400 border-gray-300"
-                                    }`}
-                            >
-                                <tr>
-                                    <th className="px-4 py-4">Status</th>
-                                    <th className="px-4 py-4">Txn Date</th>
-                                    <th className="px-4 py-4">Amount</th>
-                                    <th className="px-4 py-4">Details</th>
+    <div className="w-[340px] bg-white rounded-xl shadow-2xl border border-gray-200 p-5">
 
-                                    <th className="px-4 py-4">Remarks</th>
-                                    <th className="px-4 py-4">Mode</th>
-                                    {/* <th className="px-4 py-4">Action</th> */}
+      {/* Header */}
+      <div className="mb-4">
+        <p className="text-xs text-gray-500">Transaction ID</p>
+        <p className="text-sm font-semibold text-gray-800 break-all">
+          {activedisputetxnid}
+        </p>
+      </div>
+
+      {/* Current Remarks */}
+      <div className="mb-4">
+        <label className="text-xs font-medium text-gray-600 block mb-1">
+          Current Remarks
+        </label>
+        <p className="text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-md p-2">
+          {showremarks || "No remarks available"}
+        </p>
+      </div>
+
+      {/* Update Remarks */}
+      <div className="mb-4">
+        <label className="text-xs font-medium text-gray-600 block mb-1">
+          Update Remarks
+        </label>
+        <textarea onChange={(e) => setFormdata((prev) => ({ ...prev, dispute_remarks: e.target.value }))}
+          placeholder="Enter updated remarks..."
+          className="w-full border border-gray-300 rounded-md p-2 text-sm
+                     focus:ring-2 focus:ring-blue-400
+                     focus:border-blue-400 outline-none resize-none"
+          rows={3}
+          value={formdata?.dispute_remarks}
+        />
+      </div>
+  
+
+<div className="mb-4 relative w-full">
+
+  {/* Selected Value */}
+  <div
+    onClick={() => setOpenStatus(!openStatus)}
+    className="border border-gray-200 p-2 bg-lime-500 text-white rounded-md cursor-pointer flex justify-between items-center"
+  >
+    <span className="capitalize">{formdata?.status || "Select Status"}</span>
+    {/* <span className="text-xs"></span> */}
+    <ChevronDown/>
+  </div>
+
+  {/* Dropdown Options */}
+  {openStatus && (
+    <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+
+      {[
+        { label: "Open", value: "open" },
+        { label: "Under Review", value: "under_review" },
+        { label: "Resolved", value: "resolved" },
+        { label: "Rejected", value: "rejected" },
+      ].map((item) => (
+        <div
+          key={item.value}
+          onClick={() => {
+            setFormdata((prev) => ({ ...prev, status: item.value }));
+            setOpenStatus(false);
+          }}
+          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        >
+          {item.label}
+        </div>
+      ))}
+
+    </div>
+  )}
+</div>
+
+      {/* Buttons */}
+      <div className="flex justify-end gap-2 mt-4">
+        <button
+          onClick={() => {
+           
+            setIsEditmoelopen(false);
+          }}
+          className="px-4 py-1.5 text-xs font-medium
+                     bg-gray-100 hover:bg-gray-200
+                     text-gray-700 rounded-md transition"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => {setActivedisputetxnid(null),handeldisputeUpdate()}}
+          className="px-4 py-1.5 text-xs font-medium
+                     bg-blue-600 hover:bg-blue-700
+                     text-white rounded-md transition shadow-sm"
+        >
+          Update
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+              <table
+                className={`w-full text-sm text-left ${
+                  theme === "dark" ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                <thead
+                  className={`text-[11px] uppercase border-b border-t ${
+                    theme === "dark"
+                      ? "bg-gray-800 text-gray-400 border-gray-700"
+                      : "bg-gray-50 text-gray-400 border-gray-300"
+                  }`}
+                >
+                  <tr>
+  <th className="px-4 py-3">Status</th>
+  <th className="px-4 py-3">Dispute Date</th>
+  <th className="px-4 py-3">Transaction</th>
+  {/* <th className="px-4 py-3">Bank Details</th> */}
+  <th className="px-4 py-3">Dispute Amount</th>
+  <th className="px-4 py-3 text-center">Dispute Type</th>
+  <th className="px-4 py-3">Remarks</th>
+  <th className="px-4 py-3 text-center">Action</th>
+</tr>
+                </thead>
+                <tbody className="text-[12px] font-semibold">
+  {load ? (
+    Array.from({ length: 3 }).map((_, i) => <Contentloader key={i} />)
+  ) : Array.isArray(disputedata) && disputedata.length > 0 ? (
+    disputedata.map((item, i) => (
+      <tr
+        key={item.id}
+        className={`border-b ${
+          theme === "dark"
+            ? "border-gray-700 hover:bg-gray-800"
+            : "border-gray-100 hover:bg-gray-50"
+        }`}
+      >
+        {/* Status */}
+        <td className="px-4 py-3">
+  <span
+    className={`uppercase px-3 py-[4px] rounded-md text-[11px] font-semibold text-white
+      ${
+        item.status?.toLowerCase() === "open"
+          ? "bg-amber-500"
+          : item.status?.toLowerCase() === "under_review"
+          ? "bg-blue-500"
+          : item.status?.toLowerCase() === "resolved"
+          ? "bg-emerald-600"
+          : item.status?.toLowerCase() === "rejected"
+          ? "bg-red-600"
+          : "bg-gray-500"
+      }`}
+  >
+    {item.status?.replace("_", " ")}
+  </span>
+</td>
+
+        {/* Dispute Date */}
+        <td className="px-4 py-3">
+          {item.dispute_date
+            ? new Date(item.dispute_date).toLocaleString()
+            : "-"}
+        </td>
+
+        {/* Transaction Details */}
+        <td className="px-4 py-3">
+          <div className="flex flex-col">
+            <p>Txn ID: {item.transaction_id}</p>
+            <p>{`${item.rrn?"RRN":"UTR"}`}: {item.rrn?item.rrn:item.utr}</p>
+          </div>
+        </td>
+
+        {/* Bank Details */}
+        {/* <td className="px-4 py-3">
+          <div className="flex flex-col">
+            <p>Bank: {item.bank_name}</p>
+            <p>A/C: {item.account_no}</p>
+            <p>IFSC: {item.ifsc_code}</p>
+          </div>
+        </td> */}
+
+        {/* Dispute Amount */}
+        <td className="px-4 py-3">
+          ₹{Number(item.dispute_amount || 0).toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+          })}
+        </td>
+
+        {/* Dispute Type */}
+        <td className="px-4 py-3  text-center align-middle">
+  <span>
+    {item.dispute_type
+      ? item.dispute_type.charAt(0).toUpperCase() +
+        item.dispute_type.slice(1)
+      : "-"}
+  </span>
+</td>
+
+        {/* Remarks */}
+        <td className="px-4 py-3">
+          {`${item.dispute_remarks.slice(0,8)}...` || "-"}
+        </td>
+        {/* <td className="px-4 py-3 relative text-center align-middle">
+          {item.dispute_remarks.length>10&&   
+          
+          <button onClick={()=>{
+          setShowremarks(showremarks===item.transaction_id?null:item.transaction_id),setSelectedremarks(item.dispute_remarks)
+        }}
+  className="px-4 py-2 text-[12px] font-medium
+             bg-gradient-to-r from-blue-600 to-indigo-600
+             text-white rounded-md
+             shadow-md hover:shadow-lg
+             hover:from-blue-700 hover:to-indigo-700
+             transition-all duration-200"
+>
+  Show Full Remarks
+</button>}
 
 
-                                </tr>
-                            </thead>
 
-                            <tbody
-                                className={`text-[12px] font-semibold ${theme === "dark" ? "text-gray-300" : "text-gray-800"
-                                    }`}
-                            >
+{showremarks === item.transaction_id  && (
+  <div className="absolute top-14 right-[100px] w-[280px]
+                  bg-white rounded-xl shadow-xl
+                  border border-gray-200
+                  p-3 z-50">
+    
+    <p className="text-[12px] font-semibold text-gray-700 mb-2">
 
+      {selectedremarks}
+    </p>
 
-                                {load ? (
-                                    Array.from({ length: 4 }).map((_, i) => <Contentloader />)
-                                ) : Array.isArray(funddata) &&
-                                    funddata.length > 0 ? (
-                                    funddata.map((txn, i) => (
-                                        <tr
-                                            key={i}
-                                            className={`border-b ${theme === "dark"
-                                                ? "border-gray-700 hover:bg-gray-700/60"
-                                                : "border-gray-100 hover:bg-gray-50"
-                                                }`}
-                                        >
-                                            {/* Status */}
-                                            <td className="px-4 py-3">
-                                                <span
-                                                    className={`text-white rounded-[3px] px-[13px] py-[2px] font-bold text-[12px] ${txn.status?.toLowerCase() === "pending"
-                                                        ? "bg-yellow-500"
-                                                        : txn.status?.toLowerCase() === "success"
-                                                            ? "bg-green-500"
-                                                            : "bg-red-500"
-                                                        }`}
-                                                >
-                                                    {txn.status?.toUpperCase()}
-                                                </span>
-                                            </td>
+   
 
-                                            {/* Txn Date */}
-                                            <td className="px-4 py-3">{txn.txn_date}</td>
+    <div className="flex justify-end gap-2 mt-3">
+      <button
+        onClick={() => setShowremarks(null)}
+        className="px-3 py-1 text-[11px]
+                   bg-gray-200 rounded-md"
+      >
+        Cancel
+      </button>
 
-                                            {/* Amount */}
-                                            <td className="px-4 py-3">₹{txn.amount}</td>
+    
+    </div>
+  </div>
+)}
 
-                                            {/* UTR */}
-                                            <td className="px-4 py-3">
-
-
-                                                <div className="flex flex-col">
-                                                    <p>Corp id: {txn.company_id}</p>
-                                                    <p>UTR: {txn.utr_no}</p>
-                                                    <p>[request ID: #{txn.request_id}]</p>
-                                                </div>
-
-
-                                            </td>
-
-                                            {/* Mode */}
-
-
-                                            <td className="px-4 py-3">{txn.remark}</td>
-                                            <td className="px-4 py-3">{txn.mode}</td>
-                                            {/* <td className="px-4 py-3"><button onClick={()=>{handelupdate(txn)}} className="p-2 bg-blue-800 text-white font-bold rounded-[5px]">Update</button></td> */}
-
-
-
-
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td
-                                            colSpan={8}
-                                            className="text-center py-4 text-gray-600"
-                                        >
-                                            No data found
-                                        </td>
-                                    </tr>
-                                )}
+</td> */}
+<td className="px-4 py-3 relative text-center align-middle">
+  <button onClick={()=>{
+    setActivedisputetxnid(item.transaction_id);
+    setIsEditmoelopen(true)
+    setShowremarks(item.dispute_remarks)
+    setFormdata((prev) => ({ ...prev, status: item.status }))
+  }} className="px-4 py-2 text-[12px] font-medium
+             bg-gradient-to-r from-blue-600 to-indigo-600
+             text-white rounded-md
+             shadow-md hover:shadow-lg
+             hover:from-blue-700 hover:to-indigo-700
+             transition-all duration-200">Update Status</button>
 
 
 
 
 
+</td>
 
-                            </tbody>
-                        </table>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan={7} className="text-center py-4 text-gray-500">
+        No disputes found
+      </td>
+    </tr>
+  )}
+</tbody>
+              </table>
+
               {totalpage > 0 ? (
                 <div
                   className={`flex items-center justify-between px-4 py-3 border-t text-sm ${
@@ -875,6 +1105,7 @@ updateform(),e.preventDefault()
               ) : (
                 ""
               )}
+           
             </div>
           </div>
         </section>
@@ -883,4 +1114,4 @@ updateform(),e.preventDefault()
   );
 };
 
-export default Fund;
+export default Support;

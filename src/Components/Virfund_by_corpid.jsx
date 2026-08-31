@@ -6,7 +6,7 @@ import "../App.css";
 import "flatpickr/dist/themes/airbnb.css";
 import flatpickr from "flatpickr";
 import Contentloader from "../Components/Contentloader";
-import { Check, ChevronDown ,ChevronLeft,ChevronRight} from "lucide-react";
+import { Check, ChevronDown ,ChevronLeft,ChevronRight,ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { Theme } from "../Contexts/Theme";
 import { useParams } from "react-router-dom";
 
@@ -157,7 +157,7 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
 
 
   const funddata = useSelector((state) => state.virtualfund.virtualfund?.data)
-  console.log(40, funddata);
+  console.log("funddata", funddata);
 
   const totalpage = useSelector(
       (state) => state.virtualfund.virtualfund.pagination?.totalPages
@@ -196,7 +196,7 @@ dispatch(update_fund_status_by_corp(corpid,currentrequestid,payload))
 
   const downloadexcel = () => {
     dispatch(
-        getvirtualfund_by_corpid(corpid,searchtr, searchtr, formdatastr, formdataend, true)
+        getvirtualfund_by_corpid(  corpid, page, perPage, searchtr, fstatus,formdatastr,formdataend, true)
     );
   };
   useEffect(() => {
@@ -674,7 +674,7 @@ updateform(),e.preventDefault()
                   </div>
 
                   {/* ⬇️ Download Button */}
-                  {/* <button
+                  <button
                     onClick={downloadexcel}
                     className={`text-sm font-medium hover:shadow-xl px-4 py-1 rounded-lg transition border ${
                       theme === "dark"
@@ -688,7 +688,7 @@ updateform(),e.preventDefault()
                       }`}
                     ></i>{" "}
                     Download
-                  </button> */}
+                  </button>
                 </div>
               </div>
 
@@ -768,17 +768,32 @@ updateform(),e.preventDefault()
         <td className="px-4 py-3">{txn.remark}</td>
 
         {/* Mode */}
-        <td className="px-4 py-3">
-          <span
-            className={`px-2 py-[2px] rounded text-[11px] font-bold ${
-              txn.txn_mode === "CR"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {txn.txn_mode}
-          </span>
-        </td>
+
+<td className="px-4 py-3">
+  <div className="flex items-center">
+    {txn.txn_mode === "CR" ? (
+      <span className={`
+        flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide
+        ${theme === "dark" 
+          ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20" 
+          : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10"}
+      `}>
+        <ArrowUpRight size={13} strokeWidth={3} />
+        CREDIT
+      </span>
+    ) : (
+      <span className={`
+        flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide
+        ${theme === "dark" 
+          ? "bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20" 
+          : "bg-rose-50 text-rose-700 ring-1 ring-rose-600/10"}
+      `}>
+        <ArrowDownLeft size={13} strokeWidth={3} />
+        DEBIT
+      </span>
+    )}
+  </div>
+</td>
       </tr>
     ))
   ) : (

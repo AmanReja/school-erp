@@ -720,6 +720,28 @@ className="w-[140px] h-[42px] bg-green-600 text-white rounded-md hover:bg-green-
                   </select>{" "}
                   per page
                 </div>
+                           <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-xl shadow-sm border w-fit">
+
+  {/* Label */}
+  <h1 className="text-sm font-semibold text-gray-700">
+    Navigation Shortcut
+  </h1>
+
+  {/* Input */}
+  <input
+    type="number"
+    value={page}
+    onChange={(e) => setPage(Number(e.target.value))}
+    min="1"
+    // placeholder="Page"
+    className="w-20 px-3 py-1.5 text-center text-sm font-medium 
+               bg-gray-50 border border-gray-300 rounded-lg 
+               focus:bg-white focus:outline-none 
+               focus:ring-2 focus:ring-black focus:border-black
+               transition-all duration-200"
+  />
+
+</div>
 
                 <div className="flex items-center space-x-2">
                   {/* Showing range */}
