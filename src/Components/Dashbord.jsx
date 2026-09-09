@@ -84,13 +84,13 @@ const Dashbord = () => {
       show: showp,
       setShow: setShowp,
     },
-    {
-      to: "/dashboard/support",
-      icon: "fa-solid fa-headset",       // Services / Commercial Master
-      label: "Support",
-      show: showp,
-      setShow: setShowp,
-    },
+    // {
+    //   to: "/dashboard/support",
+    //   icon: "fa-solid fa-headset",       // Services / Commercial Master
+    //   label: "Support",
+    //   show: showp,
+    //   setShow: setShowp,
+    // },
 
   ];
   

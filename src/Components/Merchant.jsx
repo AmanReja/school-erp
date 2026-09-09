@@ -165,7 +165,7 @@ const Merchant = () => {
   const handelEntdelete = (ent) => dispatch(delete_entity(ent.corp_id, ent.status));
 
   return (
-    <div className={`w-full min-h-full flex flex-col ${isDark ? "bg-gray-950 text-gray-200" : "bg-slate-50 text-gray-800"}`}>
+    <div className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] min-h-full max-h-[300px] overflow-y-auto flex flex-col ${isDark ? "bg-gray-950 text-gray-200" : "bg-slate-50 text-gray-800"}`}>
 
       {/* ── Entity Info Modal ── */}
       {openInfo && (
@@ -395,6 +395,10 @@ const Merchant = () => {
                           <button onClick={() => handleEdit(merchant)}
                             className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-white bg-indigo-500 hover:bg-indigo-600 border border-indigo-200 rounded-lg transition-all">
                             <Pencil size={10} /> Edit
+                          </button>
+                          <button onClick={() =>{navigate(`/dashboard/ledger/${merchant.corp_id}`)}}
+                            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-white bg-indigo-500 hover:bg-indigo-600 border border-indigo-200 rounded-lg transition-all">
+                            <Pencil size={10} /> Ledger
                           </button>
                           <button onClick={() => handleDelete(merchant)}
                             className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-white bg-red-500 hover:bg-red-600 border border-red-200 rounded-lg transition-all">

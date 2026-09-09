@@ -41,7 +41,7 @@ import Dispute from "./Components/Dispute";
 import Support from "./Components/Support.jsx";
 import EntityIpPage from "./Components/EntityIpPage.jsx";
 import TokenPage from "./Components/TokenPage.jsx";
-
+import LedgerByCompany from "./Components/LedgerByCompany.jsx";
 
 if(import.meta.env.PROD){
   console.log = () => {};
@@ -68,6 +68,7 @@ const router = createBrowserRouter(
       <Route path="/dashboard" element={<Dashbord />}>
         <Route path="createmerchants" element={<Createmerchants/>}/>
         <Route path="entityIp/:corpid" element={<EntityIpPage/>}/>
+        <Route path="ledger/:corpid" element={<LedgerByCompany/>}/>
         <Route path="token/:corpid" element={<TokenPage/>}/>
         <Route path="updatepass" element={<Updatepass/>}/>
         <Route path="profile" element={<Profile />} />

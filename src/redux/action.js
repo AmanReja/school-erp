@@ -52,7 +52,7 @@ export const PKG_CMS_MASTER_DELETE = "PKG_CMS_MASTER_DELETE";
 
 export const DISPUTE_CREATE = "DISPUTE_CREATE";
 export const DISPUTE_UPDATE = "DISPUTE_UPDATE";
-export const DISPUTE_GET = "DISPUTE_GET";
+// export const DISPUTE_GET = "DISPUTE_GET";
 export const DISPUTE_GET_BY_CORPID = "DISPUTE_GET_BY_CORPID";
 export const GETALL_DISPUTE = "GETALL_DISPUTE";
 
@@ -97,6 +97,8 @@ export const GET_ENTITY_IP_DETAILS = "GET_ENTITY_IP_DETAILS";
 export const UPDATE_ENTITY_IP = "UPDATE_ENTITY_IP";
 export const GET_TOKEN_VALIDITY = "GET_TOKEN_VALIDITY";
 
+export const GET_WALLET_LEDGER = "GET_WALLET_LEDGER";
+
 
 
 
@@ -119,7 +121,7 @@ console.log(baseUrl);
 
 export const login = (admin,setLoading,navigate) => async (dispatch) => {
   try {
-    console.log("Admin credentials:", admin);
+   
     setLoading(true);
 
     const res = await fetch(`${baseUrl}/v1/admin/login`, {
@@ -169,7 +171,7 @@ export const login = (admin,setLoading,navigate) => async (dispatch) => {
 
 export const createMerchant = (formData, setStep) => async (dispatch) => {
   const token = localStorage.getItem("token");
-  console.log("Creating merchant:", formData);
+ 
 
   try {
     const res = await fetch(`${baseUrl}/v1/admin/marchent/entity`, {
@@ -269,15 +271,7 @@ export const updateMerchant = (id, updatedData) => async (dispatch) => {
     }
     
     if (res.status===200) {
-      // Include the ID in payload for reducer to identify which merchant to update
-      // dispatch({ 
-      //   type: UPDATE_MERCHANT, 
-      //   payload: { 
-      //     id: id, // or use corp_id if that's what you're using
-      //     ...updatedData,
-      //     ...data.data // include any returned data from API
-      //   } 
-      // });
+  
       alert("Merchant updated successfully");
       dispatch(getDetails())
       
@@ -332,7 +326,7 @@ export const deleteMerchant = (id) => async (dispatch) => {
 // actions/settlement.js (or wherever you put them)
 export const getSettlements = (company_id,searchTerm,searchStatus) => async (dispatch) => {
   const token = localStorage.getItem("token");
-  console.log(195,searchStatus);
+ 
 
 
 
@@ -366,10 +360,10 @@ export const getSettlements = (company_id,searchTerm,searchStatus) => async (dis
 };
 export const getallSettlements = (searchTerm,searchStatus,page,parPage) => async (dispatch) => {
 
-   console.log(251,searchStatus);
+
 
   const token = localStorage.getItem("token");
-  console.log(195,searchStatus);
+  
 
 
 
@@ -398,7 +392,9 @@ const params =new URLSearchParams()
     
   }
   if (!res.ok) {
+
     // handle error
+
     console.error("Error fetching settlements:", data);
     return;
   }
@@ -409,7 +405,7 @@ export const createSettlement = (formData,corp_id) => async (dispatch) => {
 
  
   const token = localStorage.getItem("token");
-  console.log(formData,172);
+
   const res = await fetch(`${baseUrl}/v1/admin/marchent/settlement/${corp_id}`, {
     method: "POST",
     headers: {
@@ -2332,7 +2328,7 @@ console.log(corpid);
 
 export const getall_dispute =
 (
-  corpid,
+
   searchtr,
   trstatus,
   disputetype,
@@ -2344,7 +2340,7 @@ export const getall_dispute =
 ) => async (dispatch) => {
   try {
 
-console.log(corpid);
+
   
 
 
@@ -2370,7 +2366,7 @@ console.log(corpid);
     }
 
     const res = await fetch(
-      `${baseUrl}/v1/admin/disputes/${corpid}?${params.toString()}`,
+      `${baseUrl}/v1/admin/disputes?${params.toString()}`,
       {
         method: "GET",
         headers: {
@@ -2576,3 +2572,86 @@ export const getTokenValidity = (
     console.error("Network Error (Token Validity):", error);
   }
 };
+
+
+
+export const getWalletLedger =
+  (
+    company_id,
+    searchTerm,
+    searchStatus,
+    startDate,
+    endDate,
+    page,
+    parPage,
+    download = false
+  ) =>
+  async (dispatch) => {
+    const token = localStorage.getItem("token");
+    
+    
+
+    const params = new URLSearchParams();
+
+    if (searchTerm) params.append("search", searchTerm);
+    if (searchStatus) params.append("status", searchStatus);
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+    if (page) params.append("page", page);
+    if (parPage) params.append("limit", parPage);
+    if (download) params.append("download", "excel");
+
+    try {
+      const res = await fetch(
+        `${baseUrl}/v1/admin/wallet-ledger/${company_id}?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+
+
+       if (download) {
+      const blob = await res.blob();
+      const fileURL = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.setAttribute(
+        "download",
+        `Ledger_${startDate || "all"}-${
+          endDate || "all"
+        }.xlsx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      return;
+    }
+
+
+      const data = await res.json();
+      console.log("ledgerdata",data);
+      
+
+      if (res.status === 401) {
+        window.location.href = "/";
+        return;
+      }
+
+      if (!res.ok) {
+        console.error("Error fetching wallet ledger:", data);
+        return;
+      }
+
+      dispatch({
+        type: GET_WALLET_LEDGER,
+        payload: data,
+      });
+    } catch (error) {
+      console.error("Wallet ledger API error:", error);
+    }
+  };

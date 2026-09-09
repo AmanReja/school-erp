@@ -13,7 +13,8 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   PKG_MASTER_DELETE,PKG_CMS_MASTER_GET,PKG_CMS_MASTER_CREATE,PKG_CMS_MASTER_UPDATE,PKG_CMS_MASTER_DELETE,SERVICELIST_GET,SERVICELIST_CREATE,SERVICELIST_UPDATE,SERVICELIST_DELETE
   ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS,ADMINDETAILS,GET_MERCHENT_ENTITY,GET_MERCHENT_ENTITY_DELETED, DELETE_ENTITY,GETALL_FUND,GET_FUNDS_BY_CORPID, GET_VIRTUALFUNDS, GET_VIRTUALFUNDS_BY_CORPID,PKG_CMS_MASTER_GET_BY_PKG_ID,PKG_CMS_MASTER_CREATE_BY_PKG_ID,DISPUTE_CREATE, DISPUTE_GET_BY_CORPID,
   GETALL_DISPUTE,GET_ENTITY_IP_DETAILS,
-  GET_TOKEN_VALIDITY
+  GET_TOKEN_VALIDITY,
+  GET_WALLET_LEDGER
 
 } from "../redux/action";
 
@@ -527,6 +528,7 @@ const initialSettlementState = {
 
   const coldisputestate = {
     coldispute: [],
+    alldispute:[],
   };
   
   export const coldisputeReducer = (
@@ -546,7 +548,7 @@ const initialSettlementState = {
     } else if(action.type===GETALL_DISPUTE){
       return {
         ...state,
-        coldispute:action.payload
+        alldispute:action.payload
       }
     }
       else{
@@ -580,6 +582,28 @@ export const entityIpReducer = (state = entityIpInitialState, action) => {
   }
 
   }
+ 
+  else {
+    return state;
+  }
+};
+
+  
+const ledgerInitialState = {
+  ledger: [],
+ 
+};
+
+export const ledgerReducer = (state = ledgerInitialState, action) => {
+  if (action.type === GET_WALLET_LEDGER) {
+    return {
+      ...state, 
+      ledger:action.payload, 
+    };
+  } 
+
+
+
  
   else {
     return state;

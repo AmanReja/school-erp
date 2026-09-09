@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   
   
-   dispute_get_by_corpid, dispute_update
+   getall_dispute, dispute_update
 } from "../redux/action";
 import "../App.css";
 import "flatpickr/dist/themes/airbnb.css";
@@ -131,9 +131,12 @@ const Support = () => {
 
 
 
-  const disputedata = useSelector ((state)=>state.coldispute.coldispute?.data)
+  const disputedata = useSelector ((state)=>state.coldispute.alldispute?.data)
 
-  const disputesummary = useSelector ((state)=>state.coldispute.coldispute?.summary
+  console.log("disputedata",disputedata);
+  
+
+  const disputesummary = useSelector ((state)=>state.coldispute.alldispute?.summary
   )
 
 
@@ -141,12 +144,12 @@ console.log("Summer",disputesummary);
 
 
   const totalpage = useSelector(
-    (state) => state.coldispute.coldispute.pagination?.totalPages
+    (state) => state.coldispute.alldispute.pagination?.totalPages
   );
 
 
   const totaldata = useSelector(
-    (state) => state.coldispute.coldispute.pagination?.totalRecords
+    (state) => state.coldispute.alldispute.pagination?.totalRecords
   );
 
 
@@ -168,8 +171,8 @@ console.log("Summer",disputesummary);
     if (!corpid || !formdatastr || !formdataend) return;
   
     dispatch(
-      dispute_get_by_corpid(
-        corpid,
+      getall_dispute(
+       
         searchtr,
         trstatus,
         disputetype,
@@ -181,7 +184,7 @@ console.log("Summer",disputesummary);
       )
     );
   }, [
-    corpid,
+    dispatch,
     searchtr,
     trstatus,
     disputetype,
@@ -201,7 +204,7 @@ console.log("Summer",disputesummary);
 
   const downloadexcel = () => {
     dispatch(
-      dispute_get_by_corpid(corpid,searchtr,trstatus,disputetype, formdatastr,formdataend,page,perPage,true)
+      dispute_get_by_corpid(searchtr,trstatus,disputetype, formdatastr,formdataend,page,perPage,true)
     );
   };
 
