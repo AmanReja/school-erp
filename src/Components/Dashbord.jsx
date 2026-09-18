@@ -59,17 +59,17 @@ const Dashbord = () => {
     {
       to: "/dashboard/getallsettlements",
       icon: "fa-arrow-down rotate-[35deg]",   // Settlements icon
-      label: "All settlements",
+      label: "Settlements",
       show: showp,
       setShow: setShowp,
     },
-    {
-      to: "/dashboard/getalltxn",
-      icon: "fa-solid fa-right-left rotate-[55deg]",       // Transactions icon
-      label: "Get All Transactions",
-      show: showp,
-      setShow: setShowp,
-    },
+    // {
+    //   to: "/dashboard/getalltxn",
+    //   icon: "fa-solid fa-right-left rotate-[55deg]",       // Transactions icon
+    //   label: "Get All Transactions",
+    //   show: showp,
+    //   setShow: setShowp,
+    // },
     {
       to: "/dashboard/servicelist",
       icon: "fa-solid fa-list-check",       // Services / Commercial Master
@@ -84,13 +84,20 @@ const Dashbord = () => {
       show: showp,
       setShow: setShowp,
     },
-    // {
-    //   to: "/dashboard/support",
-    //   icon: "fa-solid fa-headset",       // Services / Commercial Master
-    //   label: "Support",
-    //   show: showp,
-    //   setShow: setShowp,
-    // },
+    {
+      to: "/dashboard/dispute",
+      icon: "fa-solid fa-headset",       // Services / Commercial Master
+      label: "Dispute",
+      show: showp,
+      setShow: setShowp,
+    },
+    {
+      to: "/dashboard/transaction",
+      icon: "fa-solid fa-headset",       // Services / Commercial Master
+      label: "Transaction",
+      show: showp,
+      setShow: setShowp,
+    },
 
   ];
   

@@ -14,7 +14,11 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   ,GET_CMS_ASSIGN,ASSIGNED_CMS,DELETE_ASSIGNED_CMS,UPDATE_ASSIGNED_CMS,ADMINDETAILS,GET_MERCHENT_ENTITY,GET_MERCHENT_ENTITY_DELETED, DELETE_ENTITY,GETALL_FUND,GET_FUNDS_BY_CORPID, GET_VIRTUALFUNDS, GET_VIRTUALFUNDS_BY_CORPID,PKG_CMS_MASTER_GET_BY_PKG_ID,PKG_CMS_MASTER_CREATE_BY_PKG_ID,DISPUTE_CREATE, DISPUTE_GET_BY_CORPID,
   GETALL_DISPUTE,GET_ENTITY_IP_DETAILS,
   GET_TOKEN_VALIDITY,
-  GET_WALLET_LEDGER
+  GET_WALLET_LEDGER,
+  GET_DISPUTE_OPEN,
+  GET_DISPUTE_REJECTED,
+  GET_DISPUTE_UNDER_REVIEW,
+  GET_DISPUTE_RESOLVED
 
 } from "../redux/action";
 
@@ -525,38 +529,46 @@ const initialSettlementState = {
 
 
 
+const disputeInitialState = {
+  open: [],
+  resolved: [],
+  rejected: [],
+  underReview: [],
+};
 
-  const coldisputestate = {
-    coldispute: [],
-    alldispute:[],
-  };
+export const disputeReducer = (state = disputeInitialState, action) => {
+  if (action.type === GET_DISPUTE_OPEN) {
+    return {
+      ...state,
+      open: action.payload,
+    };
+  } 
   
-  export const coldisputeReducer = (
-    state = coldisputestate,
-    action
-  ) => {
-    if (action.type === DISPUTE_CREATE) {
-      return {
-        ...state,
-        coldispute:[action.payload,...state.coldispute]
-      };
-    } else if(action.type===DISPUTE_GET_BY_CORPID){
-      return {
-        ...state,
-        coldispute:action.payload
-      };
-    } else if(action.type===GETALL_DISPUTE){
-      return {
-        ...state,
-        alldispute:action.payload
-      }
-    }
-      else{
-      return state;
-    }
-  };
+  else if (action.type === GET_DISPUTE_REJECTED) {
+    return {
+      ...state,
+      rejected: action.payload,
+    };
+  } 
   
-
+  else if (action.type === GET_DISPUTE_RESOLVED) {
+    return {
+      ...state,
+      resolved: action.payload,
+    };
+  } 
+  
+  else if (action.type === GET_DISPUTE_UNDER_REVIEW) {
+    return {
+      ...state,
+      underReview: action.payload,
+    };
+  } 
+  
+  else {
+    return state;
+  }
+};
 
 
   

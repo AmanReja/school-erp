@@ -7,8 +7,10 @@ import {
   createRoutesFromElements,
   Route,
   RouterProvider,
+  Navigate,
 } from "react-router-dom";
 import Merchant from "./Components/Merchant";
+
 
 import Dashbord from "./Components/Dashbord";
 import { Provider } from "react-redux";
@@ -20,7 +22,7 @@ import Settlement from "./Components/Settlement";
 import Createmerchants from "./Components/Createmerchants";
 import Profile from "./Components/Profile";
 import Getallsettlements from "./Components/Getallsettlements";
-import TransactionMaster from "./Components/TransactionMaster";
+
 
 import { LoadDetailsProvider } from "./Contexts/LoadDetails";
 import GetallTxn from "./Components/GetallTxn";
@@ -42,6 +44,20 @@ import Support from "./Components/Support.jsx";
 import EntityIpPage from "./Components/EntityIpPage.jsx";
 import TokenPage from "./Components/TokenPage.jsx";
 import LedgerByCompany from "./Components/LedgerByCompany.jsx";
+import Disputemanagement from "./Components/Disputemanagement.jsx";
+import CloseDisputes from "./pages/Dispute/CloseDisputes.jsx";
+import ResolveDisputes from "./pages/Dispute/ResolveDispute.jsx";
+import OpenDisputes from "./pages/Dispute/OpenDisputes.jsx";
+import Merchants from "./pages/Dispute/Merchants.jsx";
+import UnderReview from "./pages/Dispute/UnderReview.jsx";
+import Transactionmanagement from "./Components/Transactionmanagement.jsx";
+import TransactionMaster from "./pages/Transaction/TransactionMaster.jsx";
+import Pending from "./pages/Transaction/Pending.jsx";
+import SuccessNotCredited from "./pages/Transaction/SuccessNotCredited.jsx";
+import Merchantmanagement from "./Components/Merchantmanagement.jsx";
+import MerchantMaster from "./pages/Merchant/MerchantMaster.jsx";
+import ActiveMerchants from "./pages/Merchant/ActiveMerchants.jsx";
+import MerchantConfiguration from "./pages/Merchant/MerchantConfiguration.jsx";
 
 if(import.meta.env.PROD){
   console.log = () => {};
@@ -65,8 +81,49 @@ const router = createBrowserRouter(
      
 
       <Route element={<Protectedroutes />}>
-      <Route path="/dashboard" element={<Dashbord />}>
-        <Route path="createmerchants" element={<Createmerchants/>}/>
+<Route path="/dashboard" element={<Dashbord />}>
+
+       {/* <Route path="createmerchants" element={<Createmerchants/>}/> */}
+<Route path="dispute" element={<Disputemanagement />}>
+  <Route index element={<Navigate to="merchants" replace />} />
+
+  <Route path="merchants" element={<Merchants />} />
+  <Route path="close" element={<CloseDisputes />} />
+  <Route path="resolve" element={<ResolveDisputes />} />
+  <Route path="open" element={<OpenDisputes />} />
+  <Route path="underreview" element={<UnderReview />} />
+  <Route path="rejected" element={<ResolveDisputes />} />
+</Route>
+           
+
+    <Route path="transaction" element={<Transactionmanagement/>}>
+
+
+
+        <Route  index element={<Navigate to="transactionMaster" replace/>}/>
+        <Route  path="transactionMaster" element={<TransactionMaster/>}/>
+        <Route path="pending" element={<Pending/>}/>
+        <Route path="success_not_credited" element={<SuccessNotCredited/>}/>
+        {/* <Route path="open" element={<OpenDisputes/>}/>
+        <Route path="underreview" element={<UnderReview/>}/>
+        <Route path="rejected" element={<ResolveDisputes/>}/> */}
+
+    </Route>
+
+    <Route path="merchant" element={<Merchantmanagement/>}>
+
+
+
+        <Route  index element={<Navigate to="merchantmaster" replace/>}/>
+        <Route  path="merchantmaster" element={<MerchantMaster/>}/>
+        <Route path="active" element={<ActiveMerchants/>}/>
+        <Route path="merchant_configuration" element={<MerchantConfiguration/>}/>
+        {/* <Route path="open" element={<OpenDisputes/>}/>
+        <Route path="underreview" element={<UnderReview/>}/>
+        <Route path="rejected" element={<ResolveDisputes/>}/> */}
+
+    </Route>
+       
         <Route path="entityIp/:corpid" element={<EntityIpPage/>}/>
         <Route path="ledger/:corpid" element={<LedgerByCompany/>}/>
         <Route path="token/:corpid" element={<TokenPage/>}/>
@@ -74,8 +131,8 @@ const router = createBrowserRouter(
         <Route path="profile" element={<Profile />} />
         <Route path="getallsettlements" element={<Getallsettlements />} />
         <Route path="getalltxn" element={<GetallTxn />} />
-        <Route path="transactionmaster/:merchantId" element={<TransactionMaster />} />
-        <Route path="merchant" element={<Merchant />} />
+        {/* <Route path="transactionmaster/:merchantId" element={<TransactionMaster />} /> */}
+        {/* <Route path="merchant" element={<Merchant />} /> */}
         <Route path="settlement/:merchantId" element={<Settlement />} />
         <Route path="commercial/:pkgid/:serviceid" element={<Commercial />} />
         <Route path="servicelist" element={<Servicelist />} />

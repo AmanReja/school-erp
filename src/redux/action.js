@@ -107,6 +107,20 @@ export const GET_WALLET_LEDGER = "GET_WALLET_LEDGER";
 
 
 
+export const GET_DISPUTE_OPEN="GET_DISPUTE_OPEN";
+export const GET_DISPUTE_UNDER_REVIEW ="GET_DISPUTE_UNDER_REVIEW";
+export const GET_DISPUTE_RESOLVED="GET_DISPUTE_RESOLVED";
+export const GET_DISPUTE_REJECTED="GET_DISPUTE_REJECTED";
+
+
+
+
+
+
+
+
+
+
 
 
 // "http://192.168.1.45:3000"
@@ -2653,5 +2667,228 @@ export const getWalletLedger =
       });
     } catch (error) {
       console.error("Wallet ledger API error:", error);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+// ===============================
+// Get Open Disputes
+// ===============================
+
+export const getDisputeOpen =
+  (
+    company_id,
+    dispute_type,
+    search,
+    page = 1,
+    limit = 10,
+    start_date,
+    end_date
+  ) =>
+  async (dispatch) => {
+    const token = localStorage.getItem("token");
+
+    const params = new URLSearchParams();
+
+    if (company_id) params.append("company_id", company_id);
+    if (dispute_type) params.append("dispute_type", dispute_type);
+    if (search) params.append("search", search);
+    if (page) params.append("page", page);
+    if (limit) params.append("limit", limit);
+    if (start_date) params.append("start_date", start_date);
+    if (end_date) params.append("end_date", end_date);
+
+    try {
+      const response = await fetch(
+        `${baseUrl}/v1/admin/disputes/open?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+      console.log(data);
+      
+
+      dispatch({
+        type: "GET_DISPUTE_OPEN",
+        payload: data,
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Get Open Disputes Error:", error);
+    }
+  };
+
+
+// ===============================
+// Get Under Review Disputes
+// ===============================
+
+export const getDisputeUnderReview =
+  (
+    company_id,
+    dispute_type,
+    search,
+    page = 1,
+    limit = 10,
+    start_date,
+    end_date
+  ) =>
+  async (dispatch) => {
+    const token = localStorage.getItem("token");
+
+    const params = new URLSearchParams();
+
+    if (company_id) params.append("company_id", company_id);
+    if (dispute_type) params.append("dispute_type", dispute_type);
+    if (search) params.append("search", search);
+    if (page) params.append("page", page);
+    if (limit) params.append("limit", limit);
+    if (start_date) params.append("start_date", start_date);
+    if (end_date) params.append("end_date", end_date);
+
+    try {
+      const response = await fetch(
+        `${baseUrl}/disputes/under_review?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      dispatch({
+        type: "GET_DISPUTE_UNDER_REVIEW",
+        payload: data,
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Get Under Review Disputes Error:", error);
+    }
+  };
+
+
+// ===============================
+// Get Resolved Disputes
+// ===============================
+
+export const getDisputeResolved =
+  (
+    company_id,
+    dispute_type,
+    search,
+    page = 1,
+    limit = 10,
+    start_date,
+    end_date
+  ) =>
+  async (dispatch) => {
+    const token = localStorage.getItem("token");
+
+    const params = new URLSearchParams();
+
+    if (company_id) params.append("company_id", company_id);
+    if (dispute_type) params.append("dispute_type", dispute_type);
+    if (search) params.append("search", search);
+    if (page) params.append("page", page);
+    if (limit) params.append("limit", limit);
+    if (start_date) params.append("start_date", start_date);
+    if (end_date) params.append("end_date", end_date);
+
+    try {
+      const response = await fetch(
+        `${baseUrl}/disputes/resolved?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      dispatch({
+        type: "GET_DISPUTE_RESOLVED",
+        payload: data,
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Get Resolved Disputes Error:", error);
+    }
+  };
+
+
+// ===============================
+// Get Rejected Disputes
+// ===============================
+
+export const getDisputeRejected =
+  (
+    company_id,
+    dispute_type,
+    search,
+    page = 1,
+    limit = 10,
+    start_date,
+    end_date
+  ) =>
+  async (dispatch) => {
+    const token = localStorage.getItem("token");
+
+    const params = new URLSearchParams();
+
+    if (company_id) params.append("company_id", company_id);
+    if (dispute_type) params.append("dispute_type", dispute_type);
+    if (search) params.append("search", search);
+    if (page) params.append("page", page);
+    if (limit) params.append("limit", limit);
+    if (start_date) params.append("start_date", start_date);
+    if (end_date) params.append("end_date", end_date);
+
+    try {
+      const response = await fetch(
+        `${baseUrl}/disputes/rejected?${params.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      dispatch({
+        type: "GET_DISPUTE_REJECTED",
+        payload: data,
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Get Rejected Disputes Error:", error);
     }
   };
