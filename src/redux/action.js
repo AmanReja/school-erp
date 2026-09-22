@@ -107,10 +107,10 @@ export const GET_WALLET_LEDGER = "GET_WALLET_LEDGER";
 
 
 
-export const GET_DISPUTE_OPEN="GET_DISPUTE_OPEN";
-export const GET_DISPUTE_UNDER_REVIEW ="GET_DISPUTE_UNDER_REVIEW";
-export const GET_DISPUTE_RESOLVED="GET_DISPUTE_RESOLVED";
-export const GET_DISPUTE_REJECTED="GET_DISPUTE_REJECTED";
+
+export const GET_DISPUTES="GET_DISPUTES";
+export const GET_DISPUTE_MESSAGES="GET_DISPUTE_MESSAGES";
+
 
 
 
@@ -183,7 +183,7 @@ export const login = (admin,setLoading,navigate) => async (dispatch) => {
 };
 
 
-export const createMerchant = (formData, setStep) => async (dispatch) => {
+export const createMerchant = (formData) => async (dispatch) => {
   const token = localStorage.getItem("token");
  
 
@@ -200,46 +200,60 @@ export const createMerchant = (formData, setStep) => async (dispatch) => {
     const data = await res.json();
     
     if (res.status === 201) {
-      alert("Merchant created successfully");
-      setStep(1);
+      toast.success("Merchant created");
+     
       dispatch(getDetails())
       // Dispatch the created merchant data
       dispatch({ type: CREATEMERCHANT, payload: data });
     } else if (res.status === 403) {
-      alert("Permission denied");
+      toast.error("Permission denied");
     } else {
-      alert(data.message || "Failed to create merchant");
+      // toast.error(data.message || "Failed to create merchant");s
     }
 
   } catch (error) {
-    alert("Error creating merchant: " + error.message);
+    // t("Error creating merchant: " + error.message);
   }
 };
 
-export const getDetails = (currentPage, itemsPerPage,searchTerm) => async (dispatch) => {
+export const getDetails = (
+  currentPage,
+  itemsPerPage,
+  searchTerm,
+  is_active
+) => async (dispatch) => {
   const token = localStorage.getItem("token");
 
-
- 
- 
   try {
-    
-   
     const params = new URLSearchParams();
-    if (currentPage) params.append("page", currentPage);
-    if (itemsPerPage) params.append("limit", itemsPerPage);
-    if (searchTerm) params.append("search", searchTerm);
-   
- 
 
-    const res = await fetch(`${baseUrl}/v1/admin/marchent/entity?${params.toString()}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  
+    if (currentPage) {
+      params.append("page", currentPage);
+    }
+
+    if (itemsPerPage) {
+      params.append("limit", itemsPerPage);
+    }
+
+    if (searchTerm) {
+      params.append("search", searchTerm);
+    }
+
+    // Add is_active filter
+    if (is_active !== undefined && is_active !== "") {
+      params.append("is_active", is_active);
+    }
+
+    const res = await fetch(
+      `${baseUrl}/v1/admin/marchent/entity?${params.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (res.status === 401) {
       localStorage.removeItem("token");
@@ -248,18 +262,17 @@ export const getDetails = (currentPage, itemsPerPage,searchTerm) => async (dispa
     }
 
     const data = await res.json();
-    
-  
 
     if (res.ok) {
-      dispatch({ type: GETDETAILS, payload: data });
+      dispatch({
+        type: GETDETAILS,
+        payload: data,
+      });
     } else {
       alert(data.message || "Failed to fetch merchants");
     }
   } catch (error) {
     alert("Error fetching merchants: " + error.message);
-    
-
   }
 };
 
@@ -1703,7 +1716,7 @@ export const verify_otp =
 
 
 
-  export const getmarchentent_by_companyid =(companyId,status)=> async (dispatch)=>{
+  export const getentityCallback =(companyId,status)=> async (dispatch)=>{
     console.log("status",status);
 
     const token = localStorage.getItem("token") || {};
@@ -1740,7 +1753,7 @@ export const verify_otp =
     dispatch({ type: GET_MERCHENT_ENTITY, payload: data });
 
   } 
-  export const getmarchentent_by_companyid_deleted =(companyId)=> async (dispatch)=>{
+  export const getDeletedEntityCallback =(companyId)=> async (dispatch)=>{
     
 
     const token = localStorage.getItem("token") || {};
@@ -2211,6 +2224,9 @@ console.log("downloadexcl",);
 //   dispatch({type:DISPUTE_CREATE,payload:data})
 // }
 export const dispute_update=(txnId,updatedata,corpid)=>async (dispatch) =>{
+
+  console.log("updatedata",updatedata);
+  
   
 
   const token = localStorage.getItem("token") || {};
@@ -2236,7 +2252,7 @@ export const dispute_update=(txnId,updatedata,corpid)=>async (dispatch) =>{
   toast.success(`Dispute has been updated`)
   // alert("Collection Dispute has been raised")
 
-  dispatch(dispute_get_by_corpid(corpid))
+ 
 
   }
 
@@ -2684,18 +2700,16 @@ export const getWalletLedger =
 // Get Open Disputes
 // ===============================
 
-export const getDisputeOpen =
-  (
-    company_id,
+
+    export const getDisputes =( company_id,statusFilter,
     dispute_type,
     search,
     page = 1,
     limit = 10,
     start_date,
-    end_date
-  ) =>
-  async (dispatch) => {
-    const token = localStorage.getItem("token");
+    end_date)=>async(dispatch)=>{
+
+       const token = localStorage.getItem("token");
 
     const params = new URLSearchParams();
 
@@ -2707,9 +2721,9 @@ export const getDisputeOpen =
     if (start_date) params.append("start_date", start_date);
     if (end_date) params.append("end_date", end_date);
 
-    try {
+      try {
       const response = await fetch(
-        `${baseUrl}/v1/admin/disputes/open?${params.toString()}`,
+        `${baseUrl}/v1/admin/disputes/view/${statusFilter}?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -2724,171 +2738,57 @@ export const getDisputeOpen =
       
 
       dispatch({
-        type: "GET_DISPUTE_OPEN",
+        type: "GET_DISPUTES",
         payload: data,
       });
 
       return data;
     } catch (error) {
-      console.error("Get Open Disputes Error:", error);
+      console.error("Get  Disputes Error:", error);
     }
-  };
+
+  }
 
 
-// ===============================
-// Get Under Review Disputes
-// ===============================
 
-export const getDisputeUnderReview =
-  (
-    company_id,
-    dispute_type,
-    search,
-    page = 1,
-    limit = 10,
-    start_date,
-    end_date
-  ) =>
-  async (dispatch) => {
+  export const getDisputeMessages = (transaction_id) => async (dispatch) => {
+  try {
     const token = localStorage.getItem("token");
 
-    const params = new URLSearchParams();
+    console.log("transaction_id",transaction_id);
+    
 
-    if (company_id) params.append("company_id", company_id);
-    if (dispute_type) params.append("dispute_type", dispute_type);
-    if (search) params.append("search", search);
-    if (page) params.append("page", page);
-    if (limit) params.append("limit", limit);
-    if (start_date) params.append("start_date", start_date);
-    if (end_date) params.append("end_date", end_date);
+    const response = await fetch(
+      `${baseUrl}/v1/admin/dispute/${transaction_id}/messages`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    try {
-      const response = await fetch(
-        `${baseUrl}/disputes/under_review?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+    const data = await response.json();
+
+    console.log("Dispute Messages:", data);
+
+    if (!response.ok) {
+      console.error(
+        "Get Dispute Messages Error:",
+        response.status,
+        data
       );
-
-      const data = await response.json();
-
-      dispatch({
-        type: "GET_DISPUTE_UNDER_REVIEW",
-        payload: data,
-      });
-
       return data;
-    } catch (error) {
-      console.error("Get Under Review Disputes Error:", error);
     }
-  };
 
+    dispatch({
+      type: "GET_DISPUTE_MESSAGES",
+      payload: data,
+    });
 
-// ===============================
-// Get Resolved Disputes
-// ===============================
-
-export const getDisputeResolved =
-  (
-    company_id,
-    dispute_type,
-    search,
-    page = 1,
-    limit = 10,
-    start_date,
-    end_date
-  ) =>
-  async (dispatch) => {
-    const token = localStorage.getItem("token");
-
-    const params = new URLSearchParams();
-
-    if (company_id) params.append("company_id", company_id);
-    if (dispute_type) params.append("dispute_type", dispute_type);
-    if (search) params.append("search", search);
-    if (page) params.append("page", page);
-    if (limit) params.append("limit", limit);
-    if (start_date) params.append("start_date", start_date);
-    if (end_date) params.append("end_date", end_date);
-
-    try {
-      const response = await fetch(
-        `${baseUrl}/disputes/resolved?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      dispatch({
-        type: "GET_DISPUTE_RESOLVED",
-        payload: data,
-      });
-
-      return data;
-    } catch (error) {
-      console.error("Get Resolved Disputes Error:", error);
-    }
-  };
-
-
-// ===============================
-// Get Rejected Disputes
-// ===============================
-
-export const getDisputeRejected =
-  (
-    company_id,
-    dispute_type,
-    search,
-    page = 1,
-    limit = 10,
-    start_date,
-    end_date
-  ) =>
-  async (dispatch) => {
-    const token = localStorage.getItem("token");
-
-    const params = new URLSearchParams();
-
-    if (company_id) params.append("company_id", company_id);
-    if (dispute_type) params.append("dispute_type", dispute_type);
-    if (search) params.append("search", search);
-    if (page) params.append("page", page);
-    if (limit) params.append("limit", limit);
-    if (start_date) params.append("start_date", start_date);
-    if (end_date) params.append("end_date", end_date);
-
-    try {
-      const response = await fetch(
-        `${baseUrl}/disputes/rejected?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      dispatch({
-        type: "GET_DISPUTE_REJECTED",
-        payload: data,
-      });
-
-      return data;
-    } catch (error) {
-      console.error("Get Rejected Disputes Error:", error);
-    }
-  };
+    return data;
+  } catch (error) {
+    console.error("Get Dispute Messages Error:", error);
+  }
+};

@@ -9,7 +9,7 @@ import Subfooter from "./Subfooter";
 import { Theme } from "../Contexts/Theme";
 import { LoadDetails } from "../Contexts/LoadDetails";
 import { useLocation ,useNavigate,useParams} from "react-router-dom";
-import {Eye,ArrowRight} from "lucide-react"
+import {Eye,ArrowRight,Cog} from "lucide-react"
 
 
 const Dashbord = () => {
@@ -86,14 +86,14 @@ const Dashbord = () => {
     },
     {
       to: "/dashboard/dispute",
-      icon: "fa-solid fa-headset",       // Services / Commercial Master
+      icon: "fa-solid fa-bolt",       // Services / Commercial Master
       label: "Dispute",
       show: showp,
       setShow: setShowp,
     },
     {
       to: "/dashboard/transaction",
-      icon: "fa-solid fa-headset",       // Services / Commercial Master
+      icon: "fa-solid fa-arrows-split-up-and-left",       // Services / Commercial Master
       label: "Transaction",
       show: showp,
       setShow: setShowp,

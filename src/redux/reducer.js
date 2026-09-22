@@ -15,10 +15,10 @@ import { LOGIN, CREATEMERCHANT, GETDETAILS, DELETE_MERCHANT, UPDATE_MERCHANT,GET
   GETALL_DISPUTE,GET_ENTITY_IP_DETAILS,
   GET_TOKEN_VALIDITY,
   GET_WALLET_LEDGER,
-  GET_DISPUTE_OPEN,
-  GET_DISPUTE_REJECTED,
-  GET_DISPUTE_UNDER_REVIEW,
-  GET_DISPUTE_RESOLVED
+  
+
+  GET_DISPUTES,
+  GET_DISPUTE_MESSAGES
 
 } from "../redux/action";
 
@@ -530,41 +530,26 @@ const initialSettlementState = {
 
 
 const disputeInitialState = {
-  open: [],
-  resolved: [],
-  rejected: [],
-  underReview: [],
+  disputlist:[],
+  messagelist:[]
+  
 };
 
 export const disputeReducer = (state = disputeInitialState, action) => {
-  if (action.type === GET_DISPUTE_OPEN) {
+  if (action.type === GET_DISPUTES) {
     return {
       ...state,
-      open: action.payload,
+      disputlist: action.payload,
+    };
+  } else
+  if (action.type === GET_DISPUTE_MESSAGES) {
+    return {
+      ...state,
+      messagelist: action.payload,
     };
   } 
   
-  else if (action.type === GET_DISPUTE_REJECTED) {
-    return {
-      ...state,
-      rejected: action.payload,
-    };
-  } 
-  
-  else if (action.type === GET_DISPUTE_RESOLVED) {
-    return {
-      ...state,
-      resolved: action.payload,
-    };
-  } 
-  
-  else if (action.type === GET_DISPUTE_UNDER_REVIEW) {
-    return {
-      ...state,
-      underReview: action.payload,
-    };
-  } 
-  
+ 
   else {
     return state;
   }

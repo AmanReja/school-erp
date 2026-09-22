@@ -1,306 +1,1149 @@
-import React, { useState, useContext, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Theme } from "../Contexts/Theme";
-import { ChevronLeft, ChevronRight, Search, ChevronDown, Landmark, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react";
+
+import {
+  Search,
+  Filter,
+  Landmark,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Building2,
+  CreditCard,
+  RotateCcw,
+  RefreshCw,
+  ArrowLeft,
+} from "lucide-react";
+
 import { useDispatch, useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router-dom";
+
 import { getallSettlements } from "../redux/action";
+import { Theme } from "../Contexts/Theme";
 
-// ── Defined OUTSIDE to prevent remount ───────────────────────────────────────
+import "../App.css";
 
-const StatusBadge = ({ status }) => {
-  const s = status?.toLowerCase();
-  const map = {
-    active:    "bg-emerald-50 text-emerald-700 border-emerald-200",
-    inactive:  "bg-gray-100   text-gray-600    border-gray-200",
-    suspended: "bg-red-50     text-red-600     border-red-200",
-  };
-  const dot = {
-    active: "bg-emerald-500", inactive: "bg-gray-400", suspended: "bg-red-500",
-  };
+// ======================================================
+// STATUS BADGE
+// ======================================================
+
+const StatusBadge = ({ status, isDark }) => {
+  const value = String(status || "").toLowerCase();
+
+  if (value === "active") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-bold text-white">
+        <CheckCircle2 size={12} />
+        ACTIVE
+      </span>
+    );
+  }
+
+  if (value === "inactive") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-500 px-3 py-1 text-[10px] font-bold text-white">
+        <XCircle size={12} />
+        INACTIVE
+      </span>
+    );
+  }
+
+  if (value === "suspended") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1 text-[10px] font-bold text-white">
+        <AlertTriangle size={12} />
+        SUSPENDED
+      </span>
+    );
+  }
+
   return (
-    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${map[s] || "bg-gray-100 text-gray-500 border-gray-200"}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${dot[s] || "bg-gray-400"}`} />
-      {status}
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-500 px-3 py-1 text-[10px] font-bold text-white">
+      <AlertTriangle size={12} />
+      {String(status || "PENDING").toUpperCase()}
     </span>
   );
 };
+
+// ======================================================
+// VALIDATED BADGE
+// ======================================================
 
 const ValidatedBadge = ({ val }) => {
-  const isValid = val === "1";
+  const isValid =
+    val === "1" ||
+    val === 1 ||
+    val === true ||
+    String(val || "").toLowerCase() === "validated";
+
+  if (isValid) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-bold text-white">
+        <CheckCircle2 size={12} />
+        VALIDATED
+      </span>
+    );
+  }
+
   return (
-    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider
-      ${isValid
-        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-        : "bg-amber-50 text-amber-700 border-amber-200"}`}>
-      {isValid
-        ? <CheckCircle2 size={10} className="text-emerald-500" />
-        : <AlertTriangle size={10} className="text-amber-500" />}
-      {isValid ? "Validated" : "Pending"}
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-500 px-3 py-1 text-[10px] font-bold text-white">
+      <AlertTriangle size={12} />
+      PENDING
     </span>
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ======================================================
+// MAIN COMPONENT
+// ======================================================
 
 const Getallsettlements = () => {
-  const { merchantId } = useParams();
+  const { merchantId, corpid } = useParams();
+
   const { theme } = useContext(Theme);
-  const isDark = theme === "dark";
+
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const isDark = theme === "dark";
+
+  // ====================================================
+  // LOCAL STATES
+  // ====================================================
+
+  const [load, setLoad] = useState(false);
+
   const [page, setPage] = useState(1);
+
   const [perPage, setPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("");
+
+  const [search, setSearch] = useState("");
+
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const [searchStatus, setSearchStatus] = useState("");
 
-  // ── Selectors ──
-  const settlementsData     = useSelector((s) => s.settlements?.settlements || []);
-  const totalRecords        = settlementsData[0]?.pagination.totalRecords;
-  const totalPages          = settlementsData[0]?.pagination.totalPages;
-  const settlementRowsArray = settlementsData?.map((item) => item.data || []).flat();
+  // ====================================================
+  // REDUX
+  // ====================================================
 
-  const activeCount    = settlementRowsArray.filter((i) => i.status === "active").length;
-  const inactiveCount  = settlementRowsArray.filter((i) => i.status === "inactive").length;
-  const suspendedCount = settlementRowsArray.filter((i) => i.status === "suspended").length;
+  const settlementsData = useSelector(
+    (state) => state.settlements?.settlements || []
+  );
 
-  const statCards = [
-    {
-      label: "Active",
-      count: activeCount,
-      icon: <CheckCircle2 size={18} className="text-emerald-600" />,
-      bg: "bg-emerald-50",
-      border: "border-emerald-100",
-      countColor: "text-emerald-700",
-    },
-    {
-      label: "Inactive",
-      count: inactiveCount,
-      icon: <XCircle size={18} className="text-gray-500" />,
-      bg: "bg-gray-50",
-      border: "border-gray-100",
-      countColor: "text-gray-700",
-    },
-    {
-      label: "Suspended",
-      count: suspendedCount,
-      icon: <AlertTriangle size={18} className="text-red-500" />,
-      bg: "bg-red-50",
-      border: "border-red-100",
-      countColor: "text-red-700",
-    },
-  ];
+  // ====================================================
+  // RESPONSE DATA
+  // ====================================================
 
-  // ── Effects ──
-  useEffect(() => { setPage(1); }, [searchTerm, searchStatus]);
+  const paginationData =
+    settlementsData?.[0]?.pagination || {};
+
+  const totalRecords =
+    paginationData?.totalRecords || 0;
+
+  const totalPages =
+    paginationData?.totalPages || 1;
+
+  // ====================================================
+  // SETTLEMENT ROWS
+  // ====================================================
+
+  const settlementRowsArray = useMemo(() => {
+    if (!Array.isArray(settlementsData)) {
+      return [];
+    }
+
+    return settlementsData
+      .map((item) => item?.data || [])
+      .flat();
+  }, [settlementsData]);
+
+  // ====================================================
+  // COUNTS
+  // ====================================================
+
+  const activeCount = settlementRowsArray.filter(
+    (item) =>
+      String(item?.status || "").toLowerCase() ===
+      "active"
+  ).length;
+
+  const inactiveCount = settlementRowsArray.filter(
+    (item) =>
+      String(item?.status || "").toLowerCase() ===
+      "inactive"
+  ).length;
+
+  const suspendedCount = settlementRowsArray.filter(
+    (item) =>
+      String(item?.status || "").toLowerCase() ===
+      "suspended"
+  ).length;
+
+  // ====================================================
+  // DEBOUNCE SEARCH
+  // ====================================================
+
   useEffect(() => {
-    dispatch(getallSettlements(searchTerm, searchStatus, page, perPage));
-  }, [searchStatus, searchTerm, page, perPage]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // ====================================================
+  // FETCH SETTLEMENTS
+  // ====================================================
+
+  const fetchSettlements = async () => {
+    setLoad(true);
+
+    try {
+      await dispatch(
+        getallSettlements(
+          debouncedSearch,
+          searchStatus,
+          page,
+          perPage
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Get settlements error:",
+        error
+      );
+    } finally {
+      setLoad(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSettlements();
+  }, [
+    dispatch,
+    debouncedSearch,
+    searchStatus,
+    page,
+    perPage,
+  ]);
+
+  // ====================================================
+  // RESET
+  // ====================================================
+
+  const handleReset = () => {
+    setSearch("");
+    setDebouncedSearch("");
+    setSearchStatus("");
+    setPage(1);
+  };
+
+  // ====================================================
+  // DATE FORMAT
+  // ====================================================
+
+  const formatDate = (date) => {
+    if (!date) return "-";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // ====================================================
+  // RENDER
+  // ====================================================
 
   return (
-    <div className={`w-[100%] 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${isDark ? "bg-gray-900 text-gray-300" : "bg-white text-gray-800"}`}>
-      <main className="w-full h-full flex flex-col overflow-y-scroll">
-      <div className="flex flex-col p-6 gap-5">
+    <div
+      className={`w-full 2xl:h-[85%] xl:h-[80%] h-[78%] flex flex-col ${
+        isDark
+          ? "bg-gray-900 text-gray-300"
+          : "bg-white text-gray-800"
+      }`}
+    >
+      <main className="w-full h-full flex flex-col overflow-y-auto">
 
-        {/* ── Page Header ── */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center">
-            <Landmark size={17} className="text-indigo-600" />
-          </div>
-          <div>
-            <h1 className="text-base font-bold text-gray-900 dark:text-white leading-tight">Settlements</h1>
-            <p className="text-[11px] text-gray-400">All settlement accounts</p>
-          </div>
-        </div>
+        <section className="w-full flex flex-col gap-5 mt-5 px-2 sm:px-5">
 
-        {/* ── Stat Cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {statCards.map(({ label, count, icon, bg, border, countColor }) => (
-            <div key={label}
-              className={`flex items-center gap-4 rounded-2xl border px-5 py-4 ${bg} ${border}
-                ${isDark ? "bg-gray-800/60 border-gray-700" : ""}`}>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-gray-700" : "bg-white"} shadow-sm border ${border}`}>
-                {icon}
+          {/* =================================================
+              HEADER
+          ================================================= */}
+
+          <div
+            className={`flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 rounded-xl p-6 shadow-sm border ${
+              isDark
+                ? "bg-gray-900 border-gray-800"
+                : "bg-white border-gray-100"
+            }`}
+          >
+
+            {/* LEFT */}
+
+            <div className="flex items-center gap-4">
+
+              <button
+                onClick={() => navigate(-1)}
+                className={`flex h-10 w-10 items-center justify-center rounded-lg border transition ${
+                  isDark
+                    ? "border-gray-700 hover:bg-gray-800 text-gray-300"
+                    : "border-gray-200 hover:bg-gray-100 text-gray-600"
+                }`}
+              >
+                <ArrowLeft size={18} />
+              </button>
+
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                  isDark
+                    ? "bg-indigo-500/10 text-indigo-400"
+                    : "bg-indigo-50 text-indigo-600"
+                }`}
+              >
+                <Landmark size={23} />
               </div>
+
+              <div className="flex flex-col gap-1">
+
+                <h1
+                  className={`text-2xl font-semibold ${
+                    isDark
+                      ? "text-gray-100"
+                      : "text-gray-900"
+                  }`}
+                >
+                  Settlements
+                </h1>
+
+                <p
+                  className={`text-sm ${
+                    isDark
+                      ? "text-gray-400"
+                      : "text-gray-500"
+                  }`}
+                >
+                  Manage and monitor settlement accounts
+                  {merchantId && (
+                    <>
+                      {" "}
+                      for Merchant{" "}
+                      <span className="font-bold text-indigo-500">
+                        {merchantId}
+                      </span>
+                    </>
+                  )}
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* RIGHT */}
+
+            <div className="flex flex-wrap gap-3">
+
+              <button
+                onClick={fetchSettlements}
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+              >
+                <RefreshCw
+                  size={16}
+                  className={
+                    load ? "animate-spin" : ""
+                  }
+                />
+
+                Refresh
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* =================================================
+              MERCHANT / CORPORATION INFO
+          ================================================= */}
+
+          {(merchantId || corpid) && (
+            <div
+              className={`flex items-center gap-3 rounded-xl border p-4 ${
+                isDark
+                  ? "border-gray-800 bg-gray-800/60"
+                  : "border-gray-100 bg-gray-50"
+              }`}
+            >
+
+              <div
+                className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                  isDark
+                    ? "bg-blue-500/10 text-blue-400"
+                    : "bg-blue-50 text-blue-600"
+                }`}
+              >
+                <Building2 size={19} />
+              </div>
+
               <div>
-                <p className={`text-2xl font-bold leading-none ${isDark ? "text-white" : countColor}`}>{count}</p>
-                <p className="text-[11px] text-gray-400 mt-0.5 uppercase tracking-widest font-semibold">{label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* ── Table Card ── */}
-        <div className={`flex-1 flex flex-col rounded-2xl border overflow-hidden shadow-sm
-          ${isDark ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"}`}>
+                <p
+                  className={`text-[10px] font-semibold uppercase tracking-wider ${
+                    isDark
+                      ? "text-gray-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {corpid
+                    ? "Corporation ID"
+                    : "Merchant ID"}
+                </p>
 
-          {/* Toolbar */}
-          <div className={`flex flex-wrap items-center gap-3 px-5 py-3.5 border-b
-            ${isDark ? "border-gray-800 bg-gray-900" : "border-gray-100 bg-gray-50/80"}`}>
+                <p
+                  className={`text-sm font-bold ${
+                    isDark
+                      ? "text-gray-100"
+                      : "text-gray-800"
+                  }`}
+                >
+                  {corpid || merchantId || "N/A"}
+                </p>
 
-            {/* Search */}
-            <div className="relative flex-1 min-w-[180px] max-w-xs">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search settlements…"
-                className={`w-full pl-8 pr-3 py-2 text-xs rounded-lg border outline-none transition-all
-                  ${isDark
-                    ? "bg-gray-800 border-gray-700 text-gray-200 placeholder:text-gray-500 focus:border-indigo-500"
-                    : "bg-white border-gray-200 text-gray-700 placeholder:text-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"}`}
-              />
-            </div>
-
-            {/* Status filter */}
-            <div className="relative">
-              <select
-                onChange={(e) => setSearchStatus(e.target.value)}
-                value={searchStatus}
-                className={`appearance-none pl-3 pr-7 py-2 text-xs rounded-lg border outline-none cursor-pointer transition-all
-                  ${isDark ? "bg-gray-800 border-gray-700 text-gray-200" : "bg-white border-gray-200 text-gray-700 focus:border-indigo-400"}`}>
-                <option value="">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="suspended">Suspended</option>
-              </select>
-              <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            </div>
-
-            <div className="ml-auto text-xs text-gray-400">{totalRecords ?? 0} records</div>
-          </div>
-
-          {/* Table */}
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className={`text-[10px] uppercase tracking-widest font-semibold border-b
-                  ${isDark ? "bg-gray-800/60 text-gray-400 border-gray-800" : "bg-gray-50 text-gray-400 border-gray-100"}`}>
-                  {["Account Name", "Corp ID", "Account Number", "IFSC Code", "Validated", "Status"].map((h) => (
-                    <th key={h} className="px-5 py-3 text-left whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className={`divide-y ${isDark ? "divide-gray-800" : "divide-gray-100"}`}>
-                {Array.isArray(settlementRowsArray) && settlementRowsArray.length > 0 ? (
-                  settlementRowsArray.map((s, i) => (
-                    <tr key={i} className={`transition-colors ${isDark ? "hover:bg-gray-800/50" : "hover:bg-slate-50/80"}`}>
-                      <td className={`px-5 py-3.5 text-sm font-medium ${isDark ? "text-gray-200" : "text-gray-800"}`}>
-                        {s.account_name}
-                      </td>
-                      <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        {s.company_id}
-                      </td>
-                      <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        {s.account_number}
-                      </td>
-                      <td className={`px-5 py-3.5 text-xs font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        {s.ifsc_code}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <ValidatedBadge val={s.is_validated} />
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <StatusBadge status={s.status} />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="py-16 text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                          <Landmark size={20} className="text-gray-400" />
-                        </div>
-                        <p className="text-sm text-gray-400">No settlements found</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 0 && (
-            <div className={`flex flex-wrap items-center justify-between px-5 py-3 border-t text-xs gap-3
-              ${isDark ? "border-gray-800 bg-gray-900 text-gray-400" : "border-gray-100 bg-gray-50/80 text-gray-500"}`}>
-              <div className="flex items-center gap-2">
-                <span>Rows:</span>
-                <select
-                  value={perPage}
-                  onChange={(e) => { setPerPage(Number(e.target.value)); setPage(1); }}
-                  className={`rounded-md border px-2 py-1 text-xs outline-none transition-all
-                    ${isDark ? "bg-gray-800 border-gray-700 text-gray-200" : "bg-white border-gray-200 text-gray-700"}`}>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={30}>30</option>
-                </select>
               </div>
 
-              <div className="flex items-center gap-1">
-                <span className="text-gray-400 mr-2">
-                  {(page - 1) * perPage + 1}–{Math.min(page * perPage, totalRecords)} of {totalRecords}
-                </span>
-           <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-xl shadow-sm border w-fit">
-
-  {/* Label */}
-  <h1 className="text-sm font-semibold text-gray-700">
-    Navigation Shortcut
-  </h1>
-
-  {/* Input */}
-  <input
-    type="number"
-    value={page}
-    onChange={(e) => setPage(Number(e.target.value))}
-    min="1"
-    // placeholder="Page"
-    className="w-20 px-3 py-1.5 text-center text-sm font-medium 
-               bg-gray-50 border border-gray-300 rounded-lg 
-               focus:bg-white focus:outline-none 
-               focus:ring-2 focus:ring-black focus:border-black
-               transition-all duration-200"
-  />
-
-</div>
-                <button
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                  className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
-                    ${page === 1
-                      ? "opacity-40 cursor-not-allowed border-gray-200"
-                      : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white hover:border-gray-300"}`}>
-                  <ChevronLeft size={13} />
-                </button>
-
-                {Array.from({ length: 3 }, (_, i) => page + i).map((num) =>
-                  num <= totalPages && (
-                    <button key={num} onClick={() => setPage(num)}
-                      className={`w-7 h-7 flex items-center justify-center rounded-lg text-xs font-medium border transition-all
-                        ${num === page
-                          ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                          : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white"}`}>
-                      {num}
-                    </button>
-                  )
-                )}
-
-                <button
-                  onClick={() => setPage(page + 1)}
-                  disabled={page === totalPages}
-                  className={`w-7 h-7 flex items-center justify-center rounded-lg border transition-all
-                    ${page === totalPages
-                      ? "opacity-40 cursor-not-allowed border-gray-200"
-                      : isDark ? "border-gray-700 hover:bg-gray-800" : "border-gray-200 hover:bg-white hover:border-gray-300"}`}>
-                  <ChevronRight size={13} />
-                </button>
-              </div>
             </div>
           )}
-        </div>
-        </div>
+
+          {/* =================================================
+              STATS
+          ================================================= */}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+            {/* ACTIVE */}
+
+            <div
+              className={`rounded-xl border p-5 shadow-sm ${
+                isDark
+                  ? "border-gray-800 bg-gray-800"
+                  : "border-gray-100 bg-white"
+              }`}
+            >
+
+              <div className="flex items-center justify-between">
+
+                <p
+                  className={`text-xs uppercase tracking-wider ${
+                    isDark
+                      ? "text-gray-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  Active
+                </p>
+
+                <CheckCircle2
+                  size={17}
+                  className="text-emerald-500"
+                />
+
+              </div>
+
+              <h2 className="mt-2 text-2xl font-bold text-emerald-500">
+                {activeCount}
+              </h2>
+
+            </div>
+
+            {/* INACTIVE */}
+
+            <div
+              className={`rounded-xl border p-5 shadow-sm ${
+                isDark
+                  ? "border-gray-800 bg-gray-800"
+                  : "border-gray-100 bg-white"
+              }`}
+            >
+
+              <div className="flex items-center justify-between">
+
+                <p
+                  className={`text-xs uppercase tracking-wider ${
+                    isDark
+                      ? "text-gray-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  Inactive
+                </p>
+
+                <XCircle
+                  size={17}
+                  className="text-gray-500"
+                />
+
+              </div>
+
+              <h2
+                className={`mt-2 text-2xl font-bold ${
+                  isDark
+                    ? "text-gray-200"
+                    : "text-gray-700"
+                }`}
+              >
+                {inactiveCount}
+              </h2>
+
+            </div>
+
+            {/* SUSPENDED */}
+
+            <div
+              className={`rounded-xl border p-5 shadow-sm ${
+                isDark
+                  ? "border-gray-800 bg-gray-800"
+                  : "border-gray-100 bg-white"
+              }`}
+            >
+
+              <div className="flex items-center justify-between">
+
+                <p
+                  className={`text-xs uppercase tracking-wider ${
+                    isDark
+                      ? "text-gray-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  Suspended
+                </p>
+
+                <AlertTriangle
+                  size={17}
+                  className="text-red-500"
+                />
+
+              </div>
+
+              <h2 className="mt-2 text-2xl font-bold text-red-500">
+                {suspendedCount}
+              </h2>
+
+            </div>
+
+          </div>
+
+          {/* =================================================
+              TABLE CARD
+          ================================================= */}
+
+          <div
+            className={`w-full overflow-hidden rounded-xl border ${
+              isDark
+                ? "border-gray-700 bg-gray-900"
+                : "border-gray-200 bg-white"
+            }`}
+          >
+
+            {/* =================================================
+                FILTER HEADER
+            ================================================= */}
+
+            <div
+              className={`flex flex-wrap items-center justify-between gap-4 border-b p-5 ${
+                isDark
+                  ? "border-gray-700"
+                  : "border-gray-200"
+              }`}
+            >
+
+              {/* TITLE */}
+
+              <div>
+
+                <h2
+                  className={`text-lg font-semibold ${
+                    isDark
+                      ? "text-gray-100"
+                      : "text-gray-900"
+                  }`}
+                >
+                  Settlement Accounts
+                </h2>
+
+                <p
+                  className={`mt-1 text-xs ${
+                    isDark
+                      ? "text-gray-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  View and monitor merchant settlement
+                  bank accounts
+                </p>
+
+              </div>
+
+              {/* FILTERS */}
+
+              <div className="flex flex-wrap items-center gap-3">
+
+                {/* SEARCH */}
+
+                <div
+                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
+                    isDark
+                      ? "border-gray-700 bg-gray-800"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
+
+                  <Search
+                    size={15}
+                    className={
+                      isDark
+                        ? "text-gray-500"
+                        : "text-gray-400"
+                    }
+                  />
+
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    placeholder="Search settlement..."
+                    className={`w-[220px] bg-transparent text-sm outline-none ${
+                      isDark
+                        ? "text-gray-200 placeholder:text-gray-500"
+                        : "text-gray-800 placeholder:text-gray-400"
+                    }`}
+                  />
+
+                </div>
+
+                {/* STATUS */}
+
+                <div className="relative">
+
+                  <Filter
+                    size={14}
+                    className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                      isDark
+                        ? "text-gray-500"
+                        : "text-gray-400"
+                    }`}
+                  />
+
+                  <select
+                    value={searchStatus}
+                    onChange={(e) => {
+                      setSearchStatus(
+                        e.target.value
+                      );
+                      setPage(1);
+                    }}
+                    className={`rounded-lg border py-2 pl-9 pr-3 text-sm outline-none ${
+                      isDark
+                        ? "border-gray-700 bg-gray-800 text-gray-200"
+                        : "border-gray-200 bg-white text-gray-700"
+                    }`}
+                  >
+
+                    <option value="">
+                      All Status
+                    </option>
+
+                    <option value="active">
+                      Active
+                    </option>
+
+                    <option value="inactive">
+                      Inactive
+                    </option>
+
+                    <option value="suspended">
+                      Suspended
+                    </option>
+
+                  </select>
+
+                </div>
+
+                {/* RESET */}
+
+                <button
+                  onClick={handleReset}
+                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
+                    isDark
+                      ? "border-gray-700 text-gray-400 hover:bg-gray-800"
+                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  <RotateCcw size={15} />
+                  Reset
+                </button>
+
+              </div>
+
+            </div>
+
+            {/* =================================================
+                TABLE
+            ================================================= */}
+
+            <div className="w-full overflow-x-auto">
+
+              <table className="w-full min-w-[950px] text-left text-sm">
+
+                {/* HEADER */}
+
+                <thead
+                  className={`border-b text-[11px] uppercase tracking-wider ${
+                    isDark
+                      ? "border-gray-700 bg-gray-800 text-gray-400"
+                      : "border-gray-200 bg-gray-50 text-gray-500"
+                  }`}
+                >
+
+                  <tr>
+
+                    <th className="px-6 py-4">
+                      Account
+                    </th>
+
+                    <th className="px-6 py-4">
+                      Corp ID
+                    </th>
+
+                    <th className="px-6 py-4">
+                      Account Number
+                    </th>
+
+                    <th className="px-6 py-4">
+                      IFSC Code
+                    </th>
+
+                    <th className="px-6 py-4">
+                      Validation
+                    </th>
+
+                    <th className="px-6 py-4">
+                      Status
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+                {/* BODY */}
+
+                <tbody
+                  className={`text-[12px] ${
+                    isDark
+                      ? "text-gray-300"
+                      : "text-gray-800"
+                  }`}
+                >
+
+                  {/* LOADING */}
+
+                  {load ? (
+
+                    <tr>
+
+                      <td
+                        colSpan={6}
+                        className="py-14 text-center"
+                      >
+
+                        <div className="flex items-center justify-center gap-2">
+
+                          <RefreshCw
+                            size={18}
+                            className="animate-spin"
+                          />
+
+                          Loading settlement records...
+
+                        </div>
+
+                      </td>
+
+                    </tr>
+
+                  ) : settlementRowsArray.length > 0 ? (
+
+                    settlementRowsArray.map(
+                      (settlement, index) => (
+
+                        <tr
+                          key={
+                            settlement?.id ||
+                            settlement?.account_number ||
+                            index
+                          }
+                          className={`border-b transition ${
+                            isDark
+                              ? "border-gray-700 hover:bg-gray-800"
+                              : "border-gray-100 hover:bg-gray-50"
+                          }`}
+                        >
+
+                          {/* ACCOUNT */}
+
+                          <td className="px-6 py-4">
+
+                            <div className="flex items-center gap-3">
+
+                              <div
+                                className={`flex h-9 w-9 items-center justify-center rounded-lg ${
+                                  isDark
+                                    ? "bg-indigo-500/10 text-indigo-400"
+                                    : "bg-indigo-50 text-indigo-600"
+                                }`}
+                              >
+                                <Landmark size={16} />
+                              </div>
+
+                              <div>
+
+                                <p
+                                  className={`font-semibold ${
+                                    isDark
+                                      ? "text-gray-200"
+                                      : "text-gray-800"
+                                  }`}
+                                >
+                                  {settlement?.account_name ||
+                                    "-"}
+                                </p>
+
+                                {settlement?.bank_name && (
+                                  <p className="mt-1 text-[10px] text-gray-500">
+                                    {settlement.bank_name}
+                                  </p>
+                                )}
+
+                              </div>
+
+                            </div>
+
+                          </td>
+
+                          {/* CORP ID */}
+
+                          <td className="px-6 py-4">
+
+                            <div className="flex items-center gap-2">
+
+                              <Building2
+                                size={14}
+                                className={
+                                  isDark
+                                    ? "text-gray-500"
+                                    : "text-gray-400"
+                                }
+                              />
+
+                              <span
+                                className={`font-medium ${
+                                  isDark
+                                    ? "text-gray-300"
+                                    : "text-gray-700"
+                                }`}
+                              >
+                                {settlement?.company_id ||
+                                  "-"}
+                              </span>
+
+                            </div>
+
+                          </td>
+
+                          {/* ACCOUNT NUMBER */}
+
+                          <td className="px-6 py-4">
+
+                            <div className="flex items-center gap-2">
+
+                              <CreditCard
+                                size={14}
+                                className={
+                                  isDark
+                                    ? "text-gray-500"
+                                    : "text-gray-400"
+                                }
+                              />
+
+                              <span
+                                className={`font-mono ${
+                                  isDark
+                                    ? "text-gray-300"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                {settlement?.account_number ||
+                                  "-"}
+                              </span>
+
+                            </div>
+
+                          </td>
+
+                          {/* IFSC */}
+
+                          <td className="px-6 py-4">
+
+                            <span
+                              className={`font-mono ${
+                                isDark
+                                  ? "text-indigo-300"
+                                  : "text-indigo-600"
+                              }`}
+                            >
+                              {settlement?.ifsc_code ||
+                                "-"}
+                            </span>
+
+                          </td>
+
+                          {/* VALIDATION */}
+
+                          <td className="px-6 py-4">
+
+                            <ValidatedBadge
+                              val={
+                                settlement?.is_validated
+                              }
+                            />
+
+                          </td>
+
+                          {/* STATUS */}
+
+                          <td className="px-6 py-4">
+
+                            <StatusBadge
+                              status={
+                                settlement?.status
+                              }
+                              isDark={isDark}
+                            />
+
+                          </td>
+
+                        </tr>
+
+                      )
+                    )
+
+                  ) : (
+
+                    <tr>
+
+                      <td
+                        colSpan={6}
+                        className="py-14 text-center"
+                      >
+
+                        <div className="flex flex-col items-center gap-3">
+
+                          <div
+                            className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                              isDark
+                                ? "bg-gray-800"
+                                : "bg-gray-100"
+                            }`}
+                          >
+                            <Landmark
+                              size={20}
+                              className="text-gray-400"
+                            />
+                          </div>
+
+                          <div>
+
+                            <p
+                              className={`text-sm font-medium ${
+                                isDark
+                                  ? "text-gray-300"
+                                  : "text-gray-700"
+                              }`}
+                            >
+                              No settlements found
+                            </p>
+
+                            <p className="mt-1 text-xs text-gray-500">
+                              Try changing your search
+                              or status filter.
+                            </p>
+
+                          </div>
+
+                        </div>
+
+                      </td>
+
+                    </tr>
+
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+            {/* =================================================
+                PAGINATION
+            ================================================= */}
+
+            <div
+              className={`flex flex-col gap-3 border-t px-5 py-4 text-sm sm:flex-row sm:items-center sm:justify-between ${
+                isDark
+                  ? "border-gray-700 text-gray-300"
+                  : "border-gray-200 text-gray-600"
+              }`}
+            >
+
+              {/* PER PAGE */}
+
+              <div className="flex items-center">
+
+                Show
+
+                <select
+                  value={perPage}
+                  onChange={(e) => {
+                    setPerPage(
+                      Number(e.target.value)
+                    );
+                    setPage(1);
+                  }}
+                  className={`mx-2 rounded border p-1.5 outline-none ${
+                    isDark
+                      ? "border-gray-700 bg-gray-800 text-gray-200"
+                      : "border-gray-200 bg-white text-gray-700"
+                  }`}
+                >
+
+                  <option value={5}>
+                    5
+                  </option>
+
+                  <option value={10}>
+                    10
+                  </option>
+
+                  <option value={20}>
+                    20
+                  </option>
+
+                  <option value={50}>
+                    50
+                  </option>
+
+                </select>
+
+                per page
+
+              </div>
+
+              {/* PAGINATION */}
+
+              <div className="flex items-center gap-3">
+
+                <span>
+
+                  {totalRecords > 0
+                    ? `${Math.min(
+                        (page - 1) * perPage + 1,
+                        totalRecords
+                      )}-${Math.min(
+                        page * perPage,
+                        totalRecords
+                      )} of ${totalRecords}`
+                    : "0 of 0"}
+
+                </span>
+
+                {/* PREVIOUS */}
+
+                <button
+                  onClick={() =>
+                    setPage((prev) =>
+                      Math.max(prev - 1, 1)
+                    )
+                  }
+                  disabled={page === 1}
+                  className={`rounded-lg p-1.5 ${
+                    page === 1
+                      ? "opacity-30 cursor-not-allowed"
+                      : isDark
+                      ? "hover:bg-gray-800"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+
+                {/* CURRENT PAGE */}
+
+                <span className="font-bold">
+                  {page}
+                </span>
+
+                {/* NEXT */}
+
+                <button
+                  onClick={() =>
+                    setPage((prev) =>
+                      Math.min(
+                        prev + 1,
+                        totalPages
+                      )
+                    )
+                  }
+                  disabled={page >= totalPages}
+                  className={`rounded-lg p-1.5 ${
+                    page >= totalPages
+                      ? "opacity-30 cursor-not-allowed"
+                      : isDark
+                      ? "hover:bg-gray-800"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  <ChevronRight size={18} />
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
       </main>
+
     </div>
   );
 };

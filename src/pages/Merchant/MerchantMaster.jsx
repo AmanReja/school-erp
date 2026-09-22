@@ -12,28 +12,42 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import CreateMerchantModal from "../../models/CreateMerchantModal";
+import UpdateMerchantModal from "../../models/UpdateMerchantModal";
 
 import { getDetails } from "../../redux/action";
 import { Theme } from "../../Contexts/Theme";
 import { useDispatch, useSelector } from "react-redux";
+import MerchantWiseDetailsPannel from "../../models/MerchantWiseDetailsPannel";
+
 
 const MerchantMaster = () => {
   const dispatch = useDispatch();
 
   const { theme } = useContext(Theme);
   const isDark = theme === "dark";
+  const [showDetailsPanel, setShowDetailsPanel] = useState(false);
+  // const [selectedMerchant, setSelectedMerchant] = useState(null);
 
   // ==============================
   // State
   // ==============================
-
+const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+const [selectedMerchant, setSelectedMerchant] = useState(null);
 
   // ==============================
   // Redux
   // ==============================
+
+const handleEdit = (merchant) => {
+  setSelectedMerchant(merchant);
+  setIsUpdateModalOpen(true);
+};
+
 
   const merchantData = useSelector(
     (state) => state.merchants?.merchants || {}
@@ -110,6 +124,17 @@ const MerchantMaster = () => {
   // ==============================
   // Page numbers
   // ==============================
+
+
+    const startItem =
+    total === 0
+      ? 0
+      : (currentPage - 1) * itemsPerPage + 1;
+
+  const endItem = Math.min(
+    currentPage * itemsPerPage,
+    total
+  );
 
   const getPageNumbers = () => {
     const pages = [];
@@ -233,6 +258,12 @@ const MerchantMaster = () => {
             </p>
 
           </div>
+          <button
+  onClick={() => setIsCreateModalOpen(true)}
+  className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium"
+>
+  + Create Merchant
+</button>
 
         </div>
       </div>
@@ -626,15 +657,32 @@ const MerchantMaster = () => {
 
                   <td className="px-5 py-4">
 
-                    <button
+                    <button onClick={()=>{handleEdit(merchant)}}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition ${
                         isDark
                           ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 hover:bg-indigo-500 hover:text-white"
                           : "bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-600 hover:text-white"
                       }`}
                     >
-                      <Eye size={13} />
-                      View
+                      
+                      Update
+                    </button>
+
+                  </td>
+                  <td className="px-5 py-4">
+
+                    <button onClick={()=>{
+                      setSelectedMerchant(merchant)
+                      setShowDetailsPanel(true)
+                    }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition ${
+                        isDark
+                          ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 hover:bg-indigo-500 hover:text-white"
+                          : "bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-600 hover:text-white"
+                      }`}
+                    >
+                      
+                      Details
                     </button>
 
                   </td>
@@ -672,96 +720,162 @@ const MerchantMaster = () => {
           PAGINATION FOOTER
       ========================================= */}
 
-      <div
-        className={`px-5 py-3 border-t flex flex-col md:flex-row md:items-center md:justify-between gap-3 ${
-          isDark
-            ? "border-gray-800"
-            : "border-gray-200"
-        }`}
-      >
-
-        {/* Showing */}
-
-        <span
-          className={`text-xs ${
+  <div
+          className={`px-5 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${
             isDark
-              ? "text-gray-500"
-              : "text-gray-500"
+              ? "border-slate-700"
+              : "border-gray-200"
           }`}
         >
-          Showing{" "}
-          {total === 0
-            ? 0
-            : (currentPage - 1) * itemsPerPage + 1}{" "}
-          to{" "}
-          {Math.min(
-            currentPage * itemsPerPage,
-            total
-          )}{" "}
-          of {total} merchants
-        </span>
-
-        {/* Pagination */}
-
-        <div className="flex items-center gap-1.5">
-
-          {/* Previous */}
-
-          <button
-            onClick={handlePrevious}
-            disabled={currentPage === 1}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition ${
-              currentPage === 1
-                ? "opacity-40 cursor-not-allowed"
-                : isDark
-                ? "border-gray-800 text-gray-400 hover:bg-gray-900"
-                : "border-gray-200 text-gray-500 hover:bg-gray-50"
+          {/* RESULT COUNT */}
+          <div
+            className={`text-sm ${
+              isDark
+                ? "text-gray-400"
+                : "text-gray-500"
             }`}
           >
-            <ChevronLeft size={16} />
-          </button>
-
-          {/* Page Numbers */}
-
-          {getPageNumbers().map((pageNumber) => (
-
-            <button
-              key={pageNumber}
-              onClick={() =>
-                setCurrentPage(pageNumber)
-              }
-              className={`w-8 h-8 rounded-lg text-xs font-medium transition ${
-                currentPage === pageNumber
-                  ? "bg-indigo-600 text-white"
-                  : isDark
-                  ? "text-gray-400 hover:bg-gray-900"
-                  : "text-gray-600 hover:bg-gray-100"
+            Showing{" "}
+            <span
+              className={`font-semibold ${
+                isDark
+                  ? "text-gray-200"
+                  : "text-gray-700"
               }`}
             >
-              {pageNumber}
+              {startItem}
+            </span>{" "}
+            to{" "}
+            <span
+              className={`font-semibold ${
+                isDark
+                  ? "text-gray-200"
+                  : "text-gray-700"
+              }`}
+            >
+              {endItem}
+            </span>{" "}
+            of{" "}
+            <span
+              className={`font-semibold ${
+                isDark
+                  ? "text-gray-200"
+                  : "text-gray-700"
+              }`}
+            >
+              {total}
+            </span>{" "}
+            merchants
+          </div>
+
+          {/* PAGINATION */}
+          <div className="flex items-center gap-1.5">
+            {/* PREVIOUS */}
+            <button
+              type="button"
+              onClick={handlePrevious}
+              disabled={currentPage === 1}
+              className={`w-9 h-9 rounded-lg flex items-center justify-center border transition ${
+                currentPage === 1
+                  ? "opacity-40 cursor-not-allowed"
+                  : ""
+              } ${
+                isDark
+                  ? "border-slate-700 hover:bg-slate-700"
+                  : "border-gray-200 hover:bg-gray-100"
+              }`}
+            >
+              <ChevronLeft size={17} />
             </button>
 
-          ))}
+            {/* PAGE NUMBERS */}
+            {getPageNumbers().map(
+              (page, index) => {
+                if (page === "...") {
+                  return (
+                    <span
+                      key={`dots-${index}`}
+                      className={`w-9 h-9 flex items-center justify-center text-sm ${
+                        isDark
+                          ? "text-gray-500"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      ...
+                    </span>
+                  );
+                }
 
-          {/* Next */}
+                const active =
+                  currentPage === page;
 
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition ${
-              currentPage === totalPages
-                ? "opacity-40 cursor-not-allowed"
-                : isDark
-                ? "border-gray-800 text-gray-400 hover:bg-gray-900"
-                : "border-gray-200 text-gray-500 hover:bg-gray-50"
-            }`}
-          >
-            <ChevronRight size={16} />
-          </button>
+                return (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage(page)
+                    }
+                    className={`w-9 h-9 rounded-lg text-sm font-medium transition ${
+                      active
+                        ? "bg-green-600 text-white"
+                        : isDark
+                        ? "text-gray-300 hover:bg-slate-700"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              }
+            )}
 
+            {/* NEXT */}
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={
+                currentPage === totalPages
+              }
+              className={`w-9 h-9 rounded-lg flex items-center justify-center border transition ${
+                currentPage === totalPages
+                  ? "opacity-40 cursor-not-allowed"
+                  : ""
+              } ${
+                isDark
+                  ? "border-slate-700 hover:bg-slate-700"
+                  : "border-gray-200 hover:bg-gray-100"
+              }`}
+            >
+              <ChevronRight size={17} />
+            </button>
+          </div>
         </div>
-
-      </div>
+      <CreateMerchantModal
+  isOpen={isCreateModalOpen}
+  onClose={() => setIsCreateModalOpen(false)}
+/>
+<UpdateMerchantModal
+  isOpen={isUpdateModalOpen}
+  onClose={() => {
+    setIsUpdateModalOpen(false);
+    setSelectedMerchant(null);
+  }}
+  merchant={selectedMerchant}
+/>
+<MerchantWiseDetailsPannel
+  isOpen={showDetailsPanel}
+  onClose={() => {
+    setShowDetailsPanel(false);
+    setSelectedMerchant(null);
+  }}
+  corpId={selectedMerchant?.corp_id}
+  merchantName={
+    selectedMerchant?.corp_name ||
+    selectedMerchant?.name
+  }
+  isDark={isDark}
+/>
 
     </div>
   );

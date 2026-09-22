@@ -58,6 +58,8 @@ import Merchantmanagement from "./Components/Merchantmanagement.jsx";
 import MerchantMaster from "./pages/Merchant/MerchantMaster.jsx";
 import ActiveMerchants from "./pages/Merchant/ActiveMerchants.jsx";
 import MerchantConfiguration from "./pages/Merchant/MerchantConfiguration.jsx";
+import RejectedDisputes from "./pages/Dispute/RejectedDisputes.jsx";
+import EntityCallbackPage from "./Components/EntityCallbackPage.jsx";
 
 if(import.meta.env.PROD){
   console.log = () => {};
@@ -83,16 +85,20 @@ const router = createBrowserRouter(
       <Route element={<Protectedroutes />}>
 <Route path="/dashboard" element={<Dashbord />}>
 
-       {/* <Route path="createmerchants" element={<Createmerchants/>}/> */}
+       <Route path="createmerchants" element={<Createmerchants/>}/>
 <Route path="dispute" element={<Disputemanagement />}>
   <Route index element={<Navigate to="merchants" replace />} />
 
   <Route path="merchants" element={<Merchants />} />
   <Route path="close" element={<CloseDisputes />} />
   <Route path="resolve" element={<ResolveDisputes />} />
+  <Route path="resolve/:corp_id?" element={<ResolveDisputes />} />
   <Route path="open" element={<OpenDisputes />} />
+  <Route path="open/:corp_id?" element={<OpenDisputes />} />
   <Route path="underreview" element={<UnderReview />} />
-  <Route path="rejected" element={<ResolveDisputes />} />
+  <Route path="underreview/:corp_id?" element={<UnderReview />} />
+  <Route path="rejected" element={<RejectedDisputes />} />
+  <Route path="rejected/:corp_id?" element={<RejectedDisputes />} />
 </Route>
            
 
@@ -125,6 +131,7 @@ const router = createBrowserRouter(
     </Route>
        
         <Route path="entityIp/:corpid" element={<EntityIpPage/>}/>
+        <Route path="entitycallback/:corpid" element={<EntityCallbackPage/>}/>
         <Route path="ledger/:corpid" element={<LedgerByCompany/>}/>
         <Route path="token/:corpid" element={<TokenPage/>}/>
         <Route path="updatepass" element={<Updatepass/>}/>

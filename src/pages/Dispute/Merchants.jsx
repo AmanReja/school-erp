@@ -1,117 +1,152 @@
-
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Search,
   Filter,
   Store,
-  CheckCircle2,
   CalendarDays,
   UserRound,
   FileText,
   Eye,
   RotateCcw,
-  AlertCircle,
-  Clock3,
-  XCircle,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
+import { getDetails } from "../../redux/action";
 import { Theme } from "../../Contexts/Theme";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import MerchantWiseDisputePanel from "../../models/MerchantWiseDisputePannel";
 
 const Merchants = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
+
   const { theme } = useContext(Theme);
   const isDark = theme === "dark";
 
+  // ==============================
+  // State
+  // ==============================
+
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [showDisputePanel, setShowDisputePanel] = useState(false);
+const [selectedMerchant, setSelectedMerchant] = useState(null);
 
-  // Replace this with your API response
-  const merchants = [
-    {
-      id: "MER-1001",
-      name: "Acme Technologies",
-      email: "support@acme.com",
-      phone: "+91 9876543210",
-      totalDisputes: 46,
-      openDisputes: 12,
-      resolvedDisputes: 24,
-      closedDisputes: 10,
-      disputedAmount: "₹2,45,800",
-      status: "Active",
-      lastDispute: "18 Sep 2026",
-    },
-    {
-      id: "MER-1002",
-      name: "Global Traders",
-      email: "contact@globaltraders.com",
-      phone: "+91 9876543211",
-      totalDisputes: 30,
-      openDisputes: 5,
-      resolvedDisputes: 18,
-      closedDisputes: 7,
-      disputedAmount: "₹1,84,500",
-      status: "Active",
-      lastDispute: "17 Sep 2026",
-    },
-    {
-      id: "MER-1003",
-      name: "Nova Solutions",
-      email: "admin@novasolutions.com",
-      phone: "+91 9876543212",
-      totalDisputes: 14,
-      openDisputes: 3,
-      resolvedDisputes: 9,
-      closedDisputes: 2,
-      disputedAmount: "₹96,200",
-      status: "Active",
-      lastDispute: "15 Sep 2026",
-    },
-    {
-      id: "MER-1004",
-      name: "Vertex Retail",
-      email: "support@vertexretail.com",
-      phone: "+91 9876543213",
-      totalDisputes: 21,
-      openDisputes: 4,
-      resolvedDisputes: 11,
-      closedDisputes: 6,
-      disputedAmount: "₹1,28,750",
-      status: "Inactive",
-      lastDispute: "13 Sep 2026",
-    },
-  ];
+  // ==============================
+  // Redux
+  // ==============================
 
-  const filteredMerchants = useMemo(() => {
-    return merchants.filter((merchant) => {
-      const searchText = search.toLowerCase();
-
-      const matchesSearch =
-        merchant.id.toLowerCase().includes(searchText) ||
-        merchant.name.toLowerCase().includes(searchText) ||
-        merchant.email.toLowerCase().includes(searchText) ||
-        merchant.phone.toLowerCase().includes(searchText);
-
-      const matchesStatus =
-        status === "All" || merchant.status === status;
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [search, status]);
-
-  const totalMerchants = merchants.length;
-
-  const activeMerchants = merchants.filter(
-    (merchant) => merchant.status === "Active"
-  ).length;
-
-  const totalDisputes = merchants.reduce(
-    (sum, merchant) => sum + merchant.totalDisputes,
-    0
+  const merchantData = useSelector(
+    (state) => state.merchants?.merchants || {}
   );
 
-  const totalOpen = merchants.reduce(
-    (sum, merchant) => sum + merchant.openDisputes,
-    0
-  );
+  console.log("merchantData", merchantData);
+
+  const merchants = merchantData?.data || [];
+  const total = merchantData?.total || 0;
+  const totalPages = merchantData?.totalPages || 1;
+
+  // ==============================
+  // Fetch merchants
+  // ==============================
+
+  useEffect(() => {
+    dispatch(
+      getDetails(
+        currentPage,
+        itemsPerPage,
+        search
+      )
+    );
+  }, [dispatch, currentPage, itemsPerPage, search]);
+
+  // ==============================
+  // Search
+  // ==============================
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // ==============================
+  // Limit
+  // ==============================
+
+  const handleLimitChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  // ==============================
+  // Reset
+  // ==============================
+
+  const handleReset = () => {
+    setSearch("");
+    setCurrentPage(1);
+    setItemsPerPage(10);
+  };
+
+  // ==============================
+  // Previous
+  // ==============================
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  // ==============================
+  // Next
+  // ==============================
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  // ==============================
+  // Page numbers
+  // ==============================
+
+  const getPageNumbers = () => {
+    const pages = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
+  // ==============================
+  // KYC status
+  // ==============================
+
+  const kycStatusClass = (value) => {
+    if (Number(value) === 1) {
+      return isDark
+        ? "bg-green-500/10 text-green-400 border-green-500/20"
+        : "bg-green-50 text-green-600 border-green-200";
+    }
+
+    if (Number(value) === 0) {
+      return isDark
+        ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+        : "bg-yellow-50 text-yellow-600 border-yellow-200";
+    }
+
+    return isDark
+      ? "bg-gray-800 text-gray-400 border-gray-700"
+      : "bg-gray-100 text-gray-600 border-gray-200";
+  };
 
   return (
     <div
@@ -121,13 +156,18 @@ const Merchants = () => {
           : "bg-white border-gray-200"
       }`}
     >
-      {/* ================= HEADER ================= */}
+      {/* =========================================
+          HEADER
+      ========================================= */}
+
       <div
         className={`px-5 py-5 border-b ${
           isDark ? "border-gray-800" : "border-gray-200"
         }`}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+          {/* Title */}
 
           <div className="flex items-center gap-3">
 
@@ -142,26 +182,34 @@ const Merchants = () => {
             </div>
 
             <div>
+
               <h2
                 className={`text-lg font-semibold ${
-                  isDark ? "text-gray-100" : "text-gray-800"
+                  isDark
+                    ? "text-gray-100"
+                    : "text-gray-800"
                 }`}
               >
-                Merchants
+                Merchant Master
               </h2>
-
+              
               <p
                 className={`text-xs mt-0.5 ${
-                  isDark ? "text-gray-500" : "text-gray-500"
+                  isDark
+                    ? "text-gray-500"
+                    : "text-gray-500"
                 }`}
               >
-                Manage merchants and monitor their dispute activity.
+                View and manage registered merchants.
               </p>
-            </div>
 
+            </div>
+            
+  
           </div>
 
-          {/* Total Merchants */}
+          {/* Total */}
+
           <div
             className={`px-4 py-2 rounded-xl border ${
               isDark
@@ -169,9 +217,12 @@ const Merchants = () => {
                 : "bg-gray-50 border-gray-200"
             }`}
           >
+
             <p
               className={`text-[10px] uppercase tracking-wider ${
-                isDark ? "text-gray-500" : "text-gray-400"
+                isDark
+                  ? "text-gray-500"
+                  : "text-gray-400"
               }`}
             >
               Total Merchants
@@ -179,20 +230,27 @@ const Merchants = () => {
 
             <p
               className={`text-lg font-bold ${
-                isDark ? "text-gray-100" : "text-gray-800"
+                isDark
+                  ? "text-gray-100"
+                  : "text-gray-800"
               }`}
             >
-              {totalMerchants}
+              {total}
             </p>
+
           </div>
 
         </div>
       </div>
 
-      {/* ================= SUMMARY ================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-5">
+      {/* =========================================
+          SUMMARY
+      ========================================= */}
 
-        {/* Active Merchants */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-5">
+
+        {/* Total */}
+
         <div
           className={`rounded-xl border p-4 ${
             isDark
@@ -200,14 +258,46 @@ const Merchants = () => {
               : "bg-gray-50 border-gray-200"
           }`}
         >
+
           <div className="flex items-center justify-between">
 
-            <span
-              className={`text-xs ${
-                isDark ? "text-gray-500" : "text-gray-500"
-              }`}
-            >
-              Active Merchants
+            <span className="text-xs text-gray-500">
+              Total Merchants
+            </span>
+
+            <Store
+              size={16}
+              className="text-indigo-500"
+            />
+
+          </div>
+
+          <p
+            className={`mt-2 text-xl font-bold ${
+              isDark
+                ? "text-gray-100"
+                : "text-gray-800"
+            }`}
+          >
+            {total}
+          </p>
+
+        </div>
+
+        {/* Completed KYC */}
+
+        <div
+          className={`rounded-xl border p-4 ${
+            isDark
+              ? "bg-gray-900 border-gray-800"
+              : "bg-gray-50 border-gray-200"
+          }`}
+        >
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-xs text-gray-500">
+              KYC Completed
             </span>
 
             <CheckCircle2
@@ -219,14 +309,23 @@ const Merchants = () => {
 
           <p
             className={`mt-2 text-xl font-bold ${
-              isDark ? "text-gray-100" : "text-gray-800"
+              isDark
+                ? "text-gray-100"
+                : "text-gray-800"
             }`}
           >
-            {activeMerchants}
+            {
+              merchants.filter(
+                (merchant) =>
+                  merchant.kyc_status === "Completed"
+              ).length
+            }
           </p>
+
         </div>
 
-        {/* Total Disputes */}
+        {/* Pending KYC */}
+
         <div
           className={`rounded-xl border p-4 ${
             isDark
@@ -234,123 +333,66 @@ const Merchants = () => {
               : "bg-gray-50 border-gray-200"
           }`}
         >
+
           <div className="flex items-center justify-between">
 
-            <span
-              className={`text-xs ${
-                isDark ? "text-gray-500" : "text-gray-500"
-              }`}
-            >
-              Total Disputes
+            <span className="text-xs text-gray-500">
+              KYC Pending
             </span>
 
             <FileText
               size={16}
-              className="text-indigo-500"
+              className="text-yellow-500"
             />
 
           </div>
 
           <p
             className={`mt-2 text-xl font-bold ${
-              isDark ? "text-gray-100" : "text-gray-800"
+              isDark
+                ? "text-gray-100"
+                : "text-gray-800"
             }`}
           >
-            {totalDisputes}
+            {
+              merchants.filter(
+                (merchant) =>
+                  merchant.kyc_status !== "Completed"
+              ).length
+            }
           </p>
-        </div>
 
-        {/* Open Disputes */}
-        <div
-          className={`rounded-xl border p-4 ${
-            isDark
-              ? "bg-gray-900 border-gray-800"
-              : "bg-gray-50 border-gray-200"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-
-            <span
-              className={`text-xs ${
-                isDark ? "text-gray-500" : "text-gray-500"
-              }`}
-            >
-              Open Disputes
-            </span>
-
-            <AlertCircle
-              size={16}
-              className="text-orange-500"
-            />
-
-          </div>
-
-          <p
-            className={`mt-2 text-xl font-bold ${
-              isDark ? "text-gray-100" : "text-gray-800"
-            }`}
-          >
-            {totalOpen}
-          </p>
-        </div>
-
-        {/* Last Updated */}
-        <div
-          className={`rounded-xl border p-4 ${
-            isDark
-              ? "bg-gray-900 border-gray-800"
-              : "bg-gray-50 border-gray-200"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-
-            <span
-              className={`text-xs ${
-                isDark ? "text-gray-500" : "text-gray-500"
-              }`}
-            >
-              System Status
-            </span>
-
-            <Clock3
-              size={16}
-              className="text-violet-500"
-            />
-
-          </div>
-
-          <p
-            className={`mt-2 text-xl font-bold ${
-              isDark ? "text-gray-100" : "text-gray-800"
-            }`}
-          >
-            Active
-          </p>
         </div>
 
       </div>
 
-      {/* ================= FILTER BAR ================= */}
+      {/* =========================================
+          SEARCH / FILTER
+      ========================================= */}
+
       <div className="px-5 pb-5">
 
         <div className="flex flex-col lg:flex-row gap-3">
 
           {/* Search */}
+
           <div className="relative flex-1">
 
             <Search
               size={17}
               className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                isDark ? "text-gray-500" : "text-gray-400"
+                isDark
+                  ? "text-gray-500"
+                  : "text-gray-400"
               }`}
             />
 
             <input
               type="text"
-              placeholder="Search merchant, ID, email or phone..."
+              placeholder="Search merchant, email, mobile or Corp ID..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm outline-none transition ${
+              onChange={handleSearch}
+              className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm outline-none ${
                 isDark
                   ? "bg-gray-900 border-gray-800 text-gray-200 placeholder:text-gray-600 focus:border-indigo-500"
                   : "bg-white border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-indigo-400"
@@ -359,51 +401,35 @@ const Merchants = () => {
 
           </div>
 
-          {/* Status */}
+          {/* Limit */}
+
           <div className="relative">
 
-            <Filter
-              size={15}
-              className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                isDark ? "text-gray-500" : "text-gray-400"
-              }`}
-            />
-
             <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className={`appearance-none pl-9 pr-9 py-2.5 rounded-lg border text-sm outline-none cursor-pointer ${
+              value={itemsPerPage}
+              onChange={handleLimitChange}
+              className={`appearance-none px-4 pr-8 py-2.5 rounded-lg border text-sm outline-none ${
                 isDark
                   ? "bg-gray-900 border-gray-800 text-gray-300"
                   : "bg-white border-gray-200 text-gray-700"
               }`}
             >
-              <option value="All">
-                All Merchants
-              </option>
-
-              <option value="Active">
-                Active
-              </option>
-
-              <option value="Inactive">
-                Inactive
-              </option>
-
+              <option value={10}>10 / page</option>
+              <option value={20}>20 / page</option>
+              <option value={50}>50 / page</option>
+              <option value={100}>100 / page</option>
             </select>
 
           </div>
 
           {/* Reset */}
+
           <button
-            onClick={() => {
-              setSearch("");
-              setStatus("All");
-            }}
-            className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition ${
+            onClick={handleReset}
+            className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium ${
               isDark
-                ? "border-gray-800 text-gray-400 hover:bg-gray-900 hover:text-gray-200"
-                : "border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                ? "border-gray-800 text-gray-400 hover:bg-gray-900"
+                : "border-gray-200 text-gray-500 hover:bg-gray-50"
             }`}
           >
             <RotateCcw size={15} />
@@ -414,12 +440,16 @@ const Merchants = () => {
 
       </div>
 
-      {/* ================= TABLE ================= */}
+      {/* =========================================
+          TABLE
+      ========================================= */}
+
       <div className="overflow-x-auto">
 
         <table className="w-full text-left border-collapse">
 
           <thead>
+
             <tr
               className={`border-y text-[11px] uppercase tracking-wider ${
                 isDark
@@ -428,53 +458,54 @@ const Merchants = () => {
               }`}
             >
 
-              <th className="px-5 py-3 font-semibold">
+              <th className="px-5 py-3">
                 Merchant
               </th>
 
-              <th className="px-5 py-3 font-semibold">
-                Contact
+              <th className="px-5 py-3">
+                Mobile
               </th>
 
-              <th className="px-5 py-3 font-semibold">
-                Total
+              <th className="px-5 py-3">
+                Email
               </th>
 
-              <th className="px-5 py-3 font-semibold">
-                Open
+              <th className="px-5 py-3">
+                Corp ID
               </th>
 
-              <th className="px-5 py-3 font-semibold">
-                Resolved
+              <th className="px-5 py-3">
+                PAN
               </th>
 
-              <th className="px-5 py-3 font-semibold">
-                Closed
+              <th className="px-5 py-3">
+                GST
               </th>
 
-              <th className="px-5 py-3 font-semibold">
-                Amount
+              <th className="px-5 py-3">
+                KYC
               </th>
 
-              <th className="px-5 py-3 font-semibold">
-                Status
-              </th>
+              {/* <th className="px-5 py-3">
+                Created
+              </th> */}
 
-              <th className="px-5 py-3 font-semibold text-right">
+              <th className="px-5 py-3">
                 Action
               </th>
 
             </tr>
+
           </thead>
 
           <tbody>
 
-            {filteredMerchants.length > 0 ? (
+            {merchants.length > 0 ? (
 
-              filteredMerchants.map((merchant) => (
+              merchants.map((merchant, index) => (
 
                 <tr
-                  key={merchant.id}
+                  key={merchant.userid || index}
                   className={`border-b transition ${
                     isDark
                       ? "border-gray-800 hover:bg-gray-900/60"
@@ -482,41 +513,30 @@ const Merchants = () => {
                   }`}
                 >
 
-                  {/* ================= MERCHANT ================= */}
+                  {/* Merchant */}
+
                   <td className="px-5 py-4">
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
 
                       <div
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                           isDark
                             ? "bg-indigo-500/10 text-indigo-400"
                             : "bg-indigo-50 text-indigo-600"
                         }`}
                       >
-                        <Store size={16} />
+                        <UserRound size={14} />
                       </div>
 
                       <div>
 
-                        <p
-                          className={`text-sm font-semibold ${
-                            isDark
-                              ? "text-gray-200"
-                              : "text-gray-800"
-                          }`}
-                        >
-                          {merchant.name}
+                        <p className="text-sm font-semibold">
+                          {merchant.name || "-"}
                         </p>
 
-                        <p
-                          className={`text-[11px] mt-0.5 ${
-                            isDark
-                              ? "text-gray-600"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {merchant.id}
+                        <p className="text-[11px] text-gray-500">
+                          ID: {merchant.userid || "-"}
                         </p>
 
                       </div>
@@ -525,172 +545,102 @@ const Merchants = () => {
 
                   </td>
 
-                  {/* ================= CONTACT ================= */}
+                  {/* Mobile */}
+
                   <td className="px-5 py-4">
 
-                    <div className="flex items-center gap-2">
+                    <span className="text-sm">
+                      {merchant.mobile_number || "-"}
+                    </span>
 
-                      <UserRound
+                  </td>
+
+                  {/* Email */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm text-gray-500">
+                      {merchant.email || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* Corp ID */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm font-medium">
+                      {merchant.corp_id || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* PAN */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm text-gray-500">
+                      {merchant.pan || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* GST */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm text-gray-500">
+                      {merchant.gst || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* KYC */}
+
+                  <td className="px-5 py-4">
+
+                    <span
+                      className={`px-2.5 py-1 rounded-md border text-xs font-medium ${kycStatusClass(
+                        merchant.kyc_status
+                      )}`}
+                    >
+                      {Number(merchant.kyc_status)===1?"Completed":"Pending" || ""}
+                    </span>
+
+                  </td>
+
+                  {/* Created */}
+
+                  {/* <td className="px-5 py-4">
+
+                    <div className="flex items-center gap-1.5">
+
+                      <CalendarDays
                         size={14}
-                        className={
-                          isDark
-                            ? "text-gray-600"
-                            : "text-gray-400"
-                        }
+                        className="text-gray-400"
                       />
 
-                      <div>
-
-                        <p
-                          className={`text-xs ${
-                            isDark
-                              ? "text-gray-300"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {merchant.email}
-                        </p>
-
-                        <p
-                          className={`text-[11px] mt-0.5 ${
-                            isDark
-                              ? "text-gray-600"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {merchant.phone}
-                        </p>
-
-                      </div>
+                      <span className="text-sm text-gray-500 whitespace-nowrap">
+                        {merchant.create_on || "-"}
+                      </span>
 
                     </div>
 
-                  </td>
+                  </td> */}
 
-                  {/* ================= TOTAL ================= */}
+                  {/* Action */}
+
                   <td className="px-5 py-4">
 
-                    <span
-                      className={`text-sm font-semibold ${
-                        isDark
-                          ? "text-gray-200"
-                          : "text-gray-800"
-                      }`}
-                    >
-                      {merchant.totalDisputes}
-                    </span>
-
-                  </td>
-
-                  {/* ================= OPEN ================= */}
-                  <td className="px-5 py-4">
-
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${
-                        isDark
-                          ? "bg-orange-500/10 text-orange-400"
-                          : "bg-orange-50 text-orange-600"
-                      }`}
-                    >
-                      {merchant.openDisputes}
-                    </span>
-
-                  </td>
-
-                  {/* ================= RESOLVED ================= */}
-                  <td className="px-5 py-4">
-
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${
-                        isDark
-                          ? "bg-green-500/10 text-green-400"
-                          : "bg-green-50 text-green-600"
-                      }`}
-                    >
-                      {merchant.resolvedDisputes}
-                    </span>
-
-                  </td>
-
-                  {/* ================= CLOSED ================= */}
-                  <td className="px-5 py-4">
-
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${
-                        isDark
-                          ? "bg-gray-800 text-gray-400"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {merchant.closedDisputes}
-                    </span>
-
-                  </td>
-
-                  {/* ================= AMOUNT ================= */}
-                  <td className="px-5 py-4">
-
-                    <span
-                      className={`text-sm font-semibold ${
-                        isDark
-                          ? "text-gray-200"
-                          : "text-gray-800"
-                      }`}
-                    >
-                      {merchant.disputedAmount}
-                    </span>
-
-                  </td>
-
-                  {/* ================= STATUS ================= */}
-                  <td className="px-5 py-4">
-
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
-                        merchant.status === "Active"
-                          ? isDark
-                            ? "bg-green-500/10 text-green-400"
-                            : "bg-green-50 text-green-600"
-                          : isDark
-                          ? "bg-red-500/10 text-red-400"
-                          : "bg-red-50 text-red-600"
-                      }`}
-                    >
-
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          merchant.status === "Active"
-                            ? "bg-green-500"
-                            : "bg-red-500"
-                        }`}
-                      />
-
-                      {merchant.status}
-
-                    </span>
-
-                  </td>
-
-                  {/* ================= ACTION ================= */}
-                  <td className="px-5 py-4 text-right">
-
-                    <button
-                      className="
-                        inline-flex items-center gap-1.5
-                        px-3 py-1.5
-                        rounded-md
-                        text-xs font-semibold
-                        bg-indigo-50 text-indigo-600
-                        border border-indigo-200
-                        hover:bg-indigo-600 hover:text-white
-                        transition-all duration-200
-                        active:scale-95
-                      "
-                    >
-                      <Eye size={13} />
-                      View
-                    </button>
-
+                 <button
+  onClick={() => {
+    setSelectedMerchant(merchant);
+    setShowDisputePanel(true);
+  }}
+  className="bg-blue-600 rounded-[5px] w-[60px] text-white text-[12px]"
+>
+  Manage Disputes
+</button>
                   </td>
 
                 </tr>
@@ -703,43 +653,13 @@ const Merchants = () => {
 
                 <td
                   colSpan="9"
-                  className="px-5 py-16 text-center"
+                  className={`text-center py-12 text-sm ${
+                    isDark
+                      ? "text-gray-500"
+                      : "text-gray-400"
+                  }`}
                 >
-
-                  <div className="flex flex-col items-center">
-
-                    <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        isDark
-                          ? "bg-gray-900 text-gray-600"
-                          : "bg-gray-50 text-gray-400"
-                      }`}
-                    >
-                      <Store size={22} />
-                    </div>
-
-                    <p
-                      className={`mt-3 text-sm font-semibold ${
-                        isDark
-                          ? "text-gray-300"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      No merchants found
-                    </p>
-
-                    <p
-                      className={`mt-1 text-xs ${
-                        isDark
-                          ? "text-gray-600"
-                          : "text-gray-400"
-                      }`}
-                    >
-                      Try changing your search or filter.
-                    </p>
-
-                  </div>
-
+                  No merchants found
                 </td>
 
               </tr>
@@ -752,25 +672,110 @@ const Merchants = () => {
 
       </div>
 
-      {/* ================= FOOTER ================= */}
+      {/* =========================================
+          PAGINATION FOOTER
+      ========================================= */}
+
       <div
-        className={`px-5 py-3 border-t flex items-center justify-between ${
+        className={`px-5 py-3 border-t flex flex-col md:flex-row md:items-center md:justify-between gap-3 ${
           isDark
-            ? "border-gray-800 text-gray-600"
-            : "border-gray-200 text-gray-400"
+            ? "border-gray-800"
+            : "border-gray-200"
         }`}
       >
 
-        <span className="text-xs">
-          Showing {filteredMerchants.length} of{" "}
-          {merchants.length} merchants
+        {/* Showing */}
+
+        <span
+          className={`text-xs ${
+            isDark
+              ? "text-gray-500"
+              : "text-gray-500"
+          }`}
+        >
+          Showing{" "}
+          {total === 0
+            ? 0
+            : (currentPage - 1) * itemsPerPage + 1}{" "}
+          to{" "}
+          {Math.min(
+            currentPage * itemsPerPage,
+            total
+          )}{" "}
+          of {total} merchants
         </span>
 
-        <span className="text-xs">
-          Merchant records
-        </span>
+        {/* Pagination */}
+
+        <div className="flex items-center gap-1.5">
+
+          {/* Previous */}
+
+          <button
+            onClick={handlePrevious}
+            disabled={currentPage === 1}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition ${
+              currentPage === 1
+                ? "opacity-40 cursor-not-allowed"
+                : isDark
+                ? "border-gray-800 text-gray-400 hover:bg-gray-900"
+                : "border-gray-200 text-gray-500 hover:bg-gray-50"
+            }`}
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          {/* Page Numbers */}
+
+          {getPageNumbers().map((pageNumber) => (
+
+            <button
+              key={pageNumber}
+              onClick={() =>
+                setCurrentPage(pageNumber)
+              }
+              className={`w-8 h-8 rounded-lg text-xs font-medium transition ${
+                currentPage === pageNumber
+                  ? "bg-indigo-600 text-white"
+                  : isDark
+                  ? "text-gray-400 hover:bg-gray-900"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              {pageNumber}
+            </button>
+
+          ))}
+
+          {/* Next */}
+
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition ${
+              currentPage === totalPages
+                ? "opacity-40 cursor-not-allowed"
+                : isDark
+                ? "border-gray-800 text-gray-400 hover:bg-gray-900"
+                : "border-gray-200 text-gray-500 hover:bg-gray-50"
+            }`}
+          >
+            <ChevronRight size={16} />
+          </button>
+
+        </div>
 
       </div>
+      <MerchantWiseDisputePanel
+  isOpen={showDisputePanel}
+  onClose={() => {
+    setShowDisputePanel(false);
+    setSelectedMerchant(null);
+  }}
+  corpId={selectedMerchant?.corp_id}
+  merchantName={selectedMerchant?.corp_name || selectedMerchant?.name}
+  isDark={isDark}
+/>
 
     </div>
   );

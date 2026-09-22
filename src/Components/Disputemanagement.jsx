@@ -28,18 +28,18 @@ const Disputemanagement = () => {
       path: "/dashboard/dispute/open",
       icon: FileWarning,
     },
-    {
-      name: "Close Disputes",
-      path: "/dashboard/dispute/close",
-      icon: FolderOpen,
-    },
+    // {
+    //   name: "Close Disputes",
+    //   path: "/dashboard/dispute/close",
+    //   icon: FolderOpen,
+    // },
     {
       name: "Resolve Disputes",
       path: "/dashboard/dispute/resolve",
       icon: CheckCircle2,
     },
     {
-      name: "Underreview Disputes",
+      name: "Under Review Disputes",
       path: "/dashboard/dispute/underreview",
       icon: CheckCircle2,
     },

@@ -356,7 +356,7 @@ const LedgerByCompany = () => {
               SUMMARY CARDS
           ====================================================== */}
 
-          <div
+          {/* <div
             className={`flex flex-col sm:flex-row gap-5 rounded-xl p-5 ${
               theme === "dark"
                 ? "bg-gray-900"
@@ -477,7 +477,7 @@ const LedgerByCompany = () => {
                 ));
               })()
             )}
-          </div>
+          </div> */}
 
           {/* =====================================================
               TABLE + FILTER SECTION

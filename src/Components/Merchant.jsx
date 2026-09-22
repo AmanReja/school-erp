@@ -4,7 +4,7 @@ import { Theme } from "../Contexts/Theme";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createMerchant, getDetails, updateMerchant, deleteMerchant,
-  getmarchentent_by_companyid, delete_entity, getmarchentent_by_companyid_deleted
+   delete_entity, 
 } from "../redux/action";
 import {
   X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
