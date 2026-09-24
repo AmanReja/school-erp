@@ -8,7 +8,7 @@ import {
   Workflow,
   BookOpen,
   ArrowLeftRight,
-  ChevronRight,SlidersHorizontal 
+  ChevronRight,SlidersHorizontal ,Cog 
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -31,6 +31,18 @@ const MerchantWiseDetailsPannel = ({
   };
 
   const menuItems = [
+    {
+      label: "Set Commercial",
+      description: "Manage Commercial operations",
+      path: "commerciallist/commercialmaster",
+      icon: WalletCards,
+      darkIcon: "text-orange-400",
+      lightIcon: "text-orange-600",
+      darkBg: "bg-orange-500/10",
+      lightBg: "bg-orange-50",
+      darkHover: "hover:border-orange-500/40 hover:bg-orange-500/5",
+      lightHover: "hover:border-orange-200 hover:bg-orange-50/50",
+    },
     {
       label: "Manual Fund",
       description: "Manage manual fund operations",
@@ -94,7 +106,7 @@ const MerchantWiseDetailsPannel = ({
     {
       label: "Transactions",
       description: "View merchant transactions",
-      path: "transaction",
+      path: "transaction/transactionMaster",
       icon: ArrowLeftRight,
       darkIcon: "text-indigo-400",
       lightIcon: "text-indigo-600",
@@ -108,6 +120,18 @@ const MerchantWiseDetailsPannel = ({
       description: "View merchant Settlements",
       path: "Settlement",
       icon: SlidersHorizontal,
+      darkIcon: "text-pink-400",
+      lightIcon: "text-pink-600",
+      darkBg: "bg-indigo-500/10",
+      lightBg: "bg-indigo-50",
+      darkHover: "hover:border-indigo-500/40 hover:bg-indigo-500/5",
+      lightHover: "hover:border-indigo-200 hover:bg-indigo-50/50",
+    },
+    {
+      label: "Merchant Config",
+      description: "View and edit merchant configaration",
+      path: "merchant/merchant_configuration",
+      icon: Cog ,
       darkIcon: "text-pink-400",
       lightIcon: "text-pink-600",
       darkBg: "bg-indigo-500/10",

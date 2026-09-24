@@ -1,10 +1,4 @@
-import React, {
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
+import React, { useContext, useEffect, useState } from "react";
 import {
   Search,
   Filter,
@@ -12,55 +6,65 @@ import {
   CalendarDays,
   UserRound,
   FileText,
+  Eye,
   RotateCcw,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Eye,
 } from "lucide-react";
+import CreateMerchantModal from "../../models/CreateMerchantModal";
+import UpdateMerchantModal from "../../models/UpdateMerchantModal";
 
+import { getDetails } from "../../redux/action";
 import { Theme } from "../../Contexts/Theme";
 import { useDispatch, useSelector } from "react-redux";
-import { getDetails } from "../../redux/action";
+import MerchantWiseDetailsPannel from "../../models/MerchantWiseDetailsPannel";
+
 
 const ActiveMerchants = () => {
   const dispatch = useDispatch();
 
   const { theme } = useContext(Theme);
   const isDark = theme === "dark";
+  const [showDetailsPanel, setShowDetailsPanel] = useState(false);
+  // const [selectedMerchant, setSelectedMerchant] = useState(null);
 
-  // =========================
-  // STATE
-  // =========================
+  // ==============================
+  // State
+  // ==============================
+const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("All");
-
-  // Active Merchants page
-  // 1 = Active
-  const [isActive, setIsActive] = useState("Active");
-
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+const [selectedMerchant, setSelectedMerchant] = useState(null);
+const [isActive, setIsActive] = useState("Active");
 
-  // =========================
-  // REDUX DATA
-  // =========================
+
+  // ==============================
+  // Redux
+  // ==============================
+
+const handleEdit = (merchant) => {
+  setSelectedMerchant(merchant);
+  setIsUpdateModalOpen(true);
+};
+
+
   const merchantData = useSelector(
     (state) => state.merchants?.merchants || {}
   );
 
+  console.log("merchantData", merchantData);
+
   const merchants = merchantData?.data || [];
+  const total = merchantData?.total || 0;
+  const totalPages = merchantData?.totalPages || 1;
 
-  const total = Number(merchantData?.total || 0);
+  // ==============================
+  // Fetch merchants
+  // ==============================
 
-  const totalPages = Math.max(
-    Number(merchantData?.totalPages || 1),
-    1
-  );
-
-  // =========================
-  // FETCH ACTIVE MERCHANTS
-  // =========================
   useEffect(() => {
     dispatch(
       getDetails(
@@ -70,57 +74,49 @@ const ActiveMerchants = () => {
         isActive
       )
     );
-  }, [
-    dispatch,
-    currentPage,
-    itemsPerPage,
-    search,
-    isActive,
-  ]);
+  }, [dispatch,isActive, currentPage, itemsPerPage, search]);
 
-  // =========================
-  // SEARCH
-  // =========================
+  // ==============================
+  // Search
+  // ==============================
+
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setCurrentPage(1);
   };
 
-  // =========================
-  // KYC FILTER
-  // =========================
-  const handleStatusChange = (e) => {
-    setStatus(e.target.value);
-    setCurrentPage(1);
-  };
+  // ==============================
+  // Limit
+  // ==============================
 
-  // =========================
-  // PAGE SIZE
-  // =========================
   const handleLimitChange = (e) => {
     setItemsPerPage(Number(e.target.value));
     setCurrentPage(1);
   };
 
-  // =========================
-  // RESET
-  // =========================
+  // ==============================
+  // Reset
+  // ==============================
+
   const handleReset = () => {
     setSearch("");
-    setStatus("All");
-    setIsActive("1");
     setCurrentPage(1);
     setItemsPerPage(10);
   };
 
-  // =========================
-  // PAGINATION
-  // =========================
+  // ==============================
+  // Previous
+  // ==============================
+
   const handlePrevious = () => {
     if (currentPage > 1) {
       setCurrentPage((prev) => prev - 1);
     }
   };
+
+  // ==============================
+  // Next
+  // ==============================
 
   const handleNext = () => {
     if (currentPage < totalPages) {
@@ -128,113 +124,12 @@ const ActiveMerchants = () => {
     }
   };
 
-  const getPageNumbers = () => {
-    const pages = [];
+  // ==============================
+  // Page numbers
+  // ==============================
 
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
 
-      return pages;
-    }
-
-    pages.push(1);
-
-    if (currentPage > 4) {
-      pages.push("...");
-    }
-
-    const start = Math.max(2, currentPage - 1);
-    const end = Math.min(
-      totalPages - 1,
-      currentPage + 1
-    );
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (currentPage < totalPages - 3) {
-      pages.push("...");
-    }
-
-    pages.push(totalPages);
-
-    return pages;
-  };
-
-  // =========================
-  // KYC STATUS
-  // =========================
-  const getKycStatus = (value) => {
-    if (
-      Number(value) === 1 ||
-      value === "Completed"
-    ) {
-      return "Completed";
-    }
-
-    return "Pending";
-  };
-
-  const kycStatusClass = (value) => {
-    const completed =
-      Number(value) === 1 ||
-      value === "Completed";
-
-    if (completed) {
-      return isDark
-        ? "bg-green-500/10 text-green-400 border-green-500/20"
-        : "bg-green-50 text-green-600 border-green-200";
-    }
-
-    return isDark
-      ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-      : "bg-yellow-50 text-yellow-600 border-yellow-200";
-  };
-
-  // =========================
-  // KYC FILTER
-  // =========================
-  /*
-    Search is already sent to backend.
-
-    Active status is already sent to backend:
-    is_active = 1
-
-    KYC status is not being sent to backend,
-    so we can filter the current page locally.
-  */
-  const filteredMerchants = useMemo(() => {
-    return merchants.filter((merchant) => {
-      const kycStatus = getKycStatus(
-        merchant.kyc_status
-      );
-
-      return (
-        status === "All" ||
-        status === kycStatus
-      );
-    });
-  }, [merchants, status]);
-
-  // =========================
-  // KYC COUNTS
-  // =========================
-  const completedKycCount = merchants.filter(
-    (merchant) =>
-      Number(merchant.kyc_status) === 1 ||
-      merchant.kyc_status === "Completed"
-  ).length;
-
-  const pendingKycCount =
-    merchants.length - completedKycCount;
-
-  // =========================
-  // ROW START / END
-  // =========================
-  const startItem =
+    const startItem =
     total === 0
       ? 0
       : (currentPage - 1) * itemsPerPage + 1;
@@ -244,224 +139,296 @@ const ActiveMerchants = () => {
     total
   );
 
-  // =========================
-  // VIEW MERCHANT
-  // =========================
-  const handleViewMerchant = (merchant) => {
-    console.log("View merchant:", merchant);
+  // ==============================
+  // Page numbers (truncated: 1 2 ... 10 style)
+  // ==============================
 
-    // Add your navigation / drawer logic here
-    // Example:
-    // navigate(`/dashboard/merchant/${merchant.id}`);
+  const getPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const pages = [1];
+
+    const rangeStart = Math.max(2, currentPage - 1);
+    const rangeEnd = Math.min(totalPages - 1, currentPage + 1);
+
+    if (rangeStart > 2) {
+      pages.push("...");
+    }
+
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      pages.push(i);
+    }
+
+    if (rangeEnd < totalPages - 1) {
+      pages.push("...");
+    }
+
+    pages.push(totalPages);
+
+    return pages;
+  };
+
+  // ==============================
+  // KYC status
+  // ==============================
+
+  const kycStatusClass = (value) => {
+    if (Number(value) === 1) {
+      return isDark
+        ? "bg-green-500/10 text-green-400 border-green-500/20"
+        : "bg-green-50 text-green-600 border-green-200";
+    }
+
+    if (Number(value) === 0) {
+      return isDark
+        ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+        : "bg-yellow-50 text-yellow-600 border-yellow-200";
+    }
+
+    return isDark
+      ? "bg-gray-800 text-gray-400 border-gray-700"
+      : "bg-gray-100 text-gray-600 border-gray-200";
   };
 
   return (
     <div
-      className={`min-h-screen p-4 md:p-6 transition-colors duration-200 ${
+      className={`w-full rounded-2xl border ${
         isDark
-          ? "bg-[#0f172a] text-white"
-          : "bg-gray-50 text-gray-900"
+          ? "bg-gray-950 border-gray-800"
+          : "bg-white border-gray-200"
       }`}
     >
-      {/* ========================================= */}
-      {/* HEADER */}
-      {/* ========================================= */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center ${
-              isDark
-                ? "bg-green-500/10 text-green-400"
-                : "bg-green-50 text-green-600"
-            }`}
-          >
-            <Store size={22} />
-          </div>
+      {/* =========================================
+          HEADER
+      ========================================= */}
 
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold">
-              Active Merchants
-            </h1>
+      <div
+        className={`px-5 py-5 border-b ${
+          isDark ? "border-gray-800" : "border-gray-200"
+        }`}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 
-            <p
-              className={`text-sm mt-0.5 ${
-                isDark
-                  ? "text-gray-400"
-                  : "text-gray-500"
-              }`}
-            >
-              Manage and monitor active merchants
-            </p>
-          </div>
-        </div>
+          {/* Title */}
 
-        {/* TOTAL ACTIVE */}
-        <div
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${
-            isDark
-              ? "bg-slate-800 border-slate-700"
-              : "bg-white border-gray-200"
-          }`}
-        >
-          <div
-            className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-              isDark
-                ? "bg-green-500/10 text-green-400"
-                : "bg-green-50 text-green-600"
-            }`}
-          >
-            <CheckCircle2 size={19} />
-          </div>
-
-          <div>
-            <p
-              className={`text-xs ${
-                isDark
-                  ? "text-gray-400"
-                  : "text-gray-500"
-              }`}
-            >
-              Total Active
-            </p>
-
-            <p className="text-lg font-bold">
-              {total}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================= */}
-      {/* SUMMARY CARDS */}
-      {/* ========================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {/* ACTIVE */}
-        <div
-          className={`rounded-2xl border p-5 ${
-            isDark
-              ? "bg-slate-800 border-slate-700"
-              : "bg-white border-gray-200"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p
-                className={`text-sm ${
-                  isDark
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                Active Merchants
-              </p>
-
-              <h3 className="text-2xl font-bold mt-1">
-                {total}
-              </h3>
-            </div>
+          <div className="flex items-center gap-3">
 
             <div
-              className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                 isDark
-                  ? "bg-green-500/10 text-green-400"
-                  : "bg-green-50 text-green-600"
+                  ? "bg-indigo-500/10 text-indigo-400"
+                  : "bg-indigo-50 text-indigo-600"
               }`}
             >
               <Store size={21} />
             </div>
-          </div>
-        </div>
 
-        {/* KYC COMPLETED */}
-        <div
-          className={`rounded-2xl border p-5 ${
-            isDark
-              ? "bg-slate-800 border-slate-700"
-              : "bg-white border-gray-200"
-          }`}
-        >
-          <div className="flex items-center justify-between">
             <div>
-              <p
-                className={`text-sm ${
+
+              <h2
+                className={`text-lg font-semibold ${
                   isDark
-                    ? "text-gray-400"
+                    ? "text-gray-100"
+                    : "text-gray-800"
+                }`}
+              >
+                Merchant Master
+              </h2>
+
+              <p
+                className={`text-xs mt-0.5 ${
+                  isDark
+                    ? "text-gray-500"
                     : "text-gray-500"
                 }`}
               >
-                KYC Completed
+                View and manage registered merchants.
               </p>
 
-              <h3 className="text-2xl font-bold mt-1">
-                {completedKycCount}
-              </h3>
             </div>
 
-            <div
-              className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+          </div>
+
+          {/* Total */}
+
+          <div
+            className={`px-4 py-2 rounded-xl border ${
+              isDark
+                ? "bg-gray-900 border-gray-800"
+                : "bg-gray-50 border-gray-200"
+            }`}
+          >
+
+            <p
+              className={`text-[10px] uppercase tracking-wider ${
                 isDark
-                  ? "bg-blue-500/10 text-blue-400"
-                  : "bg-blue-50 text-blue-600"
+                  ? "text-gray-500"
+                  : "text-gray-400"
               }`}
             >
-              <CheckCircle2 size={21} />
-            </div>
-          </div>
-        </div>
+              Total Merchants
+            </p>
 
-        {/* KYC PENDING */}
-        <div
-          className={`rounded-2xl border p-5 ${
-            isDark
-              ? "bg-slate-800 border-slate-700"
-              : "bg-white border-gray-200"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p
-                className={`text-sm ${
-                  isDark
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                KYC Pending
-              </p>
-
-              <h3 className="text-2xl font-bold mt-1">
-                {pendingKycCount}
-              </h3>
-            </div>
-
-            <div
-              className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+            <p
+              className={`text-lg font-bold ${
                 isDark
-                  ? "bg-yellow-500/10 text-yellow-400"
-                  : "bg-yellow-50 text-yellow-600"
+                  ? "text-gray-100"
+                  : "text-gray-800"
               }`}
             >
-              <FileText size={21} />
-            </div>
+              {total}
+            </p>
+
           </div>
+          <button
+  onClick={() => setIsCreateModalOpen(true)}
+  className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium"
+>
+  + Create Merchant
+</button>
+
         </div>
       </div>
 
-      {/* ========================================= */}
-      {/* FILTER CARD */}
-      {/* ========================================= */}
-      <div
-        className={`rounded-2xl border p-4 mb-6 ${
-          isDark
-            ? "bg-slate-800 border-slate-700"
-            : "bg-white border-gray-200"
-        }`}
-      >
-        <div className="flex flex-col xl:flex-row gap-3">
-          {/* SEARCH */}
+      {/* =========================================
+          SUMMARY
+      ========================================= */}
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-5">
+
+        {/* Total */}
+
+        <div
+          className={`rounded-xl border p-4 ${
+            isDark
+              ? "bg-gray-900 border-gray-800"
+              : "bg-gray-50 border-gray-200"
+          }`}
+        >
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-xs text-gray-500">
+              Total Merchants
+            </span>
+
+            <Store
+              size={16}
+              className="text-indigo-500"
+            />
+
+          </div>
+
+          <p
+            className={`mt-2 text-xl font-bold ${
+              isDark
+                ? "text-gray-100"
+                : "text-gray-800"
+            }`}
+          >
+            {total}
+          </p>
+
+        </div>
+
+        {/* Completed KYC */}
+
+        <div
+          className={`rounded-xl border p-4 ${
+            isDark
+              ? "bg-gray-900 border-gray-800"
+              : "bg-gray-50 border-gray-200"
+          }`}
+        >
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-xs text-gray-500">
+              KYC Completed
+            </span>
+
+            <CheckCircle2
+              size={16}
+              className="text-green-500"
+            />
+
+          </div>
+
+          <p
+            className={`mt-2 text-xl font-bold ${
+              isDark
+                ? "text-gray-100"
+                : "text-gray-800"
+            }`}
+          >
+            {
+              merchants.filter(
+                (merchant) =>
+                  merchant.kyc_status === "Completed"
+              ).length
+            }
+          </p>
+
+        </div>
+
+        {/* Pending KYC */}
+
+        <div
+          className={`rounded-xl border p-4 ${
+            isDark
+              ? "bg-gray-900 border-gray-800"
+              : "bg-gray-50 border-gray-200"
+          }`}
+        >
+
+          <div className="flex items-center justify-between">
+
+            <span className="text-xs text-gray-500">
+              KYC Pending
+            </span>
+
+            <FileText
+              size={16}
+              className="text-yellow-500"
+            />
+
+          </div>
+
+          <p
+            className={`mt-2 text-xl font-bold ${
+              isDark
+                ? "text-gray-100"
+                : "text-gray-800"
+            }`}
+          >
+            {
+              merchants.filter(
+                (merchant) =>
+                  merchant.kyc_status !== "Completed"
+              ).length
+            }
+          </p>
+
+        </div>
+
+      </div>
+
+      {/* =========================================
+          SEARCH / FILTER
+      ========================================= */}
+
+      <div className="px-5 pb-5">
+
+        <div className="flex flex-col lg:flex-row gap-3">
+
+          {/* Search */}
+
           <div className="relative flex-1">
+
             <Search
-              size={18}
+              size={17}
               className={`absolute left-3 top-1/2 -translate-y-1/2 ${
                 isDark
                   ? "text-gray-500"
@@ -471,342 +438,313 @@ const ActiveMerchants = () => {
 
             <input
               type="text"
+              placeholder="Search merchant, email, mobile or Corp ID..."
               value={search}
               onChange={handleSearch}
-              placeholder="Search merchant, email, mobile, corp ID..."
-              className={`w-full h-11 pl-10 pr-4 rounded-xl border outline-none transition ${
+              className={`w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm outline-none ${
                 isDark
-                  ? "bg-slate-900 border-slate-700 text-white placeholder:text-gray-500 focus:border-green-500"
-                  : "bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-green-500"
+                  ? "bg-gray-900 border-gray-800 text-gray-200 placeholder:text-gray-600 focus:border-indigo-500"
+                  : "bg-white border-gray-200 text-gray-800 placeholder:text-gray-400 focus:border-indigo-400"
               }`}
             />
+
           </div>
 
-          {/* KYC FILTER */}
+          {/* Limit */}
+
           <div className="relative">
-            <Filter
-              size={17}
-              className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-                isDark
-                  ? "text-gray-500"
-                  : "text-gray-400"
-              }`}
-            />
 
             <select
-              value={status}
-              onChange={handleStatusChange}
-              className={`h-11 pl-9 pr-9 rounded-xl border outline-none appearance-none min-w-[160px] ${
+              value={itemsPerPage}
+              onChange={handleLimitChange}
+              className={`appearance-none px-4 pr-8 py-2.5 rounded-lg border text-sm outline-none ${
                 isDark
-                  ? "bg-slate-900 border-slate-700 text-white"
-                  : "bg-gray-50 border-gray-200 text-gray-700"
+                  ? "bg-gray-900 border-gray-800 text-gray-300"
+                  : "bg-white border-gray-200 text-gray-700"
               }`}
             >
-              <option value="All">
-                All KYC
-              </option>
-
-              <option value="Completed">
-                Completed
-              </option>
-
-              <option value="Pending">
-                Pending
-              </option>
+              <option value={10}>10 / page</option>
+              <option value={20}>20 / page</option>
+              <option value={50}>50 / page</option>
+              <option value={100}>100 / page</option>
             </select>
+
           </div>
 
-          {/* PAGE LIMIT */}
-          <select
-            value={itemsPerPage}
-            onChange={handleLimitChange}
-            className={`h-11 px-4 rounded-xl border outline-none ${
-              isDark
-                ? "bg-slate-900 border-slate-700 text-white"
-                : "bg-gray-50 border-gray-200 text-gray-700"
-            }`}
-          >
-            <option value={10}>10 / page</option>
-            <option value={20}>20 / page</option>
-            <option value={50}>50 / page</option>
-            <option value={100}>100 / page</option>
-          </select>
+          {/* Reset */}
 
-          {/* RESET */}
           <button
-            type="button"
             onClick={handleReset}
-            className={`h-11 px-4 rounded-xl border flex items-center justify-center gap-2 transition ${
+            className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium ${
               isDark
-                ? "border-slate-700 bg-slate-900 text-gray-300 hover:bg-slate-700"
-                : "border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
+                ? "border-gray-800 text-gray-400 hover:bg-gray-900"
+                : "border-gray-200 text-gray-500 hover:bg-gray-50"
             }`}
           >
-            <RotateCcw size={17} />
+            <RotateCcw size={15} />
             Reset
           </button>
+
         </div>
+
       </div>
 
-      {/* ========================================= */}
-      {/* TABLE */}
-      {/* ========================================= */}
-      <div
-        className={`rounded-2xl border overflow-hidden ${
-          isDark
-            ? "bg-slate-800 border-slate-700"
-            : "bg-white border-gray-200"
-        }`}
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1100px]">
-            <thead
-              className={
+      {/* =========================================
+          TABLE
+      ========================================= */}
+
+      <div className="overflow-x-auto">
+
+        <table className="w-full text-left border-collapse">
+
+          <thead>
+
+            <tr
+              className={`border-y text-[11px] uppercase tracking-wider ${
                 isDark
-                  ? "bg-slate-900/70"
-                  : "bg-gray-50"
-              }
+                  ? "bg-gray-900/70 border-gray-800 text-gray-500"
+                  : "bg-gray-50 border-gray-200 text-gray-500"
+              }`}
             >
-              <tr
-                className={`text-left text-xs uppercase tracking-wider ${
-                  isDark
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                <th className="px-5 py-4 font-semibold">
-                  Merchant
-                </th>
 
-                <th className="px-5 py-4 font-semibold">
-                  Mobile
-                </th>
+              <th className="px-5 py-3">
+                Merchant
+              </th>
 
-                <th className="px-5 py-4 font-semibold">
-                  Email
-                </th>
+              <th className="px-5 py-3">
+                Mobile
+              </th>
 
-                <th className="px-5 py-4 font-semibold">
-                  Corp ID
-                </th>
+              <th className="px-5 py-3">
+                Email
+              </th>
 
-                <th className="px-5 py-4 font-semibold">
-                  PAN
-                </th>
+              <th className="px-5 py-3">
+                Corp ID
+              </th>
 
-                <th className="px-5 py-4 font-semibold">
-                  GST
-                </th>
+              <th className="px-5 py-3">
+                PAN
+              </th>
 
-                <th className="px-5 py-4 font-semibold">
-                  KYC
-                </th>
+              <th className="px-5 py-3">
+                GST
+              </th>
 
-                <th className="px-5 py-4 font-semibold text-center">
-                  Action
-                </th>
-              </tr>
-            </thead>
+              <th className="px-5 py-3">
+                KYC
+              </th>
 
-            <tbody
-              className={
-                isDark
-                  ? "divide-y divide-slate-700"
-                  : "divide-y divide-gray-100"
-              }
-            >
-              {filteredMerchants.length > 0 ? (
-                filteredMerchants.map(
-                  (merchant, index) => {
-                    const kycStatus =
-                      getKycStatus(
-                        merchant.kyc_status
-                      );
+              {/* <th className="px-5 py-3">
+                Created
+              </th> */}
 
-                    return (
-                      <tr
-                        key={
-                          merchant.id ||
-                          merchant.userid ||
-                          merchant.corp_id ||
-                          index
-                        }
-                        className={`transition ${
-                          isDark
-                            ? "hover:bg-slate-700/40"
-                            : "hover:bg-gray-50"
-                        }`}
-                      >
-                        {/* MERCHANT */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                                isDark
-                                  ? "bg-green-500/10 text-green-400"
-                                  : "bg-green-50 text-green-600"
-                              }`}
-                            >
-                              <UserRound
-                                size={18}
-                              />
-                            </div>
+              <th className="px-5 py-3">
+                Action
+              </th>
 
-                            <div>
-                              <p className="font-semibold text-sm">
-                                {merchant.name ||
-                                  merchant.merchant_name ||
-                                  "-"}
-                              </p>
+            </tr>
 
-                              <p
-                                className={`text-xs mt-0.5 ${
-                                  isDark
-                                    ? "text-gray-500"
-                                    : "text-gray-400"
-                                }`}
-                              >
-                                {merchant.userid ||
-                                  merchant.login_id ||
-                                  "-"}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
+          </thead>
 
-                        {/* MOBILE */}
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2 text-sm">
-                            <span>
-                              {merchant.mobile_number ||
-                                merchant.mobile ||
-                                "-"}
-                            </span>
-                          </div>
-                        </td>
+          <tbody>
 
-                        {/* EMAIL */}
-                        <td className="px-5 py-4">
-                          <span className="text-sm">
-                            {merchant.email || "-"}
-                          </span>
-                        </td>
+            {merchants.length > 0 ? (
 
-                        {/* CORP ID */}
-                        <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${
-                              isDark
-                                ? "bg-slate-700 text-gray-300"
-                                : "bg-gray-100 text-gray-700"
-                            }`}
-                          >
-                            {merchant.corp_id ||
-                              "-"}
-                          </span>
-                        </td>
+              merchants.map((merchant, index) => (
 
-                        {/* PAN */}
-                        <td className="px-5 py-4">
-                          <span className="text-sm">
-                            {merchant.pan ||
-                              merchant.pan_number ||
-                              "-"}
-                          </span>
-                        </td>
+                <tr
+                  key={merchant.userid || index}
+                  className={`border-b transition ${
+                    isDark
+                      ? "border-gray-800 hover:bg-gray-900/60"
+                      : "border-gray-100 hover:bg-gray-50"
+                  }`}
+                >
 
-                        {/* GST */}
-                        <td className="px-5 py-4">
-                          <span className="text-sm">
-                            {merchant.gst ||
-                              merchant.gst_number ||
-                              "-"}
-                          </span>
-                        </td>
+                  {/* Merchant */}
 
-                        {/* KYC */}
-                        <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${kycStatusClass(
-                              merchant.kyc_status
-                            )}`}
-                          >
-                            <CheckCircle2
-                              size={13}
-                            />
+                  <td className="px-5 py-4">
 
-                            {kycStatus}
-                          </span>
-                        </td>
+                    <div className="flex items-center gap-2.5">
 
-                        {/* ACTION */}
-                        <td className="px-5 py-4">
-                          <div className="flex justify-center">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleViewMerchant(
-                                  merchant
-                                )
-                              }
-                              className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
-                                isDark
-                                  ? "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
-                                  : "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                              }`}
-                            >
-                              <Eye size={16} />
-                              View
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  }
-                )
-              ) : (
-                <tr>
-                  <td
-                    colSpan={8}
-                    className="px-5 py-16 text-center"
-                  >
-                    <div className="flex flex-col items-center justify-center">
                       <div
-                        className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                           isDark
-                            ? "bg-slate-700 text-gray-500"
-                            : "bg-gray-100 text-gray-400"
+                            ? "bg-indigo-500/10 text-indigo-400"
+                            : "bg-indigo-50 text-indigo-600"
                         }`}
                       >
-                        <Store size={24} />
+                        <UserRound size={14} />
                       </div>
 
-                      <p className="font-semibold">
-                        No active merchants found
-                      </p>
+                      <div>
 
-                      <p
-                        className={`text-sm mt-1 ${
-                          isDark
-                            ? "text-gray-500"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        Try changing your search or
-                        KYC filter.
-                      </p>
+                        <p className="text-sm font-semibold">
+                          {merchant.name || "-"}
+                        </p>
+
+                        <p className="text-[11px] text-gray-500">
+                          ID: {merchant.userid || "-"}
+                        </p>
+
+                      </div>
+
                     </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
 
-        {/* ========================================= */}
-        {/* PAGINATION */}
-        {/* ========================================= */}
-        <div
+                  </td>
+
+                  {/* Mobile */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm">
+                      {merchant.mobile_number || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* Email */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm text-gray-500">
+                      {merchant.email || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* Corp ID */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm font-medium">
+                      {merchant.corp_id || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* PAN */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm text-gray-500">
+                      {merchant.pan || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* GST */}
+
+                  <td className="px-5 py-4">
+
+                    <span className="text-sm text-gray-500">
+                      {merchant.gst || "-"}
+                    </span>
+
+                  </td>
+
+                  {/* KYC */}
+
+                  <td className="px-5 py-4">
+
+                    <span
+                      className={`px-2.5 py-1 rounded-md border text-xs font-medium ${kycStatusClass(
+                        merchant.kyc_status
+                      )}`}
+                    >
+                      {Number(merchant.kyc_status)===1?"Completed":"Pending" || ""}
+                    </span>
+
+                  </td>
+
+                  {/* Created */}
+
+                  {/* <td className="px-5 py-4">
+
+                    <div className="flex items-center gap-1.5">
+
+                      <CalendarDays
+                        size={14}
+                        className="text-gray-400"
+                      />
+
+                      <span className="text-sm text-gray-500 whitespace-nowrap">
+                        {merchant.create_on || "-"}
+                      </span>
+
+                    </div>
+
+                  </td> */}
+
+                  {/* Action */}
+
+                  <td className="px-5 py-4">
+
+                    <button onClick={()=>{handleEdit(merchant)}}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition ${
+                        isDark
+                          ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 hover:bg-indigo-500 hover:text-white"
+                          : "bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-600 hover:text-white"
+                      }`}
+                    >
+                      
+                      Update
+                    </button>
+
+                  </td>
+                  <td className="px-5 py-4">
+
+                    <button onClick={()=>{
+                      setSelectedMerchant(merchant)
+                      setShowDetailsPanel(true)
+                    }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition ${
+                        isDark
+                          ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20 hover:bg-indigo-500 hover:text-white"
+                          : "bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-600 hover:text-white"
+                      }`}
+                    >
+                      
+                      Details
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              ))
+
+            ) : (
+
+              <tr>
+
+                <td
+                  colSpan="9"
+                  className={`text-center py-12 text-sm ${
+                    isDark
+                      ? "text-gray-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  No merchants found
+                </td>
+
+              </tr>
+
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      {/* =========================================
+          PAGINATION FOOTER
+      ========================================= */}
+
+  <div
           className={`px-5 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${
             isDark
               ? "border-slate-700"
@@ -937,7 +875,32 @@ const ActiveMerchants = () => {
             </button>
           </div>
         </div>
-      </div>
+      <CreateMerchantModal
+  isOpen={isCreateModalOpen}
+  onClose={() => setIsCreateModalOpen(false)}
+/>
+<UpdateMerchantModal
+  isOpen={isUpdateModalOpen}
+  onClose={() => {
+    setIsUpdateModalOpen(false);
+    setSelectedMerchant(null);
+  }}
+  merchant={selectedMerchant}
+/>
+<MerchantWiseDetailsPannel
+  isOpen={showDetailsPanel}
+  onClose={() => {
+    setShowDetailsPanel(false);
+    setSelectedMerchant(null);
+  }}
+  corpId={selectedMerchant?.corp_id}
+  merchantName={
+    selectedMerchant?.corp_name ||
+    selectedMerchant?.name
+  }
+  isDark={isDark}
+/>
+
     </div>
   );
 };

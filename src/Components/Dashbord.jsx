@@ -98,6 +98,13 @@ const Dashbord = () => {
       show: showp,
       setShow: setShowp,
     },
+    {
+      to: "/dashboard/ledger",
+      icon: "fa-solid fa-book",       // Services / Commercial Master
+      label: "Ledger",
+      show: showp,
+      setShow: setShowp,
+    },
 
   ];
   

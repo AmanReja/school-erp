@@ -98,6 +98,7 @@ export const UPDATE_ENTITY_IP = "UPDATE_ENTITY_IP";
 export const GET_TOKEN_VALIDITY = "GET_TOKEN_VALIDITY";
 
 export const GET_WALLET_LEDGER = "GET_WALLET_LEDGER";
+export const GET_ALL_WALLET_LEDGER = "GET_ALL_WALLET_LEDGER";
 
 
 
@@ -110,6 +111,11 @@ export const GET_WALLET_LEDGER = "GET_WALLET_LEDGER";
 
 export const GET_DISPUTES="GET_DISPUTES";
 export const GET_DISPUTE_MESSAGES="GET_DISPUTE_MESSAGES";
+
+
+
+export const GET_MERCHENT_VA_DETAILS="GET_MERCHENT_VA_DETAILS";
+export const GET_MERCHENT_DASHBOARD_DETAILS="GET_MERCHENT_DASHBOARD_DETAILS";
 
 
 
@@ -262,6 +268,8 @@ export const getDetails = (
     }
 
     const data = await res.json();
+    console.log("data",data);
+    
 
     if (res.ok) {
       dispatch({
@@ -2623,6 +2631,7 @@ export const getWalletLedger =
 
     const params = new URLSearchParams();
 
+    if (company_id) params.append("company_id",company_id);
     if (searchTerm) params.append("search", searchTerm);
     if (searchStatus) params.append("status", searchStatus);
     if (startDate) params.append("start_date", startDate);
@@ -2633,7 +2642,7 @@ export const getWalletLedger =
 
     try {
       const res = await fetch(
-        `${baseUrl}/v1/admin/wallet-ledger/${company_id}?${params.toString()}`,
+        `${baseUrl}/v1/admin/wallet-ledger?${params.toString()}`,
         {
           method: "GET",
           headers: {
@@ -2792,3 +2801,85 @@ export const getWalletLedger =
     console.error("Get Dispute Messages Error:", error);
   }
 };
+
+
+export const getMerchentVaDetails = (company_id) => async (dispatch) => {
+  console.log("company_id",company_id);
+  
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${baseUrl}/v1/admin/get-va/${company_id}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+    console.log("vadetails",data);
+    
+
+    if (!response.ok) {
+      throw new Error(
+        data?.message || "Failed to fetch merchant VA details"
+      );
+    }
+
+    dispatch({
+      type: GET_MERCHENT_VA_DETAILS,
+      payload: data,
+    });
+
+    return data;
+  } catch (error) {
+    console.error("Get Merchant VA Details Error:", error);
+
+    throw error;
+  }
+};
+
+export const getMerchentDashboardDetails =
+  (company_id) => async (dispatch) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `${baseUrl}/v1/admin/dashboard/${company_id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Failed to fetch merchant dashboard details"
+        );
+      }
+
+      dispatch({
+        type: GET_MERCHENT_DASHBOARD_DETAILS,
+        payload: data?.data,
+      });
+
+      return data;
+    } catch (error) {
+      console.error(
+        "Get Merchant Dashboard Details Error:",
+        error
+      );
+
+      throw error;
+    }
+  };

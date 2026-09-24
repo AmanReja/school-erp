@@ -116,15 +116,41 @@ const [selectedMerchant, setSelectedMerchant] = useState(null);
   // Page numbers
   // ==============================
 
-  const getPageNumbers = () => {
-    const pages = [];
+ const getPageNumbers = () => {
+  const pages = [];
 
+  if (totalPages <= 4) {
     for (let i = 1; i <= totalPages; i++) {
       pages.push(i);
     }
 
     return pages;
-  };
+  }
+
+  pages.push(1);
+
+  if (currentPage > 4) {
+    pages.push("...");
+  }
+
+  const start = Math.max(2, currentPage - 2);
+  const end = Math.min(
+    totalPages - 1,
+    currentPage + 2
+  );
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  if (currentPage < totalPages - 3) {
+    pages.push("...");
+  }
+
+  pages.push(totalPages);
+
+  return pages;
+};
 
   // ==============================
   // KYC status
@@ -675,97 +701,181 @@ const [selectedMerchant, setSelectedMerchant] = useState(null);
       {/* =========================================
           PAGINATION FOOTER
       ========================================= */}
+<div
+  className={`px-5 py-4 border-t flex flex-col lg:flex-row items-center justify-between gap-4 ${
+    isDark
+      ? "border-slate-700"
+      : "border-gray-200"
+  }`}
+>
+  {/* LEFT — RESULT COUNT */}
+  <div
+    className={`text-sm ${
+      isDark
+        ? "text-gray-400"
+        : "text-gray-500"
+    }`}
+  >
+    Showing{" "}
+    <span
+      className={`font-semibold ${
+        isDark
+          ? "text-gray-200"
+          : "text-gray-700"
+      }`}
+    >
+      {total === 0
+        ? 0
+        : (currentPage - 1) * itemsPerPage + 1}
+    </span>{" "}
+    to{" "}
+    <span
+      className={`font-semibold ${
+        isDark
+          ? "text-gray-200"
+          : "text-gray-700"
+      }`}
+    >
+      {Math.min(
+        currentPage * itemsPerPage,
+        total
+      )}
+    </span>{" "}
+    of{" "}
+    <span
+      className={`font-semibold ${
+        isDark
+          ? "text-gray-200"
+          : "text-gray-700"
+      }`}
+    >
+      {total}
+    </span>{" "}
+    merchants
+  </div>
 
-      <div
-        className={`px-5 py-3 border-t flex flex-col md:flex-row md:items-center md:justify-between gap-3 ${
+  {/* RIGHT SIDE */}
+  <div className="flex flex-col sm:flex-row items-center gap-4">
+
+    {/* SHOW PER PAGE */}
+    <div
+      className={`flex items-center gap-2 text-sm ${
+        isDark
+          ? "text-gray-400"
+          : "text-gray-500"
+      }`}
+    >
+      <span>Show</span>
+
+      <select
+        value={itemsPerPage}
+        onChange={(e) => {
+          setItemsPerPage(Number(e.target.value));
+          setCurrentPage(1);
+        }}
+        className={`rounded-lg border outline-none px-2 py-1.5 text-sm ${
           isDark
-            ? "border-gray-800"
-            : "border-gray-200"
+            ? "bg-gray-900 text-gray-200 border-slate-700"
+            : "bg-white text-gray-700 border-gray-200"
         }`}
       >
+        <option value={10}>10</option>
+        <option value={20}>20</option>
+        <option value={30}>30</option>
+        <option value={50}>50</option>
+      </select>
 
-        {/* Showing */}
+      <span>per page</span>
+    </div>
 
-        <span
-          className={`text-xs ${
-            isDark
-              ? "text-gray-500"
-              : "text-gray-500"
-          }`}
-        >
-          Showing{" "}
-          {total === 0
-            ? 0
-            : (currentPage - 1) * itemsPerPage + 1}{" "}
-          to{" "}
-          {Math.min(
-            currentPage * itemsPerPage,
-            total
-          )}{" "}
-          of {total} merchants
-        </span>
+    {/* PAGINATION */}
+    <div className="flex items-center gap-1.5">
 
-        {/* Pagination */}
+      {/* PREVIOUS */}
+      <button
+        type="button"
+        onClick={handlePrevious}
+        disabled={currentPage === 1}
+        className={`w-9 h-9 rounded-lg flex items-center justify-center border transition ${
+          currentPage === 1
+            ? "opacity-40 cursor-not-allowed"
+            : ""
+        } ${
+          isDark
+            ? "border-slate-700 text-gray-400 hover:bg-slate-700"
+            : "border-gray-200 text-gray-500 hover:bg-gray-100"
+        }`}
+      >
+        <ChevronLeft size={17} />
+      </button>
 
-        <div className="flex items-center gap-1.5">
+      {/* PAGE NUMBERS */}
+      {getPageNumbers().map((pageNumber, index) => {
 
-          {/* Previous */}
-
-          <button
-            onClick={handlePrevious}
-            disabled={currentPage === 1}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition ${
-              currentPage === 1
-                ? "opacity-40 cursor-not-allowed"
-                : isDark
-                ? "border-gray-800 text-gray-400 hover:bg-gray-900"
-                : "border-gray-200 text-gray-500 hover:bg-gray-50"
-            }`}
-          >
-            <ChevronLeft size={16} />
-          </button>
-
-          {/* Page Numbers */}
-
-          {getPageNumbers().map((pageNumber) => (
-
-            <button
-              key={pageNumber}
-              onClick={() =>
-                setCurrentPage(pageNumber)
-              }
-              className={`w-8 h-8 rounded-lg text-xs font-medium transition ${
-                currentPage === pageNumber
-                  ? "bg-indigo-600 text-white"
-                  : isDark
-                  ? "text-gray-400 hover:bg-gray-900"
-                  : "text-gray-600 hover:bg-gray-100"
+        {/* Ellipsis */}
+        if (pageNumber === "...") {
+          return (
+            <span
+              key={`dots-${index}`}
+              className={`w-9 h-9 flex items-center justify-center text-sm ${
+                isDark
+                  ? "text-gray-500"
+                  : "text-gray-400"
               }`}
             >
-              {pageNumber}
-            </button>
+              ...
+            </span>
+          );
+        }
 
-          ))}
+        const active =
+          currentPage === pageNumber;
 
-          {/* Next */}
-
+        return (
           <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center border transition ${
-              currentPage === totalPages
-                ? "opacity-40 cursor-not-allowed"
+            key={pageNumber}
+            type="button"
+            onClick={() =>
+              setCurrentPage(pageNumber)
+            }
+            className={`w-9 h-9 rounded-lg text-sm font-medium transition ${
+              active
+                ? "bg-indigo-600 text-white"
                 : isDark
-                ? "border-gray-800 text-gray-400 hover:bg-gray-900"
-                : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                ? "text-gray-300 hover:bg-slate-700"
+                : "text-gray-600 hover:bg-gray-100"
             }`}
           >
-            <ChevronRight size={16} />
+            {pageNumber}
           </button>
+        );
+      })}
 
-        </div>
+      {/* NEXT */}
+      <button
+        type="button"
+        onClick={handleNext}
+        disabled={
+          currentPage === totalPages ||
+          totalPages === 0
+        }
+        className={`w-9 h-9 rounded-lg flex items-center justify-center border transition ${
+          currentPage === totalPages ||
+          totalPages === 0
+            ? "opacity-40 cursor-not-allowed"
+            : ""
+        } ${
+          isDark
+            ? "border-slate-700 text-gray-400 hover:bg-slate-700"
+            : "border-gray-200 text-gray-500 hover:bg-gray-100"
+        }`}
+      >
+        <ChevronRight size={17} />
+      </button>
 
-      </div>
+    </div>
+  </div>
+</div>
       <MerchantWiseDisputePanel
   isOpen={showDisputePanel}
   onClose={() => {

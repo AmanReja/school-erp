@@ -72,6 +72,9 @@ const TransactionMaster = () => {
       state.transactions?.transactions || {}
   );
 
+console.log(transactionData);
+
+
   const transactionDataArray =
     transactionData?.data || [];
 
@@ -695,7 +698,7 @@ const TransactionMaster = () => {
 
           {/* STATUS */}
 
-          <div className="relative">
+          {/* <div className="relative">
             <Filter
               size={15}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -726,7 +729,7 @@ const TransactionMaster = () => {
                 FAILURE
               </option>
             </select>
-          </div>
+          </div> */}
 
           {/* RESET */}
 

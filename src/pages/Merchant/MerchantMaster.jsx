@@ -136,12 +136,33 @@ const handleEdit = (merchant) => {
     total
   );
 
-  const getPageNumbers = () => {
-    const pages = [];
+  // ==============================
+  // Page numbers (truncated: 1 2 ... 10 style)
+  // ==============================
 
-    for (let i = 1; i <= totalPages; i++) {
+  const getPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const pages = [1];
+
+    const rangeStart = Math.max(2, currentPage - 1);
+    const rangeEnd = Math.min(totalPages - 1, currentPage + 1);
+
+    if (rangeStart > 2) {
+      pages.push("...");
+    }
+
+    for (let i = rangeStart; i <= rangeEnd; i++) {
       pages.push(i);
     }
+
+    if (rangeEnd < totalPages - 1) {
+      pages.push("...");
+    }
+
+    pages.push(totalPages);
 
     return pages;
   };
@@ -767,6 +788,44 @@ const handleEdit = (merchant) => {
             </span>{" "}
             merchants
           </div>
+
+
+
+          <div className="flex items-center gap-2">
+  <span className="text-sm text-gray-500">Go to page</span>
+
+  <input
+    type="number"
+    min={1}
+    max={totalPages}
+    value={currentPage}
+    onChange={(e) => setCurrentPage(e.target.value)}
+    
+    className={`w-16 h-9 px-2 text-center rounded-lg border outline-none ${
+      isDark
+        ? "bg-gray-900 text-gray-200 border-slate-700"
+        : "bg-white text-gray-700 border-gray-200"
+    }`}
+    placeholder="1"
+  />
+
+  {/* <button
+    type="button"
+    onClick={() => {
+      const pageNumber = Number(pageInput);
+
+      if (pageNumber >= 1 && pageNumber <= totalPages) {
+        setCurrentPage(pageNumber);
+      }
+    }}
+    className="h-9 px-3 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition"
+  >
+    Go
+  </button> */}
+</div>
+
+
+
 
           {/* PAGINATION */}
           <div className="flex items-center gap-1.5">

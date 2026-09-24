@@ -18,25 +18,28 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  Undo2,
+  Undo2,Building2
 } from "lucide-react";
 
 import { Theme } from "../../Contexts/Theme";
 
 import { useDispatch, useSelector } from "react-redux";
 
+
 import {
-  getall_txn_data,
+  getall_txn_data,getTransactions_by_companyid
 } from "../../redux/action";
 
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
 import { DateRange } from "react-date-range";
+import { useParams } from "react-router-dom";
 
-const Pending = () => {
+const TransactionMasterByCorpId = () => {
   const { theme } = useContext(Theme);
   const isDark = theme === "dark";
+  const{corp_id:routeParamsid} = useParams()
 
   const dispatch = useDispatch();
 
@@ -45,7 +48,7 @@ const Pending = () => {
   // ==========================================
 
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("pending");
+  const [status, setStatus] = useState("");
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
@@ -71,6 +74,8 @@ const Pending = () => {
     (state) =>
       state.transactions?.transactions || {}
   );
+  console.log("transactionData",transactionData);
+  
 
   const transactionDataArray =
     transactionData?.data || [];
@@ -91,7 +96,8 @@ const Pending = () => {
 
   useEffect(() => {
     dispatch(
-      getall_txn_data(
+      getTransactions_by_companyid(
+        routeParamsid,
         search,
         status,
         page,
@@ -104,6 +110,7 @@ const Pending = () => {
     );
   }, [
     dispatch,
+    routeParamsid,
     search,
     status,
     page,
@@ -134,7 +141,7 @@ const Pending = () => {
       setIsDownloading(true);
 
       await dispatch(
-        getall_txn_data(
+        getTransactions_by_companyid(
           search,
           status,
           page,
@@ -217,7 +224,7 @@ const Pending = () => {
 
   const handleReset = () => {
     setSearch("");
-    setStatus("pending");
+    setStatus("");
 
     setDateRange({
       startDate: "",
@@ -269,7 +276,7 @@ const Pending = () => {
       return [1];
     }
 
-    if (totalPages <= 7) {
+    if (totalPages <= 5) {
       for (
         let i = 1;
         i <= totalPages;
@@ -425,8 +432,8 @@ const Pending = () => {
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                 isDark
-                  ? "bg-orange-500/10 text-green-400"
-                  : "bg-yellow-50 text-green-600"
+                  ? "bg-orange-500/10 text-orange-400"
+                  : "bg-orange-50 text-orange-600"
               }`}
             >
               <AlertCircle size={21} />
@@ -440,7 +447,7 @@ const Pending = () => {
                     : "text-gray-800"
                 }`}
               >
-                Pending List
+                Transaction Master
               </h2>
 
               <p
@@ -454,6 +461,30 @@ const Pending = () => {
               </p>
             </div>
           </div>
+          {routeParamsid?        <div
+  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium ${
+    isDark
+      ? "bg-gray-900 border-gray-800 text-gray-300"
+      : "bg-gray-50 border-gray-200 text-gray-600"
+  }`}
+>
+  <Building2
+    size={14}
+    className={isDark ? "text-indigo-400" : "text-indigo-600"}
+  />
+
+  <span className="text-gray-500">
+    Merchant
+  </span>
+
+  <span
+    className={`font-semibold ${
+      isDark ? "text-gray-200" : "text-gray-800"
+    }`}
+  >
+    {routeParamsid}
+  </span>
+</div>:""}
 
           {/* TOTAL */}
           <div
@@ -517,7 +548,7 @@ const Pending = () => {
                 : "text-gray-800"
             }`}
           >
-            {successCount}
+            {transactionData?.counts?.success}
           </p>
         </div>
 
@@ -547,7 +578,7 @@ const Pending = () => {
                 : "text-gray-800"
             }`}
           >
-            {pendingCount}
+            {transactionData?.counts?.pending}
           </p>
         </div>
 
@@ -577,7 +608,8 @@ const Pending = () => {
                 : "text-gray-800"
             }`}
           >
-            {failureCount}
+            {transactionData?.counts?.failed
+}
           </p>
         </div>
       </div>
@@ -695,7 +727,7 @@ const Pending = () => {
 
           {/* STATUS */}
 
-          {/* <div className="relative">
+          <div className="relative">
             <Filter
               size={15}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -726,7 +758,7 @@ const Pending = () => {
                 FAILURE
               </option>
             </select>
-          </div> */}
+          </div>
 
           {/* RESET */}
 
@@ -1183,4 +1215,4 @@ const Pending = () => {
   );
 };
 
-export default Pending;
+export default TransactionMasterByCorpId;

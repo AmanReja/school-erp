@@ -280,6 +280,58 @@ getDisputes(
     setEndDate("")
   };
 
+
+   
+const startItem =
+  totalData > 0 ? (page - 1) * perPage + 1 : 0;
+
+const endItem =
+  totalData > 0
+    ? Math.min(page * perPage, totalData)
+    : 0;
+
+const handlePrevious = () => {
+  setPage((prev) => Math.max(prev - 1, 1));
+};
+
+const handleNext = () => {
+  setPage((prev) =>
+    prev < totalPage ? prev + 1 : prev
+  );
+};
+
+const getPageNumbers = () => {
+  const pages = [];
+
+  if (totalPage <= 5) {
+    for (let i = 1; i <= totalPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  pages.push(1);
+
+  if (page > 4) {
+    pages.push("...");
+  }
+
+  const start = Math.max(2, page - 2);
+  const end = Math.min(totalPage - 1, page + 2);
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  if (page < totalPage - 3) {
+    pages.push("...");
+  }
+
+  pages.push(totalPage);
+
+  return pages;
+};
+
   // =========================
   // UI
   // =========================
@@ -957,102 +1009,169 @@ setCorp_id(item.corp_id);
 
       {/* ================= PAGINATION ================= */}
 
-      {totalPage > 0 && (
+{totalPage > 0 && (
+  <div
+    className={`px-5 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${
+      isDark
+        ? "border-slate-700"
+        : "border-gray-200"
+    }`}
+  >
+    {/* RESULT COUNT */}
+    <div
+      className={`text-sm ${
+        isDark
+          ? "text-gray-400"
+          : "text-gray-500"
+      }`}
+    >
+      Showing{" "}
+      <span
+        className={`font-semibold ${
+          isDark
+            ? "text-gray-200"
+            : "text-gray-700"
+        }`}
+      >
+        {startItem}
+      </span>{" "}
+      to{" "}
+      <span
+        className={`font-semibold ${
+          isDark
+            ? "text-gray-200"
+            : "text-gray-700"
+        }`}
+      >
+        {endItem}
+      </span>{" "}
+      of{" "}
+      <span
+        className={`font-semibold ${
+          isDark
+            ? "text-gray-200"
+            : "text-gray-700"
+        }`}
+      >
+        {totalData}
+      </span>{" "}
+      records
+    </div>
 
-        <div
-          className={`flex items-center justify-between px-5 py-3 border-t text-sm ${
+    {/* RIGHT SIDE */}
+    <div className="flex items-center gap-4">
+
+      {/* PER PAGE */}
+      <div
+        className={`flex items-center gap-2 text-sm ${
+          isDark
+            ? "text-gray-400"
+            : "text-gray-500"
+        }`}
+      >
+        <span>Show</span>
+
+        <select
+          value={perPage}
+          onChange={(e) => {
+            setPerPage(Number(e.target.value));
+            setPage(1);
+          }}
+          className={`rounded-lg border outline-none px-2 py-1.5 ${
             isDark
-              ? "border-gray-800 text-gray-400"
-              : "border-gray-200 text-gray-600"
+              ? "bg-gray-900 text-gray-200 border-slate-700"
+              : "bg-white text-gray-700 border-gray-200"
           }`}
         >
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={30}>30</option>
+          <option value={50}>50</option>
+        </select>
 
-          <div>
+        <span>per page</span>
+      </div>
 
-            Show{" "}
+      {/* PAGINATION */}
+      <div className="flex items-center gap-1.5">
 
-            <select
-              className={`rounded border outline-none px-[5px] py-[5px] ${
-                isDark
-                  ? "bg-gray-900 text-gray-200 border-gray-800"
-                  : "bg-white text-gray-700 border-gray-200"
-              }`}
-              value={perPage}
-              onChange={(e) => {
-                setPerPage(Number(e.target.value));
-                setPage(1);
-              }}
-            >
+        {/* PREVIOUS */}
+        <button
+          type="button"
+          onClick={handlePrevious}
+          disabled={page === 1}
+          className={`w-9 h-9 rounded-lg flex items-center justify-center border transition ${
+            page === 1
+              ? "opacity-40 cursor-not-allowed"
+              : ""
+          } ${
+            isDark
+              ? "border-slate-700 hover:bg-slate-700"
+              : "border-gray-200 hover:bg-gray-100"
+          }`}
+        >
+          <ChevronLeft size={17} />
+        </button>
 
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={30}>30</option>
-              <option value={50}>50</option>
+        {/* PAGE NUMBERS */}
+        {getPageNumbers().map((pageNumber, index) => {
+          if (pageNumber === "...") {
+            return (
+              <span
+                key={`dots-${index}`}
+                className={`w-9 h-9 flex items-center justify-center text-sm ${
+                  isDark
+                    ? "text-gray-500"
+                    : "text-gray-400"
+                }`}
+              >
+                ...
+              </span>
+            );
+          }
 
-            </select>{" "}
+          const active = page === pageNumber;
 
-            per page
-
-          </div>
-
-          <div className="flex items-center gap-2">
-
-            <p>
-              {totalData > 0
-                ? `${(page - 1) * perPage + 1}-${Math.min(
-                    page * perPage,
-                    totalData
-                  )} of ${totalData}`
-                : "0 of 0"}
-            </p>
-
+          return (
             <button
-              onClick={() =>
-                setPage((prev) =>
-                  Math.max(prev - 1, 1)
-                )
-              }
-              disabled={page === 1}
-              className={`px-2 py-1 rounded-md ${
-                page === 1
-                  ? "opacity-50 cursor-not-allowed"
+              key={pageNumber}
+              type="button"
+              onClick={() => setPage(pageNumber)}
+              className={`w-9 h-9 rounded-lg text-sm font-medium transition ${
+                active
+                  ? "bg-green-600 text-white"
                   : isDark
-                  ? "hover:bg-gray-900"
-                  : "hover:bg-gray-100"
+                  ? "text-gray-300 hover:bg-slate-700"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
             >
-              <ChevronLeft size={16} />
+              {pageNumber}
             </button>
+          );
+        })}
 
-            <span>
-              Page {page} of {totalPage}
-            </span>
+        {/* NEXT */}
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={page === totalPage}
+          className={`w-9 h-9 rounded-lg flex items-center justify-center border transition ${
+            page === totalPage
+              ? "opacity-40 cursor-not-allowed"
+              : ""
+          } ${
+            isDark
+              ? "border-slate-700 hover:bg-slate-700"
+              : "border-gray-200 hover:bg-gray-100"
+          }`}
+        >
+          <ChevronRight size={17} />
+        </button>
 
-            <button
-              onClick={() =>
-                setPage((prev) =>
-                  prev < totalPage
-                    ? prev + 1
-                    : prev
-                )
-              }
-              disabled={page === totalPage}
-              className={`px-2 py-1 rounded-md ${
-                page === totalPage
-                  ? "opacity-50 cursor-not-allowed"
-                  : isDark
-                  ? "hover:bg-gray-900"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              <ChevronRight size={16} />
-            </button>
-
-          </div>
-
-        </div>
-
-      )}
+      </div>
+    </div>
+  </div>
+)}
 <DisputeViewModal onClose={()=>setDisputeData(null)} dispute={disputeData} isDark={isDark}/>
  {showUpdateModal && (
   <UpdateDisputeModal

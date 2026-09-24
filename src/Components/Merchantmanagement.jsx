@@ -28,11 +28,11 @@ const Merchantmanagement = () => {
       path: "/dashboard/merchant/active",
       icon: FileWarning,
     },
-    {
-      name: "Merchant Configuration",
-      path: "/dashboard/merchant/merchant_configuration",
-      icon: FolderOpen,
-    },
+    // {
+    //   name: "Merchant Configuration",
+    //   path: "/dashboard/merchant/merchant_configuration",
+    //   icon: FolderOpen,
+    // },
     // {
     //   name: "Resolve Disputes",
     //   path: "/dashboard/dispute/resolve",
