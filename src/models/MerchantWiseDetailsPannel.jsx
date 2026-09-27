@@ -8,7 +8,7 @@ import {
   Workflow,
   BookOpen,
   ArrowLeftRight,
-  ChevronRight,SlidersHorizontal ,Cog 
+  ChevronRight,SlidersHorizontal ,Cog ,PlugZap 
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -35,11 +35,11 @@ const MerchantWiseDetailsPannel = ({
       label: "Set Commercial",
       description: "Manage Commercial operations",
       path: "commerciallist/commercialmaster",
-      icon: WalletCards,
-      darkIcon: "text-orange-400",
-      lightIcon: "text-orange-600",
-      darkBg: "bg-orange-500/10",
-      lightBg: "bg-orange-50",
+      icon: PlugZap,
+      darkIcon: "text-blue-400",
+      lightIcon: "text-blue-600",
+      darkBg: "bg-blue-500/10",
+      lightBg: "bg-blue-50",
       darkHover: "hover:border-orange-500/40 hover:bg-orange-500/5",
       lightHover: "hover:border-orange-200 hover:bg-orange-50/50",
     },

@@ -8,14 +8,13 @@ import {
   Outlet,
   useLocation,
 } from "react-router-dom";
-import Dashbord from "./Components/Dashbord";
-import Navbar from "./Components/Navbar";
-import { ToastContainer, toast } from "react-toastify";
-import Titlecontroller from "./Components/Titlecontroller";
+
+
+
 import { Toaster } from "sonner";
 
 const App = () => {
-  Titlecontroller()
+
   return (
     <>
 <Toaster
