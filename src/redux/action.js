@@ -22,6 +22,45 @@ import {
   MARK_STAFF_ATTENDANCE_REQUEST,
   MARK_STAFF_ATTENDANCE_SUCCESS,
   MARK_STAFF_ATTENDANCE_FAILURE,
+
+
+
+
+   GET_STUDENTS_REQUEST,
+  GET_STUDENTS_SUCCESS,
+  GET_STUDENTS_FAILURE,
+
+  GET_STUDENT_REQUEST,
+  GET_STUDENT_SUCCESS,
+  GET_STUDENT_FAILURE,
+
+  GET_STAFF_REQUEST,
+  GET_STAFF_SUCCESS,
+  GET_STAFF_FAILURE,
+
+  GET_STAFF_BY_ID_REQUEST,
+  GET_STAFF_BY_ID_SUCCESS,
+  GET_STAFF_BY_ID_FAILURE,
+
+  GET_CLASSES_REQUEST,
+  GET_CLASSES_SUCCESS,
+  GET_CLASSES_FAILURE,
+
+  GET_CLASS_TIMETABLE_REQUEST,
+  GET_CLASS_TIMETABLE_SUCCESS,
+  GET_CLASS_TIMETABLE_FAILURE,
+
+  GET_FEES_REQUEST,
+  GET_FEES_SUCCESS,
+  GET_FEES_FAILURE,
+
+  GET_EXPENSES_REQUEST,
+  GET_EXPENSES_SUCCESS,
+  GET_EXPENSES_FAILURE,
+
+  GET_SALARIES_REQUEST,
+  GET_SALARIES_SUCCESS,
+  GET_SALARIES_FAILURE,
 } from "./type";
 
 import { toast } from "sonner";
@@ -463,5 +502,309 @@ export const markStaffAttendance = (
     toast.error(message);
 
     throw new Error(message);
+  }
+};
+
+
+
+
+
+
+
+
+export const getStudents = (corpId) => async (dispatch) => {
+  try {
+    dispatch({
+      type: GET_STUDENTS_REQUEST,
+    });
+
+    const response = await axios.get(
+      `${baseUrl}/students/${corpId}`,
+      getConfig()
+    );
+
+    dispatch({
+      type: GET_STUDENTS_SUCCESS,
+      payload: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: GET_STUDENTS_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch students",
+    });
+
+    throw error;
+  }
+};
+
+
+export const getStudent = (corpId, id) => async (dispatch) => {
+  try {
+    dispatch({
+      type: GET_STUDENT_REQUEST,
+    });
+
+    const response = await axios.get(
+      `${baseUrl}/student/${corpId}/${id}`,
+      getConfig()
+    );
+
+    dispatch({
+      type: GET_STUDENT_SUCCESS,
+      payload: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: GET_STUDENT_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch student",
+    });
+
+    throw error;
+  }
+};
+
+
+// =====================================================
+// STAFF
+// =====================================================
+
+export const getStaff =
+  (corpId, role = "") =>
+  async (dispatch) => {
+    try {
+      dispatch({
+        type: GET_STAFF_REQUEST,
+      });
+
+      const response = await axios.get(
+        `${baseUrl}/staff/${corpId}`,
+        {
+          ...getConfig(),
+          params: role ? { role } : {},
+        }
+      );
+
+      dispatch({
+        type: GET_STAFF_SUCCESS,
+        payload: response.data.data,
+      });
+
+      return response.data;
+    } catch (error) {
+      dispatch({
+        type: GET_STAFF_FAILURE,
+        payload: error.response?.data?.message || "Failed to fetch staff",
+      });
+
+      throw error;
+    }
+  };
+
+
+export const getStaffById =
+  (corpId, id) =>
+  async (dispatch) => {
+    try {
+      dispatch({
+        type: GET_STAFF_BY_ID_REQUEST,
+      });
+
+      const response = await axios.get(
+        `${baseUrl}/staff/${corpId}/${id}`,
+        getConfig()
+      );
+
+      dispatch({
+        type: GET_STAFF_BY_ID_SUCCESS,
+        payload: response.data.data,
+      });
+
+      return response.data;
+    } catch (error) {
+      dispatch({
+        type: GET_STAFF_BY_ID_FAILURE,
+        payload:
+          error.response?.data?.message ||
+          "Failed to fetch staff details",
+      });
+
+      throw error;
+    }
+  };
+
+
+// =====================================================
+// CLASSES
+// =====================================================
+
+export const getClasses = (corpId) => async (dispatch) => {
+  try {
+    dispatch({
+      type: GET_CLASSES_REQUEST,
+    });
+
+    const response = await axios.get(
+      `${baseUrl}/classes/${corpId}`,
+      getConfig()
+    );
+
+    dispatch({
+      type: GET_CLASSES_SUCCESS,
+      payload: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: GET_CLASSES_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch classes",
+    });
+
+    throw error;
+  }
+};
+
+
+// =====================================================
+// TIMETABLE
+// =====================================================
+
+export const getClassTimetable =
+  (corpId, classId) =>
+  async (dispatch) => {
+    try {
+      dispatch({
+        type: GET_CLASS_TIMETABLE_REQUEST,
+      });
+
+      const response = await axios.get(
+        `${baseUrl}/class/${corpId}/${classId}/timetable`,
+        getConfig()
+      );
+
+      dispatch({
+        type: GET_CLASS_TIMETABLE_SUCCESS,
+        payload: response.data.data,
+      });
+
+      return response.data;
+    } catch (error) {
+      dispatch({
+        type: GET_CLASS_TIMETABLE_FAILURE,
+        payload:
+          error.response?.data?.message ||
+          "Failed to fetch timetable",
+      });
+
+      throw error;
+    }
+  };
+
+
+// =====================================================
+// FEES
+// =====================================================
+
+export const getFees =
+  (corpId, status = "") =>
+  async (dispatch) => {
+    try {
+      dispatch({
+        type: GET_FEES_REQUEST,
+      });
+
+      const response = await axios.get(
+        `${baseUrl}/fees/${corpId}`,
+        {
+          ...getConfig(),
+          params: status ? { status } : {},
+        }
+      );
+
+      dispatch({
+        type: GET_FEES_SUCCESS,
+        payload: response.data.data,
+      });
+
+      return response.data;
+    } catch (error) {
+      dispatch({
+        type: GET_FEES_FAILURE,
+        payload: error.response?.data?.message || "Failed to fetch fees",
+      });
+
+      throw error;
+    }
+  };
+
+
+// =====================================================
+// EXPENSES
+// =====================================================
+
+export const getExpenses = (corpId) => async (dispatch) => {
+  try {
+    dispatch({
+      type: GET_EXPENSES_REQUEST,
+    });
+
+    const response = await axios.get(
+      `${baseUrl}/expenses/${corpId}`,
+      getConfig()
+    );
+
+    dispatch({
+      type: GET_EXPENSES_SUCCESS,
+      payload: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: GET_EXPENSES_FAILURE,
+      payload:
+        error.response?.data?.message ||
+        "Failed to fetch expenses",
+    });
+
+    throw error;
+  }
+};
+
+
+// =====================================================
+// SALARIES
+// =====================================================
+
+export const getSalaries = (corpId) => async (dispatch) => {
+  try {
+    dispatch({
+      type: GET_SALARIES_REQUEST,
+    });
+
+    const response = await axios.get(
+      `${baseUrl}/salaries/${corpId}`,
+      getConfig()
+    );
+
+    dispatch({
+      type: GET_SALARIES_SUCCESS,
+      payload: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: GET_SALARIES_FAILURE,
+      payload:
+        error.response?.data?.message ||
+        "Failed to fetch salaries",
+    });
+
+    throw error;
   }
 };
