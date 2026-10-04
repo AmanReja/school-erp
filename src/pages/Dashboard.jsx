@@ -2,42 +2,35 @@ import React from "react";
 
 import DashboardSidebar from "../Components/DashboardSidebar";
 import DashboardHeader from "../Components/DashboardHeader";
-import DashboardStats from "../Components/DashboardStats";
-import TrafficOverview from "../Components/TrafficOverview";
-import WebsiteTraffic from "../Components/WebsiteTraffic";
-import DeviceTraffic from "../Components/DeviceTraffic";
-import LocationTraffic from "../Components/LocationTraffic";
-import DashboardActivity from "../Components/DashboardActivity";
 import Footer from "../Components/Footer";
 import { Outlet } from "react-router-dom";
+import { useSettings } from "../Contexts/SettingsContext";
 
 const Dashboard = () => {
+  const { theme } = useSettings();
+  const isDark = theme === "dark";
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-
-      <div className="flex min-h-screen">
-
+    <div className="h-screen overflow-hidden bg-white text-gray-900">
+      <div className="flex h-screen overflow-hidden">
         {/* LEFT SIDEBAR */}
         <DashboardSidebar />
 
         {/* CENTER AREA */}
-        <div className="flex min-w-0 flex-1 flex-col">
-
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           {/* HEADER */}
           <DashboardHeader />
 
-          {/* MAIN CONTENT */}
-          <main className="flex-1 overflow-y-auto bg-white">
-            <Outlet/>
-
-            
+          {/* ONLY THIS AREA SCROLLS */}
+          <main className="min-h-0 flex-1 overflow-y-auto bg-white">
+            <Outlet />
           </main>
-          <Footer/>
+
+          {/* FOOTER */}
+          <Footer />
         </div>
 
         {/* RIGHT ACTIVITY PANEL */}
         {/* <DashboardActivity /> */}
-
       </div>
     </div>
   );

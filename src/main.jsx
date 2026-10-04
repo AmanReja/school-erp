@@ -17,10 +17,10 @@ import { store } from "./redux/store.js";
 
 import { Login } from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
-import CreateStaff from "./pages/CreateStaff";
-import CreateStudent from "./pages/CreateStudent";
-import StudentAttendance from "./pages/StudentAttendance";
-import StaffAttendance from "./pages/StaffAttendance";
+import Staff from "./pages/Staff";
+import Student from "./pages/Student";
+import Attendance from "./pages/Attendance";
+
 import { SettingsProvider } from "./Contexts/SettingsContext.jsx";
 import DashboardSummary from "./pages/DashboardSummary.jsx";
 
@@ -35,57 +35,31 @@ if (import.meta.env.PROD) {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<App />}>
-
       {/* AUTH */}
       <Route path="/" element={<Login />} />
 
       {/* DASHBOARD PARENT */}
       <Route path="/dashboard" element={<Dashboard />}>
+        <Route index element={<DashboardSummary />} />
+        <Route path="staff" element={<Staff />} />
 
+        <Route path="student" element={<Student />} />
 
-
-        <Route
-         index
-          element={<DashboardSummary />}
-        />
-        <Route
-          path="create-staff"
-          element={<CreateStaff />}
-        />
-
-        <Route
-          path="create-student"
-          element={<CreateStudent />}
-        />
-
-        <Route
-          path="attendance/student"
-          element={<StudentAttendance />}
-        />
-
-        <Route
-          path="attendance/staff"
-          element={<StaffAttendance />}
-        />
-
+        <Route path="attendance" element={<Attendance />} />
       </Route>
 
       {/* FALLBACK */}
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
-
-    </Route>
-  )
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Route>,
+  ),
 );
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <SettingsProvider>
-    <Provider store={store}>
-      <RouterProvider router={router} />
-    </Provider>
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
     </SettingsProvider>
-  </StrictMode>
+  </StrictMode>,
 );

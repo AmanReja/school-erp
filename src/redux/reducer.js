@@ -8,7 +8,6 @@ import {
   GET_STUDENTS_REQUEST,
   GET_STUDENTS_SUCCESS,
   GET_STUDENTS_FAILURE,
-
   GET_STUDENT_REQUEST,
   GET_STUDENT_SUCCESS,
   GET_STUDENT_FAILURE,
@@ -17,20 +16,21 @@ import {
   GET_STAFF_REQUEST,
   GET_STAFF_SUCCESS,
   GET_STAFF_FAILURE,
-
   GET_STAFF_BY_ID_REQUEST,
   GET_STAFF_BY_ID_SUCCESS,
   GET_STAFF_BY_ID_FAILURE,
 } from "./type";
-
+const storedUser = localStorage.getItem("user")
+  ? JSON.parse(localStorage.getItem("user"))
+  : null;
 const initialLoginState = {
   // =========================
   // AUTH
   // =========================
   loading: false,
   token: localStorage.getItem("token") || null,
-  userType: localStorage.getItem("userType") || null,
-  corpId: localStorage.getItem("corpId") || null,
+  userType: storedUser.role || null,
+  corpId: storedUser?.corpId || null,
   error: null,
   isAuthenticated: !!localStorage.getItem("token"),
 
@@ -61,7 +61,6 @@ const initialLoginState = {
 
 export const authReducer = (state = initialLoginState, action) => {
   switch (action.type) {
-
     // =====================================================
     // LOGIN
     // =====================================================
